@@ -9,13 +9,17 @@ const pool = new Pool({
   database: process.env.PGDATABASE,
   password: process.env.PGPASSWORD,
   port: Number(process.env.PGPORT),
-  options: '-c search_path=ptitjob,public'
+  ssl: {
+    rejectUnauthorized: false
+  },
+  options: `-c search_path=${process.env.PGSCHEMA || 'public'}`
 });
+
 pool.connect((err: Error | undefined, client, done) => {
     if (err) {
         console.error('Error connecting to the database', err);
     } else {
-        console.log('Connected to the database');
+        console.log('Connected to Supabase database');
         done();
     }
 });
