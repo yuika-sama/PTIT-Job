@@ -1,14 +1,20 @@
 import pool from '../config/config.js';
 interface Location {
-    id: number;
+    id: string;
     city: string;
     slug: string;
+    job_count?: number; // Extended field for display
 }
 
 export class LocationModel {
     static async findAll(): Promise<Location[]> {
         try {
-            const result = await pool.query('SELECT * FROM locations ORDER BY city ASC');
+            const result = await pool.query(`
+                select l.*, count(j.location_id) as job_count from locations l
+                left join jobs j on j.location_id = l.id
+                group by l.id
+                order by job_count desc;
+            `);
             return result.rows;
         } catch (error) {
             console.error('Error fetching locations:', error);
@@ -16,7 +22,7 @@ export class LocationModel {
         }
     }
 
-    static async findById(id: number): Promise<Location | null> {
+    static async findById(id: string): Promise<Location | null> {
         try {
             const result = await pool.query('SELECT * FROM locations WHERE id = $1', [id]);
             if (result.rows.length === 0) {
@@ -52,7 +58,7 @@ export class LocationModel {
         ).then(result => result.rows[0]);
     }
 
-    static async update(id: number, location: Partial<Omit<Location, 'id'>>): Promise<Location | null> {
+    static async update(id: string, location: Partial<Omit<Location, 'id'>>): Promise<Location | null> {
         try {
             const fields = [];
             const values = [];
@@ -77,7 +83,7 @@ export class LocationModel {
         }
     }
 
-    static async delete(id: number): Promise<boolean> {
+    static async delete(id: string): Promise<boolean> {
         try {
             const result = await pool.query('DELETE FROM locations WHERE id = $1', [id]);
             return (result.rowCount ?? 0) > 0;

@@ -1,174 +1,136 @@
-import type { Request, Response } from 'express';
 import { LocationModel } from '../models/LocationModel.js';
+import { validateUUID } from '../utils/uuid.js';
 
 export class LocationController {
-    static async getAllLocations(req: Request, res: Response) {
+    static async getAllLocations(): Promise<{ success: boolean; data: any; message: string }> {
         try {
             const locations = await LocationModel.findAll();
-            res.status(200).json({
+            return {
                 success: true,
                 data: locations,
                 message: 'Locations retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getAllLocations:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw new Error('Internal server error');
         }
     }
 
-    static async getLocationById(req: Request, res: Response) {
+    static async getLocationById({ params }: { params: { id: string } }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { id } = req.params;
-            const locationId = parseInt(id ?? '');
+            const { id } = params;
 
-            if (isNaN(locationId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid location ID'
-                });
+            if (!id) {
+                throw new Error('Location ID is required');
             }
 
+            const locationId = validateUUID(id, 'Location ID');
             const location = await LocationModel.findById(locationId);
             if (!location) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Location not found'
-                });
+                throw new Error('Location not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 data: location,
                 message: 'Location retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getLocationById:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async getLocationBySlug(req: Request, res: Response) {
+    static async getLocationBySlug({ params }: { params: { slug: string } }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { slug } = req.params;
+            const { slug } = params;
 
-            const location = await LocationModel.findBySlug(slug ?? '');
-            if (!location) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Location not found'
-                });
+            if (!slug) {
+                throw new Error('Slug is required');
             }
 
-            res.status(200).json({
+            const location = await LocationModel.findBySlug(slug);
+            if (!location) {
+                throw new Error('Location not found');
+            }
+
+            return {
                 success: true,
                 data: location,
                 message: 'Location retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getLocationBySlug:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async createLocation(req: Request, res: Response) {
+    static async createLocation({ body }: { body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { city, slug } = req.body;
+            const { city, slug } = body;
 
             if (!city || !slug) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'City and slug are required'
-                });
+                throw new Error('City and slug are required');
             }
 
             const newLocation = await LocationModel.create({ city, slug });
-            res.status(201).json({
+            return {
                 success: true,
                 data: newLocation,
                 message: 'Location created successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in createLocation:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async updateLocation(req: Request, res: Response) {
+    static async updateLocation({ params, body }: { params: { id: string }; body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { id } = req.params;
-            const locationId = parseInt(id ?? '');
+            const { id } = params;
 
-            if (isNaN(locationId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid location ID'
-                });
+            if (!id) {
+                throw new Error('Location ID is required');
             }
 
-            const updatedLocation = await LocationModel.update(locationId, req.body);
+            const locationId = validateUUID(id, 'Location ID');
+            const updatedLocation = await LocationModel.update(locationId, body);
             if (!updatedLocation) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Location not found'
-                });
+                throw new Error('Location not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 data: updatedLocation,
                 message: 'Location updated successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in updateLocation:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async deleteLocation(req: Request, res: Response) {
+    static async deleteLocation({ params }: { params: { id: string } }): Promise<{ success: boolean; message: string }> {
         try {
-            const { id } = req.params;
-            const locationId = parseInt(id ?? '');
+            const { id } = params;
 
-            if (isNaN(locationId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid location ID'
-                });
+            if (!id) {
+                throw new Error('Location ID is required');
             }
 
+            const locationId = validateUUID(id, 'Location ID');
             const deleted = await LocationModel.delete(locationId);
             if (!deleted) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Location not found'
-                });
+                throw new Error('Location not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 message: 'Location deleted successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in deleteLocation:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 }

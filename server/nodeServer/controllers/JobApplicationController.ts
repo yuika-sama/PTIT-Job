@@ -1,88 +1,71 @@
-import type { Request, Response } from 'express';
 import { JobApplicationModel } from '../models/JobApplicationModel.js';
+import { validateUUID } from '../utils/uuid.js';
 import type { ApplicationStatus } from '../models/types/Types.js';
 
 export class JobApplicationController {
-    static async getAllApplications(req: Request, res: Response) {
+    static async getAllApplications(): Promise<{ success: boolean; data: any; message: string }> {
         try {
             const applications = await JobApplicationModel.findAll();
-            res.status(200).json({
+            console.log("✅ Applications fetched successfully:", applications.length, "applications");
+            return {
                 success: true,
                 data: applications,
                 message: 'Job applications retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getAllApplications:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw new Error('Internal server error');
         }
     }
 
-    static async getApplicationsByJobId(req: Request, res: Response) {
+    static async getApplicationsByJobId({ params }: { params: { jobId: string } }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { jobId } = req.params;
-            const jobIdNum = parseInt(jobId ?? '');
+            const { jobId } = params;
 
-            if (isNaN(jobIdNum)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid job ID'
-                });
+            if (!jobId) {
+                throw new Error('Job ID is required');
             }
 
-            const applications = await JobApplicationModel.findByJobId(jobIdNum);
-            res.status(200).json({
+            const jobIdValidated = validateUUID(jobId, 'Job ID');
+            const applications = await JobApplicationModel.findByJobId(jobIdValidated);
+            return {
                 success: true,
                 data: applications,
                 message: 'Job applications retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getApplicationsByJobId:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async getApplicationsByUserId(req: Request, res: Response) {
+    static async getApplicationsByUserId({ params }: { params: { userId: string } }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { userId } = req.params;
-            const userIdNum = parseInt(userId ?? '');
+            const { userId } = params;
 
-            if (isNaN(userIdNum)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid user ID'
-                });
+            if (!userId) {
+                throw new Error('User ID is required');
             }
 
-            const applications = await JobApplicationModel.findByUserId(userIdNum);
-            res.status(200).json({
+            const userIdValidated = validateUUID(userId, 'User ID');
+            const applications = await JobApplicationModel.findByUserId(userIdValidated);
+            return {
                 success: true,
                 data: applications,
                 message: 'User applications retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getApplicationsByUserId:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async createApplication(req: Request, res: Response) {
+    static async createApplication({ body }: { body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { job_id, user_id, resume_id, cover_letter } = req.body;
+            const { job_id, user_id, resume_id, cover_letter } = body;
 
             if (!job_id || !user_id || !resume_id) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Missing required fields: job_id, user_id, resume_id'
-                });
+                throw new Error('Missing required fields: job_id, user_id, resume_id');
             }
 
             const newApplication = await JobApplicationModel.create({
@@ -92,59 +75,44 @@ export class JobApplicationController {
                 cover_letter
             });
 
-            res.status(201).json({
+            return {
                 success: true,
                 data: newApplication,
                 message: 'Job application submitted successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in createApplication:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async updateApplicationStatus(req: Request, res: Response) {
+    static async updateApplicationStatus({ params, body }: { params: { id: string }; body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { id } = req.params;
-            const { status } = req.body;
-            const applicationId = parseInt(id ?? '');
+            const { id } = params;
+            const { status } = body;
 
-            if (isNaN(applicationId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid application ID'
-                });
+            if (!id) {
+                throw new Error('Application ID is required');
             }
 
             if (!status) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Status is required'
-                });
+                throw new Error('Status is required');
             }
 
+            const applicationId = validateUUID(id, 'Application ID');
             const updatedApplication = await JobApplicationModel.updateStatus(applicationId, status as ApplicationStatus);
             if (!updatedApplication) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Job application not found'
-                });
+                throw new Error('Job application not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 data: updatedApplication,
                 message: 'Application status updated successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in updateApplicationStatus:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 }

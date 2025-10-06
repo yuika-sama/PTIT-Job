@@ -1,157 +1,118 @@
-import type { Request, Response } from 'express';
 import { JobCategoryModel } from '../models/JobCategoryModel.js';
+import { validateUUID } from '../utils/uuid.js';
 
 export class JobCategoryController {
-    static async getAllCategories(req: Request, res: Response) {
+    static async getAllCategories(): Promise<{ success: boolean; data: any; message: string }> {
         try {
             const categories = await JobCategoryModel.findAll();
-            res.status(200).json({
+            return {
                 success: true,
                 data: categories,
                 message: 'Job categories retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getAllCategories:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw new Error('Internal server error');
         }
     }
 
-    static async getCategoryById(req: Request, res: Response) {
+    static async getCategoryById({ params }: { params: { id: string } }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { id } = req.params;
-            const categoryId = parseInt(id ?? '');
+            const { id } = params;
 
-            if (isNaN(categoryId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid category ID'
-                });
+            if (!id) {
+                throw new Error('Category ID is required');
             }
 
+            const categoryId = validateUUID(id, 'Category ID');
             const category = await JobCategoryModel.findById(categoryId);
             if (!category) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Job category not found'
-                });
+                throw new Error('Job category not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 data: category,
                 message: 'Job category retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getCategoryById:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async createCategory(req: Request, res: Response) {
+    static async createCategory({ body }: { body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { name, slug } = req.body;
+            const { name, slug } = body;
 
             if (!name || !slug) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Name and slug are required'
-                });
+                throw new Error('Name and slug are required');
             }
 
             const newCategory = await JobCategoryModel.create(name, slug);
 
-            res.status(201).json({
+            return {
                 success: true,
                 data: newCategory,
                 message: 'Job category created successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in createCategory:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async updateCategory(req: Request, res: Response) {
+    static async updateCategory({ params, body }: { params: { id: string }; body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { id } = req.params;
-            const { name, slug } = req.body;
-            const categoryId = parseInt(id ?? '');
+            const { id } = params;
+            const { name, slug } = body;
 
-            if (isNaN(categoryId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid category ID'
-                });
+            if (!id) {
+                throw new Error('Category ID is required');
             }
 
             if (!name || !slug) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Name and slug are required'
-                });
+                throw new Error('Name and slug are required');
             }
 
+            const categoryId = validateUUID(id, 'Category ID');
             const updatedCategory = await JobCategoryModel.update(categoryId, name, slug);
             if (!updatedCategory) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Job category not found'
-                });
+                throw new Error('Job category not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 data: updatedCategory,
                 message: 'Job category updated successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in updateCategory:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async deleteCategory(req: Request, res: Response) {
+    static async deleteCategory({ params }: { params: { id: string } }): Promise<{ success: boolean; message: string }> {
         try {
-            const { id } = req.params;
-            const categoryId = parseInt(id ?? '');
+            const { id } = params;
 
-            if (isNaN(categoryId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid category ID'
-                });
+            if (!id) {
+                throw new Error('Category ID is required');
             }
 
+            const categoryId = validateUUID(id, 'Category ID');
             const deleted = await JobCategoryModel.delete(categoryId);
             if (!deleted) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Job category not found'
-                });
+                throw new Error('Job category not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 message: 'Job category deleted successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in deleteCategory:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 }

@@ -1,168 +1,135 @@
-import type { Request, Response } from 'express';
 import { ResumeModel } from '../models/ResumeModel.js';
+import { validateUUID } from '../utils/uuid.js';
 
 export class ResumeController {
-    static async getAllResumes(req: Request, res: Response) {
+    static async getAllResumes(): Promise<{ success: boolean; data: any; message: string }> {
         try {
             const resumes = await ResumeModel.findAll();
-            res.status(200).json({
+            return {
                 success: true,
                 data: resumes,
                 message: 'Resumes retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getAllResumes:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw new Error('Internal server error');
         }
     }
 
-    static async getResumeById(req: Request, res: Response) {
+    static async getResumeById({ params }: { params: { id: string } }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { id } = req.params;
-            const resumeId = parseInt(id ?? '');
-
-            if (isNaN(resumeId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid resume ID'
-                });
+            const { id } = params;
+            
+            if (!id) {
+                throw new Error('Resume ID is required');
             }
 
+            const resumeId = validateUUID(id, 'Resume ID');
             const resume = await ResumeModel.findById(resumeId);
             if (!resume) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Resume not found'
-                });
+                throw new Error('Resume not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 data: resume,
                 message: 'Resume retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getResumeById:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async getResumesByUserId(req: Request, res: Response) {
+    static async getResumesByUserId({ params }: { params: { userId: string } }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { userId } = req.params;
-            const userIdNum = parseInt(userId ?? '');
+            const { userId } = params;
 
-            if (isNaN(userIdNum)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid user ID'
-                });
+            if (!userId) {
+                throw new Error('User ID is required');
             }
 
-            const resumes = await ResumeModel.findByUserId(userIdNum);
-            res.status(200).json({
+            const userIdValidated = validateUUID(userId, 'User ID');
+            const resumes = await ResumeModel.findByUserId(userIdValidated);
+            return {
                 success: true,
                 data: resumes,
                 message: 'User resumes retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getResumesByUserId:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async uploadResume(req: Request, res: Response) {
+    static async uploadResume({ body }: { body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { userId, fileUrl, fileName, isDefault } = req.body;
+            const { userId, fileUrl, fileName, isDefault } = body;
 
             if (!userId || !fileUrl || !fileName) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Missing required fields: userId, fileUrl, fileName'
-                });
+                throw new Error('Missing required fields: userId, fileUrl, fileName');
             }
 
+            const userIdValidated = validateUUID(userId, 'User ID');
             const newResume = await ResumeModel.uploadResume(
-                parseInt(userId), 
+                userIdValidated, 
                 fileUrl, 
                 fileName, 
                 isDefault || false
             );
 
-            res.status(201).json({
+            return {
                 success: true,
                 data: newResume,
                 message: 'Resume uploaded successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in uploadResume:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async setDefaultResume(req: Request, res: Response) {
+    static async setDefaultResume({ params }: { params: { userId: string; resumeId: string } }): Promise<{ success: boolean; message: string }> {
         try {
-            const { userId, resumeId } = req.params;
-            const userIdNum = parseInt(userId ?? '');
-            const resumeIdNum = parseInt(resumeId ?? '');
+            const { userId, resumeId } = params;
 
-            if (isNaN(userIdNum) || isNaN(resumeIdNum)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid user ID or resume ID'
-                });
+            if (!userId || !resumeId) {
+                throw new Error('User ID and Resume ID are required');
             }
 
-            await ResumeModel.setDefaultResume(userIdNum, resumeIdNum);
-            res.status(200).json({
+            const userIdValidated = validateUUID(userId, 'User ID');
+            const resumeIdValidated = validateUUID(resumeId, 'Resume ID');
+
+            await ResumeModel.setDefaultResume(userIdValidated, resumeIdValidated);
+            return {
                 success: true,
                 message: 'Default resume set successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in setDefaultResume:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async deleteResume(req: Request, res: Response) {
+    static async deleteResume({ params }: { params: { userId: string; resumeId: string } }): Promise<{ success: boolean; message: string }> {
         try {
-            const { userId, resumeId } = req.params;
-            const userIdNum = parseInt(userId ?? '');
-            const resumeIdNum = parseInt(resumeId ?? '');
+            const { userId, resumeId } = params;
 
-            if (isNaN(userIdNum) || isNaN(resumeIdNum)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid user ID or resume ID'
-                });
+            if (!userId || !resumeId) {
+                throw new Error('User ID and Resume ID are required');
             }
 
-            await ResumeModel.deleteResume(userIdNum, resumeIdNum);
-            res.status(200).json({
+            const userIdValidated = validateUUID(userId, 'User ID');
+            const resumeIdValidated = validateUUID(resumeId, 'Resume ID');
+
+            await ResumeModel.deleteResume(userIdValidated, resumeIdValidated);
+            return {
                 success: true,
                 message: 'Resume deleted successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in deleteResume:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 }

@@ -1,68 +1,49 @@
 // filepath: f:\codingSpace\Asm\PJob\server\nodeServer\controllers\CompanyController.ts
-import type { Request, Response } from 'express';
 import { CompanyModel } from '../models/CompanyModel.js';
+import { validateUUID } from '../utils/uuid.js';
 
 export class CompanyController {
-    static async getAllCompanies(req: Request, res: Response) {
+    static async getAllCompanies(): Promise<{ success: boolean; data: any; message: string }> {
         try {
             const companies = await CompanyModel.findAll();
-            res.status(200).json({
+            return {
                 success: true,
                 data: companies,
                 message: 'Companies retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getAllCompanies:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw new Error('Internal server error');
         }
     }
 
-    static async getCompanyById(req: Request, res: Response) {
+    static async getCompanyById({ params }: { params: { id: string } }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { id } = req.params;
-            const companyId = parseInt(id ?? '');
-
-            if (isNaN(companyId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid company ID'
-                });
-            }
+            const { id } = params;
+            const companyId = validateUUID(id, 'Company ID');
 
             const company = await CompanyModel.findById(companyId);
             if (!company) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Company not found'
-                });
+                throw new Error('Company not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 data: company,
                 message: 'Company retrieved successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in getCompanyById:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async createCompany(req: Request, res: Response) {
+    static async createCompany({ body }: { body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { name, description, website, company_size, logoUrl } = req.body;
+            const { name, description, website, company_size, logoUrl, address } = body;
 
             if (!name) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Company name is required'
-                });
+                throw new Error('Company name is required');
             }
 
             const newCompany = await CompanyModel.create({
@@ -70,87 +51,59 @@ export class CompanyController {
                 description,
                 website,
                 company_size,
-                logoUrl
+                logoUrl,
+                address
             });
 
-            res.status(201).json({
+            return {
                 success: true,
                 data: newCompany,
                 message: 'Company created successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in createCompany:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async updateCompany(req: Request, res: Response) {
+    static async updateCompany({ params, body }: { params: { id: string }; body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { id } = req.params;
-            const companyId = parseInt(id ?? '');
+            const { id } = params;
+            const companyId = validateUUID(id, 'Company ID');
 
-            if (isNaN(companyId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid company ID'
-                });
-            }
-
-            const updatedCompany = await CompanyModel.update(companyId, req.body);
+            const updatedCompany = await CompanyModel.update(companyId, body);
             if (!updatedCompany) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Company not found'
-                });
+                throw new Error('Company not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 data: updatedCompany,
                 message: 'Company updated successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in updateCompany:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 
-    static async deleteCompany(req: Request, res: Response) {
+    static async deleteCompany({ params }: { params: { id: string } }): Promise<{ success: boolean; message: string }> {
         try {
-            const { id } = req.params;
-            const companyId = parseInt(id ?? '');
-
-            if (isNaN(companyId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid company ID'
-                });
-            }
+            const { id } = params;
+            const companyId = validateUUID(id, 'Company ID');
 
             const deleted = await CompanyModel.delete(companyId);
             if (!deleted) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Company not found'
-                });
+                throw new Error('Company not found');
             }
 
-            res.status(200).json({
+            return {
                 success: true,
                 message: 'Company deleted successfully'
-            });
+            };
         } catch (error) {
             console.error('Error in deleteCompany:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
+            throw error;
         }
     }
 }

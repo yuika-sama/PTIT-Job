@@ -1,8 +1,8 @@
 import pool from '../config/config.js';
 
 interface Resume {
-    id: number;
-    user_id: number;
+    id: string;
+    user_id: string;
     file_url: string;
     file_name: string;
     is_default: boolean;
@@ -19,7 +19,7 @@ export class ResumeModel {
         }
     }   
     
-    static async findById(id: number): Promise<Resume | null> { 
+    static async findById(id: string): Promise<Resume | null> { 
         try {
             const result = await pool.query('SELECT * FROM resumes WHERE id = $1', [id]);
             if (result.rows.length === 0) {
@@ -31,7 +31,7 @@ export class ResumeModel {
         }   
     }
     
-    static async findByUserId(userId: number): Promise<Resume[]> {
+    static async findByUserId(userId: string): Promise<Resume[]> {
         try {
             const result = await pool.query('SELECT * FROM resumes WHERE user_id = $1', [userId]);   
             return result.rows;
@@ -40,7 +40,7 @@ export class ResumeModel {
         }
     }
     
-    static async uploadResume(userId: number, fileUrl: string, fileName: string, isDefault: boolean): Promise<Resume> {
+    static async uploadResume(userId: string, fileUrl: string, fileName: string, isDefault: boolean): Promise<Resume> {
         try {
             if (isDefault) {
                 await pool.query('UPDATE resumes SET is_default = FALSE WHERE user_id = $1', [userId]);
@@ -55,7 +55,7 @@ export class ResumeModel {
         }   
     }
     
-    static async setDefaultResume(userId: number, resumeId: number): Promise<void> {
+    static async setDefaultResume(userId: string, resumeId: string): Promise<void> {
         try {
             await pool.query('UPDATE resumes SET is_default = FALSE WHERE user_id = $1', [userId]);
             await pool.query('UPDATE resumes SET is_default = TRUE WHERE id = $1 AND user_id = $2', [resumeId, userId]);
@@ -64,7 +64,7 @@ export class ResumeModel {
         }
     }
     
-    static async deleteResume(userId: number, resumeId: number): Promise<void> {
+    static async deleteResume(userId: string, resumeId: string): Promise<void> {
         try {
             await pool.query('DELETE FROM resumes WHERE id = $1 AND user_id = $2', [resumeId, userId]);
         } catch (error) {

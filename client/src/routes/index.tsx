@@ -24,6 +24,8 @@ import CandidateDashboard from '../pages/Candidate/CandidateDashboard';
 
 // Shared Pages
 import Profile from '../pages/Shared/Profile';
+import EmployerLayout from '../components/EmployerLayout';
+import CandidateLayout from '../components/CandidateLayout';
 
 // Role-based route protection
 interface RoleProtectedRouteProps {
@@ -56,8 +58,17 @@ const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({ children, allow
     return <Navigate to="/403-forbidden" replace />;
   }
 
-  return <LayoutWrapper>{children}</LayoutWrapper>;
-};
+  if (allowedRoles.includes('admin')) {
+    return <LayoutWrapper>{children}</LayoutWrapper>;
+  }
+  if (allowedRoles.includes('employer')) {
+    return <EmployerLayout>{children}</EmployerLayout>;
+  }
+  if (allowedRoles.includes('candidate')) {
+    return <CandidateLayout>{children}</CandidateLayout>;
+  }
+  return <>{children}</>;
+}
 
 // Dashboard redirect based on role
 const DashboardRedirect: React.FC = () => {

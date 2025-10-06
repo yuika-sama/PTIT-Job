@@ -9,6 +9,7 @@ import {
   Notifications as NotificationsIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import CandidateLayout from '../../components/CandidateLayout';
 
 interface StatCardProps {
   title: string;
@@ -60,7 +61,7 @@ const CandidateDashboard: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ pt: 3, pb: 4 }}>
       <Typography variant="h4" gutterBottom>
         Chào mừng trở lại, {user?.full_name || user?.email}!
       </Typography>

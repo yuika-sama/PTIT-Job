@@ -1,7 +1,8 @@
 import pool from '../config/config.js';
 import type {JobType, JobStatus} from './types/Types.js';
+
 interface Job {
-    id: number;
+    id: string;
     title: string;
     description: string;
     requirements?: string;
@@ -12,9 +13,9 @@ interface Job {
     job_type: JobType;
     status: JobStatus
     expiry_date?: Date;
-    company_id: number;
-    category_id?: number;
-    location_id?: number;
+    company_id: string;
+    category_id?: string;
+    location_id?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -22,7 +23,18 @@ interface Job {
 export class JobModel {
     static async findAll(): Promise<Job[]> {
         try {
-            const result = await pool.query('SELECT * FROM jobs ORDER BY created_at DESC');
+            const result = await pool.query(`
+                SELECT 
+                    j.*,
+                    c.name as company_name,
+                    ct.name as category_name,
+                    l.city as location_name
+                FROM jobs j
+                LEFT JOIN companies c ON j.company_id = c.id
+                LEFT JOIN job_categories  ct ON j.category_id = ct.id
+                LEFT JOIN locations l ON j.location_id = l.id
+                ORDER BY created_at DESC
+            `);
             return result.rows as Job[];
         } catch (error) {
             console.error('Error fetching jobs:', error);
@@ -30,7 +42,7 @@ export class JobModel {
         }
     }
 
-    static async findById(id: number): Promise<Job | null> {
+    static async findById(id: string): Promise<Job | null> {
         try {
             const result = await pool.query('SELECT * FROM jobs WHERE id = $1', [id]);
             if (result.rows.length === 0) {
@@ -63,7 +75,7 @@ export class JobModel {
             throw error;
         }
     }
-    static async update(id: number, jobData: Partial<Job>): Promise<Job | null> {
+    static async update(id: string, jobData: Partial<Job>): Promise<Job | null> {
         const {
             title, description, requirements, benefits, salary_min, salary_max,
             currency, job_type, status, expiry_date, company_id, category_id, location_id
@@ -100,7 +112,7 @@ export class JobModel {
         }
     }
 
-    static async delete(id: number): Promise<boolean> {
+    static async delete(id: string): Promise<boolean> {
         try {
             const result = await pool.query('DELETE FROM jobs WHERE id = $1', [id]);
             return (result.rowCount ?? 0) > 0;

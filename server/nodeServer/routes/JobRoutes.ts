@@ -1,21 +1,22 @@
-import { Router } from 'express';
+import { Elysia } from 'elysia';
 import { JobController } from '../controllers/JobController.js';
 
-const router = Router();
-
-// GET /api/jobs - Get all jobs
-router.get('/', JobController.getAllJobs);
-
-// GET /api/jobs/:id - Get job by ID
-router.get('/:id', JobController.getJobById);
-
-// POST /api/jobs - Create new job
-router.post('/', JobController.createJob);
-
-// PUT /api/jobs/:id - Update job
-router.put('/:id', JobController.updateJob);
-
-// DELETE /api/jobs/:id - Delete job
-router.delete('/:id', JobController.deleteJob);
-
-export default router;
+export const jobRoutes = new Elysia()
+    .group('/jobs', (app) => 
+        app
+            .get('/', JobController.getAllJobs, {
+                detail: { tags: ['Jobs'] }
+            })
+            .get('/:id', JobController.getJobById, {
+                detail: { tags: ['Jobs'] }
+            })
+            .post('/', JobController.createJob, {
+                detail: { tags: ['Jobs'] }
+            })
+            .put('/:id', JobController.updateJob, {
+                detail: { tags: ['Jobs'] }
+            })
+            .delete('/:id', JobController.deleteJob, {
+                detail: { tags: ['Jobs'] }
+            })
+    )

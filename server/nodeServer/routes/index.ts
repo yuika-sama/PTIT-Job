@@ -1,21 +1,28 @@
-import { Router } from 'express';
-import userRoutes from './UserRoutes.js';
-import companyRoutes from './CompanyRoutes.js';
-import jobRoutes from './JobRoutes.js';
-import jobApplicationRoutes from './JobApplicationRoutes.js';
-import resumeRoutes from './ResumeRoutes.js';
-import jobCategoryRoutes from './JobCategoryRoutes.js';
-import locationRoutes from './LocationRoutes.js';
+import { Elysia } from 'elysia';
+import { authRoutes } from './AuthRoutes.js';
+import { userRoutes } from './UserRoutes.js';
+import { jobRoutes } from './JobRoutes.js';
+import { companyRoutes } from './CompanyRoutes.js';
+import { jobApplicationRoutes } from './JobApplicationRoutes.js';
+import { jobCategoryRoutes } from './JobCategoryRoutes.js';
+import { locationRoutes } from './LocationRoutes.js';
+import { resumeRoutes } from './ResumeRoutes.js';
+import { TestRoutes } from './TestRoutes.js';
 
-const router = Router();
-
-// Mount all routes
-router.use('/users', userRoutes);
-router.use('/companies', companyRoutes);
-router.use('/jobs', jobRoutes);
-router.use('/applications', jobApplicationRoutes);
-router.use('/resumes', resumeRoutes);
-router.use('/categories', jobCategoryRoutes);
-router.use('/locations', locationRoutes);
-
-export default router;
+export function setupApiRoutes(app: Elysia) {
+    // Setup API routes with proper grouping
+    app.group('/api', (api) => {
+        return api
+            .use(authRoutes)
+            .use(userRoutes)
+            .use(jobRoutes)
+            .use(companyRoutes)
+            .use(jobApplicationRoutes)
+            .use(jobCategoryRoutes)
+            .use(locationRoutes)
+            .use(resumeRoutes)
+            .use(TestRoutes); // Chỉ trong development
+    });
+    
+    return app;
+}

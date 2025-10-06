@@ -4,11 +4,10 @@ import {
   Work as WorkIcon,
   People as PeopleIcon,
   Assessment as AssessmentIcon,
-  TrendingUp as TrendingUpIcon,
-  Business as BusinessIcon,
   Visibility as VisibilityIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import EmployerLayout from '../../components/EmployerLayout';
 
 interface StatCardProps {
   title: string;
@@ -60,7 +59,7 @@ const EmployerDashboard: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ pt: 3, pb: 4 }}>
       <Typography variant="h4" gutterBottom>
         Chào mừng nhà tuyển dụng, {user?.full_name || user?.email}!
       </Typography>

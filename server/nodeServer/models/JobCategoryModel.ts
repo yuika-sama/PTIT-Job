@@ -1,20 +1,32 @@
 import pool from '../config/config.js'
 interface JobCategory {
-    id: number;
+    id: string;
     name: string;
-    slug: string
+    slug: string;
+    job_count?: number;
 }
 export class JobCategoryModel {
     static async findAll(): Promise<JobCategory[]> {
         try {
-            const result = await pool.query('SELECT * FROM job_categories ORDER BY name');
+            const result = await pool.query(
+                `SELECT 
+                    c.*,
+                    COUNT(j.id) AS job_count
+                FROM 
+                    job_categories c
+                LEFT JOIN 
+                    jobs j ON j.category_id = c.id
+                GROUP BY 
+                    c.id, c.name
+                ORDER BY 
+                    job_count DESC;`);
             return result.rows;
         } catch (error) {
             console.error('Error finding all job categories:', error);
             throw error;
         }
     }
-    static async findById(id: number): Promise<JobCategory | null> {
+    static async findById(id: string): Promise<JobCategory | null> {
         try {
             const result = await pool.query('SELECT * FROM job_categories WHERE id = $1', [id]);
             return result.rows[0] || null;
@@ -35,7 +47,7 @@ export class JobCategoryModel {
             throw error;
         }
     }
-    static async update(id: number, name: string, slug: string): Promise<JobCategory | null> {
+    static async update(id: string, name: string, slug: string): Promise<JobCategory | null> {
         try {
             const result = await pool.query(
                 'UPDATE job_categories SET name = $1, slug = $2 WHERE id = $3 RETURNING *',
@@ -47,7 +59,7 @@ export class JobCategoryModel {
             throw error;
         }
     }
-    static async delete(id: number): Promise<boolean> {
+    static async delete(id: string): Promise<boolean> {
         try {
             const result = await pool.query('DELETE FROM job_categories WHERE id = $1', [id]);
             return (result.rowCount ?? 0) > 0;

@@ -1,11 +1,11 @@
 import pool from '../config/config.js';
  interface Company {
-    id: number;
+    id: string;
     name: string;
     description?: string;
     website?: string;
-    location?: string;
     company_size?: string;
+    address?: string;
     logoUrl?: string;
     createdAt: Date;
     updatedAt: Date;
@@ -13,7 +13,12 @@ import pool from '../config/config.js';
 export class CompanyModel {
     static async findAll(): Promise<Company[]>{
         try{
-            const result = await pool.query('SELECT * FROM companies ORDER BY created_at DESC');
+            const result = await pool.query(
+                `
+                SELECT * FROM companies
+                ORDER BY created_at DESC
+                `
+            );
             return result.rows;
         } catch (error) {
             console.error('Error fetching companies:', error);
@@ -21,7 +26,7 @@ export class CompanyModel {
         }
     }
 
-    static async findById(id: number): Promise<Company | null> {
+    static async findById(id: string): Promise<Company | null> {
         try {
             const result = await pool.query('SELECT * FROM companies WHERE id = $1', [id]);
             if (result.rows.length === 0) {
@@ -35,16 +40,16 @@ export class CompanyModel {
     }
 
     static create(company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>): Promise<Company> {
-        const { name, description, website, company_size, logoUrl } = company;
+        const { name, description, website, company_size, logoUrl, address } = company;
         return pool.query(
-            `INSERT INTO companies (name, description, website, company_size, logo_url, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+            `INSERT INTO companies (name, description, website, company_size, logo_url, address, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
              RETURNING *`,
-            [name, description, website, company_size, logoUrl]
+            [name, description, website, company_size, logoUrl, address]
         ).then(result => result.rows[0]);
     }
 
-    static async update(id: number, companyData: Partial<Company>): Promise<Company | null> {
+    static async update(id: string, companyData: Partial<Company>): Promise<Company | null> {
         try {
             const result = await pool.query(
                 `UPDATE companies SET 
@@ -66,7 +71,7 @@ export class CompanyModel {
         }
     }
 
-    static async delete (id: number): Promise<boolean> {
+    static async delete (id: string): Promise<boolean> {
         try {
             const result = await pool.query('DELETE FROM companies WHERE id = $1', [id]);
             return (result.rowCount ?? 0) > 0;

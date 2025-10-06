@@ -1,24 +1,28 @@
 import pool from '../config/config.js';
 import type { ApplicationStatus } from './types/Types.js';
 interface JobApplication {
-    id: number;
-    job_id: number;
-    user_id: number;    
-    resume_id: number;
+    id: string;
+    job_id: string;
+    user_id: string;    
+    resume_id: string;
     cover_letter?: string;
     status: ApplicationStatus;
     applied_at: Date;
+    user_name?: string;
+    user_email?: string;
+    job_name?: string;
+    file_url?: string;
 }
 export class JobApplicationModel {
     static async findAll(): Promise<JobApplication[]> {
         try {
             const result = await pool.query(`
-                SELECT ja.*, j.title as job_title, u.full_name as applicant_name, c.name as company_name
-                FROM job_applications ja
-                LEFT JOIN jobs j ON ja.job_id = j.id
-                LEFT JOIN users u ON ja.user_id = u.id
-                LEFT JOIN companies c ON j.company_id = c.id
-                ORDER BY ja.applied_at DESC
+                select ja.*, u.full_name as user_name, u.email as user_email, j.title as job_name, r.file_url as file_url
+                    from ptitjob.job_applications ja
+                    left join ptitjob.users u on ja.user_id = u.id
+                    left join ptitjob.jobs j on ja.job_id = j.id
+                    left join ptitjob.resumes r on ja.resume_id = r.id
+                ORDER BY applied_at DESC;
             `);
             return result.rows;
         } catch (error) {
@@ -27,7 +31,7 @@ export class JobApplicationModel {
         }
     }
 
-    static async findByJobId(jobId: number): Promise<JobApplication[]> {
+    static async findByJobId(jobId: string): Promise<JobApplication[]> {
         try {
             const result = await pool.query(`
                 SELECT ja.*, u.full_name as applicant_name, u.email as applicant_email
@@ -43,7 +47,7 @@ export class JobApplicationModel {
         }
     }
 
-    static async findByUserId(userId: number): Promise<JobApplication[]> {
+    static async findByUserId(userId: string): Promise<JobApplication[]> {
         try {
             const result = await pool.query(`
                 SELECT ja.*, j.title as job_title, c.name as company_name
@@ -75,7 +79,7 @@ export class JobApplicationModel {
         }
     }
 
-    static async updateStatus(id: number, status: ApplicationStatus): Promise<JobApplication | null> {
+    static async updateStatus(id: string, status: ApplicationStatus): Promise<JobApplication | null> {
         try {
             const result = await pool.query(
                 'UPDATE job_applications SET status = $2 WHERE id = $1 RETURNING *',
