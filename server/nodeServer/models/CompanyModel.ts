@@ -7,6 +7,7 @@ import pool from '../config/config.js';
     company_size?: string;
     address?: string;
     logoUrl?: string;
+    jobs_count?: number | 0; // Số lượng job liên quan
     createdAt: Date;
     updatedAt: Date;
 }
@@ -15,7 +16,9 @@ export class CompanyModel {
         try{
             const result = await pool.query(
                 `
-                SELECT * FROM companies
+                SELECT c.*, COUNT(j.id) as job_count FROM companies c
+                LEFT JOIN jobs j ON c.id = j.company_id
+                GROUP BY c.id
                 ORDER BY created_at DESC
                 `
             );

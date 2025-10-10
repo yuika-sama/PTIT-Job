@@ -62,7 +62,7 @@ export class JobService extends BaseApiService {
 
   // Get featured jobs
   async getFeaturedJobs(): Promise<ApiResponse<Job[]>> {
-    return this.get<Job[]>(`${this.endpoint}/featured`);
+    return this.get<Job[]>(`${this.endpoint}`);
   }
 }
 

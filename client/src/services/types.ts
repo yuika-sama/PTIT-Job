@@ -6,7 +6,7 @@ export interface User {
   phone_number?: string;
   role: UserRole;
   company_id?: string;
-  company_name?: string; // Tên công ty từ backend
+  company_name?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -15,7 +15,6 @@ export interface User {
 
 export type UserRole = 'candidate' | 'employer' | 'admin';
 
-// Auth response types
 export interface AuthResponse {
   user: User;
   accessToken: string;
@@ -73,6 +72,7 @@ export interface Company {
   logo_url?: string;
   created_at: string;
   updated_at: string;
+  job_count?: number;
 }
 
 export interface CreateCompanyRequest {
@@ -110,11 +110,13 @@ export interface Job {
   company_name: string;
   category_name: string;
   location_name: string;
+  company_logo?: string | null;
   created_at: string; 
   updated_at: string;
   company_id: string;
   category_id: string;
   location_id: string;
+  job_count?: number; 
 }
 
 export type JobType = 'full_time' | 'part_time' | 'contract' | 'internship' | 'freelance';
@@ -135,7 +137,6 @@ export interface CreateJobRequest {
   location_name: string;
 }
 
-// Job Application types
 export interface JobApplication {
   id: string;
   job_id: string;
@@ -166,7 +167,6 @@ export interface CreateJobApplicationRequest {
   cover_letter?: string;
 }
 
-// Resume types
 export interface Resume {
   id: string;
   user_id: string;
@@ -176,14 +176,14 @@ export interface Resume {
   uploaded_date: string;
 }
 
-// Job Category types
 export interface JobCategory {
   id: string;
   name: string;
   slug?: string;
   description?: string;
   is_active?: boolean;
-  job_count?: number; // Extended field for display
+  job_count?: number;
+  icon_url?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -219,7 +219,6 @@ export interface LocationFilters {
   status: string;
 }
 
-// API Response types
 export interface PaginatedResponse<T> {
   success: boolean;
   data: T[];
@@ -232,7 +231,6 @@ export interface PaginatedResponse<T> {
   message: string;
 }
 
-// Error types
 export interface ApiError {
   success: false;
   message: string;

@@ -26,7 +26,12 @@ import {
   Logout as LogoutIcon,
   Settings as SettingsIcon,
   Person as PersonIcon,
-  School as SchoolIcon
+  School as SchoolIcon,
+  Calculate as CalculateIcon,
+  MonetizationOn as MonetizationOnIcon,
+  AccountBalance as AccountBalanceIcon,
+  Security as SecurityIcon,
+  TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -40,6 +45,7 @@ const CandidateHeader: React.FC = () => {
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
   const [toolsAnchorEl, setToolsAnchorEl] = useState<null | HTMLElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setProfileAnchorEl(event.currentTarget);
@@ -50,11 +56,56 @@ const CandidateHeader: React.FC = () => {
   };
 
   const handleToolsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
     setToolsAnchorEl(event.currentTarget);
   };
 
   const handleToolsMenuClose = () => {
     setToolsAnchorEl(null);
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
+  };
+
+  const handleToolsHover = (event: React.MouseEvent<HTMLElement>) => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
+    if (!toolsAnchorEl) {
+      setToolsAnchorEl(event.currentTarget);
+    }
+  };
+
+  const handleToolsLeave = () => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+    }
+    const timeout = setTimeout(() => {
+      setToolsAnchorEl(null);
+    }, 200);
+    setCloseTimeout(timeout);
+  };
+
+  const handleMenuEnter = () => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
+  };
+
+  const handleMenuLeave = () => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+    }
+    const timeout = setTimeout(() => {
+      setToolsAnchorEl(null);
+    }, 200);
+    setCloseTimeout(timeout);
   };
 
   const handleLogout = () => {
@@ -81,10 +132,55 @@ const CandidateHeader: React.FC = () => {
       icon: <BuildIcon />,
       hasDropdown: true,
       dropdownItems: [
-        { label: 'Tạo CV', icon: <AssignmentIcon />, path: '/candidate/cv-builder' },
-        { label: 'Đánh giá CV', icon: <AssignmentIcon />, path: '/candidate/cv-review' },
-        { label: 'Luyện tập phỏng vấn', icon: <PsychologyIcon />, path: '/candidate/interview-practice' },
-        { label: 'Tìm khóa học', icon: <SchoolIcon />, path: '/candidate/courses' }
+        // CV & Interview Tools
+        { 
+          label: 'Tạo CV', 
+          icon: <AssignmentIcon />, 
+          path: '/candidate/cv-builder',
+          category: 'cv'
+        },
+        { 
+          label: 'Đánh giá CV', 
+          icon: <AssignmentIcon />, 
+          path: '/candidate/cv-review',
+          category: 'cv'
+        },
+        { 
+          label: 'Luyện tập phỏng vấn', 
+          icon: <PsychologyIcon />, 
+          path: '/candidate/interview-practice',
+          category: 'cv'
+        },
+        { 
+          label: 'Tính lương Gross/Net', 
+          icon: <CalculateIcon />, 
+          path: '/candidate/salary-calculator',
+          category: 'finance'
+        },
+        { 
+          label: 'Tính thuế thu nhập cá nhân', 
+          icon: <MonetizationOnIcon />, 
+          path: '/candidate/personal-income-tax',
+          category: 'finance'
+        },
+        { 
+          label: 'Tính lãi suất kép', 
+          icon: <TrendingUpIcon />, 
+          path: '/candidate/compound-interest',
+          category: 'finance'
+        },
+        { 
+          label: 'Tính bảo hiểm thất nghiệp', 
+          icon: <SecurityIcon />, 
+          path: '/candidate/unemployment-insurance',
+          category: 'finance'
+        },
+        { 
+          label: 'Tính bảo hiểm xã hội một lần', 
+          icon: <AccountBalanceIcon />, 
+          path: '/candidate/bhxh-calculator',
+          category: 'finance'
+        }
       ]
     },
     {
@@ -151,8 +247,12 @@ const CandidateHeader: React.FC = () => {
                 <Button
                   startIcon={item.icon}
                   onClick={handleToolsMenuOpen}
+                  onMouseEnter={handleToolsHover}
+                  onMouseLeave={handleToolsLeave}
                   sx={{
-                    color: 'text.primary',
+                    backgroundColor: Boolean(toolsAnchorEl) ? 'primary.light' : 'transparent',
+                    color: Boolean(toolsAnchorEl) ? 'primary.main' : 'text.primary',
+                    transition: 'all 0.2s ease',
                     '&:hover': {
                       backgroundColor: 'primary.light',
                       color: 'primary.main'
@@ -165,38 +265,116 @@ const CandidateHeader: React.FC = () => {
                   anchorEl={toolsAnchorEl}
                   open={Boolean(toolsAnchorEl)}
                   onClose={handleToolsMenuClose}
+                  onMouseEnter={handleMenuEnter}
+                  onMouseLeave={handleMenuLeave}
+                  MenuListProps={{
+                    onMouseEnter: handleMenuEnter,
+                    onMouseLeave: handleMenuLeave,
+                    sx: { py: 1 }
+                  }}
                   PaperProps={{
                     sx: {
-                      mt: 1,
-                      minWidth: 220,
+                      mt: 0.5,
+                      minWidth: 560,
+                      maxHeight: 500,
                       '& .MuiMenuItem-root': {
                         px: 2,
-                        py: 1
+                        py: 1.5,
+                        minHeight: 48
                       }
                     }
                   }}
                 >
-                  {item.dropdownItems?.map((dropdownItem, dropdownIndex) => (
-                    <MenuItem
-                      key={dropdownIndex}
-                      onClick={() => {
-                        navigate(dropdownItem.path);
-                        handleToolsMenuClose();
-                      }}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: 'primary.light'
-                        }
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        {dropdownItem.icon}
-                        <Typography variant="body2">
-                          {dropdownItem.label}
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, p: 1 }}>
+                    {/* Left Column */}
+                    <Box>
+                      {/* CV & Interview Tools */}
+                      <Box sx={{ px: 1, py: 1 }}>
+                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                          CV & Phỏng vấn
                         </Typography>
                       </Box>
-                    </MenuItem>
-                  ))}
+                      {item.dropdownItems?.filter(dropdownItem => dropdownItem.category === 'cv').map((dropdownItem, dropdownIndex) => (
+                        <MenuItem
+                          key={`cv-${dropdownIndex}`}
+                          onClick={() => {
+                            navigate(dropdownItem.path);
+                            handleToolsMenuClose();
+                          }}
+                          sx={{
+                            mx: 1,
+                            borderRadius: 1,
+                            '&:hover': {
+                              backgroundColor: 'primary.light'
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            {dropdownItem.icon}
+                            <Typography variant="body2">
+                              {dropdownItem.label}
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                      {item.dropdownItems?.filter(dropdownItem => dropdownItem.category === 'learning').map((dropdownItem, dropdownIndex) => (
+                        <MenuItem
+                          key={`learning-${dropdownIndex}`}
+                          onClick={() => {
+                            navigate(dropdownItem.path);
+                            handleToolsMenuClose();
+                          }}
+                          sx={{
+                            mx: 1,
+                            borderRadius: 1,
+                            '&:hover': {
+                              backgroundColor: 'primary.light'
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            {dropdownItem.icon}
+                            <Typography variant="body2">
+                              {dropdownItem.label}
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Box>
+
+                    {/* Right Column */}
+                    <Box>
+                      {/* Financial Tools */}
+                      <Box sx={{ px: 1, py: 1 }}>
+                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                          Công cụ tài chính
+                        </Typography>
+                      </Box>
+                      {item.dropdownItems?.filter(dropdownItem => dropdownItem.category === 'finance').map((dropdownItem, dropdownIndex) => (
+                        <MenuItem
+                          key={`finance-${dropdownIndex}`}
+                          onClick={() => {
+                            navigate(dropdownItem.path);
+                            handleToolsMenuClose();
+                          }}
+                          sx={{
+                            mx: 1,
+                            borderRadius: 1,
+                            '&:hover': {
+                              backgroundColor: 'primary.light'
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            {dropdownItem.icon}
+                            <Typography variant="body2">
+                              {dropdownItem.label}
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Box>
+                  </Box>
                 </Menu>
               </Box>
             ) : (

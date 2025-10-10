@@ -16,6 +16,7 @@ interface Job {
     company_id: string;
     category_id?: string;
     location_id?: string;
+    company_logo?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -28,7 +29,8 @@ export class JobModel {
                     j.*,
                     c.name as company_name,
                     ct.name as category_name,
-                    l.city as location_name
+                    l.city as location_name,
+                    c.logo_url as company_logo
                 FROM jobs j
                 LEFT JOIN companies c ON j.company_id = c.id
                 LEFT JOIN job_categories  ct ON j.category_id = ct.id

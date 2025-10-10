@@ -21,11 +21,23 @@ import EmployerDashboard from '../pages/Employer/EmployerDashboard';
 
 // Candidate Pages
 import CandidateDashboard from '../pages/Candidate/CandidateDashboard';
+import CandidateJobList from '../pages/Candidate/CandidateJobList';
+import BestJobsPage from '../pages/Candidate/BestJobsPage';
+import AttractiveJobsPage from '../pages/Candidate/AttractiveJobsPage';
+import CompaniesPage from '../pages/Candidate/CompaniesPage';
+import TopCompaniesPage from '../pages/Candidate/TopCompaniesPage';
+import CompanyDetailPage from '../pages/Candidate/CompanyDetailPage';
+import BHXHCalculatorPage from '../pages/Candidate/BHXHCalculatorPage';
+import SalaryCalculatorPage from '../pages/Candidate/SalaryCalculatorPage';
+import UnemploymentInsurancePage from '../pages/Candidate/UnemploymentInsurancePage';
+import JobSearchPage from '../pages/Candidate/JobSearchPage';
+import { CompoundInterestPage } from '../pages/Candidate';
 
 // Shared Pages
 import Profile from '../pages/Shared/Profile';
 import EmployerLayout from '../components/EmployerLayout';
 import CandidateLayout from '../components/CandidateLayout';
+import { PersonalIncomeTaxPage } from '../pages/Candidate';
 
 // Role-based route protection
 interface RoleProtectedRouteProps {
@@ -234,6 +246,18 @@ const AppRoutes: React.FC = () => {
             <Routes>
               <Route path="dashboard" element={<CandidateDashboard />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="jobs" element={<CandidateJobList />} />
+              <Route path="job-search" element={<JobSearchPage />} />
+              <Route path="best-jobs" element={<BestJobsPage />} />
+              <Route path="attractive-jobs" element={<AttractiveJobsPage />} />
+              <Route path="companies" element={<CompaniesPage />} />
+              <Route path="top-companies" element={<TopCompaniesPage />} />
+              <Route path="company/:id" element={<CompanyDetailPage />} />
+              <Route path="bhxh-calculator" element={<BHXHCalculatorPage />} />
+              <Route path="personal-income-tax" element={<PersonalIncomeTaxPage />} />
+              <Route path="salary-calculator" element={<SalaryCalculatorPage />} />
+              <Route path="unemployment-insurance" element={<UnemploymentInsurancePage />} />
+              <Route path="compound-interest" element={<CompoundInterestPage />} />
               <Route path="" element={<Navigate to="/candidate/dashboard" replace />} />
               <Route path="*" element={<NotFound404 />} />
             </Routes>

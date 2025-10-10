@@ -43,13 +43,13 @@ export class JobCategoryController {
 
     static async createCategory({ body }: { body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const { name, slug } = body;
+            const { name, slug, icon_url } = body;
 
             if (!name || !slug) {
                 throw new Error('Name and slug are required');
             }
 
-            const newCategory = await JobCategoryModel.create(name, slug);
+            const newCategory = await JobCategoryModel.create(name, slug, icon_url);
 
             return {
                 success: true,
@@ -65,7 +65,7 @@ export class JobCategoryController {
     static async updateCategory({ params, body }: { params: { id: string }; body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
             const { id } = params;
-            const { name, slug } = body;
+            const { name, slug, icon_url } = body;
 
             if (!id) {
                 throw new Error('Category ID is required');
@@ -76,7 +76,7 @@ export class JobCategoryController {
             }
 
             const categoryId = validateUUID(id, 'Category ID');
-            const updatedCategory = await JobCategoryModel.update(categoryId, name, slug);
+            const updatedCategory = await JobCategoryModel.update(categoryId, name, slug, icon_url);
             if (!updatedCategory) {
                 throw new Error('Job category not found');
             }

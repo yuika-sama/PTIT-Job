@@ -26,8 +26,19 @@ interface ThemeContextProviderProps {
 const PTIT_COLORS = {
   primary: '#DE221A',          // PTIT Red
   primaryDark: '#B01B14',      // Darker PTIT Red
-  accentBlue: '#0A4D8C',       // Navy Blue accent
+  primaryLight: '#FF5A52',     // Lighter PTIT Red
+  secondary: '#1976D2',        // PTIT Blue
+  secondaryDark: '#0D47A1',    // Dark PTIT Blue
+  secondaryLight: '#42A5F5',   // Light PTIT Blue
+  accent: '#FF9800',           // Orange accent
+  accentLight: '#FFB74D',      // Light orange
+  success: '#4CAF50',          // Green for success
+  warning: '#FF9800',          // Orange for warning
+  error: '#DE221A',            // PTIT Red for error
+  info: '#2196F3',             // Blue for info
   neutralGray: '#F5F5F5',      // Light gray background
+  darkGray: '#424242',         // Dark gray text
+  lightGray: '#FAFAFA',        // Very light background
   textDark: '#333333',         // Dark text
   textLight: '#FFFFFF',        // Light text
 };
@@ -44,9 +55,9 @@ const createAppTheme = (mode: PaletteMode): Theme => {
         contrastText: PTIT_COLORS.textLight,
       },
       secondary: {
-        main: PTIT_COLORS.accentBlue,
-        light: '#4B7BC8',
-        dark: '#083A6B',
+        main: PTIT_COLORS.secondary,
+        light: PTIT_COLORS.secondaryLight,
+        dark: PTIT_COLORS.secondaryDark,
         contrastText: PTIT_COLORS.textLight,
       },
       background: {
@@ -69,7 +80,7 @@ const createAppTheme = (mode: PaletteMode): Theme => {
         dark: '#e65100',
       },
       info: {
-        main: PTIT_COLORS.accentBlue,
+        main: PTIT_COLORS.info,
         light: '#64b5f6',
         dark: '#1976d2',
       },
@@ -166,7 +177,7 @@ const createAppTheme = (mode: PaletteMode): Theme => {
         styleOverrides: {
           root: {
             '&:hover': {
-              backgroundColor: mode === 'light' ? '#f0f0f0' : '#404040',
+              backgroundColor: mode === 'light' ? '#fff' : '#404040',
             },
           },
         },
@@ -175,7 +186,7 @@ const createAppTheme = (mode: PaletteMode): Theme => {
         styleOverrides: {
           root: {
             '&.MuiChip-colorDefault': {
-              backgroundColor: mode === 'light' ? '#e0e0e0' : '#404040',
+              backgroundColor: mode === 'light' ? '#fff' : '#404040',
               color: mode === 'light' ? PTIT_COLORS.textDark : PTIT_COLORS.textLight,
             },
           },

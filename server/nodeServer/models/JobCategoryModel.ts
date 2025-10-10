@@ -4,6 +4,7 @@ interface JobCategory {
     name: string;
     slug: string;
     job_count?: number;
+    icon_url?: string;
 }
 export class JobCategoryModel {
     static async findAll(): Promise<JobCategory[]> {
@@ -35,11 +36,11 @@ export class JobCategoryModel {
             throw error;
         }
     }
-    static async create(name: string, slug: string): Promise<JobCategory> {
+    static async create(name: string, slug: string, iconUrl: string): Promise<JobCategory> {
         try {
             const result = await pool.query(
-                'INSERT INTO job_categories (name, slug) VALUES ($1, $2) RETURNING *',
-                [name, slug]
+                'INSERT INTO job_categories (name, slug, icon_url) VALUES ($1, $2, $3) RETURNING *',
+                [name, slug, iconUrl]
             );
             return result.rows[0];
         } catch (error) {
@@ -47,11 +48,11 @@ export class JobCategoryModel {
             throw error;
         }
     }
-    static async update(id: string, name: string, slug: string): Promise<JobCategory | null> {
+    static async update(id: string, name: string, slug: string, iconUrl: string): Promise<JobCategory | null> {
         try {
             const result = await pool.query(
-                'UPDATE job_categories SET name = $1, slug = $2 WHERE id = $3 RETURNING *',
-                [name, slug, id]
+                'UPDATE job_categories SET name = $1, slug = $2, icon_url = $3 WHERE id = $4 RETURNING *',
+                [name, slug, iconUrl, id]
             );
             return result.rows[0] || null;
         } catch (error) {

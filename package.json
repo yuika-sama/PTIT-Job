@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "concurrently \"bun run --cwd server/nodeServer dev\" \"npm start --prefix client\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
