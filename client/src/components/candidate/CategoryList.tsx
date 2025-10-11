@@ -48,16 +48,15 @@ const CategoryList: React.FC<CategoryListProps> = ({
   const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
-
-  // Use fallback data if categories is empty
   const displayCategories = categories.length > 0 
     ? categories.map((cat, index) => ({
         name: cat.name,
         slug: cat.slug || `category-${cat.id}`,
-        icon: FALLBACK_CATEGORIES[index % FALLBACK_CATEGORIES.length]?.icon || '📁',
-        color: FALLBACK_CATEGORIES[index % FALLBACK_CATEGORIES.length]?.color || theme.palette.primary.main
+        icon: cat.icon_url,
+        color: FALLBACK_CATEGORIES[index % FALLBACK_CATEGORIES.length]?.color || theme.palette.primary.main,
+        jobCount: cat.job_count || 0
       }))
-    : FALLBACK_CATEGORIES;
+    : [];
 
   const totalPages = Math.ceil(displayCategories.length / pageSize);
   const pagedCategories = displayCategories.slice(page * pageSize, page * pageSize + pageSize);
@@ -174,7 +173,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
                     transition: 'transform 0.2s ease'
                   }}
                 >
-                  {cat.icon}
+                  <img src={cat.icon ?? undefined} alt={cat.name} width='40px' height='40px'/>
                 </Box>
 
                 {/* Category Info */}
@@ -193,7 +192,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
                   
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Chip
-                      label={`${jobCount} jobs`}
+                      label={`${cat.jobCount} công việc`}
                       size="small"
                       sx={{
                         height: 20,
@@ -206,16 +205,6 @@ const CategoryList: React.FC<CategoryListProps> = ({
                         }
                       }}
                     />
-                    
-                    {Math.random() > 0.6 && (
-                      <Tooltip title="Ngành nghề hot">
-                        <TrendingUpIcon sx={{ 
-                          fontSize: 16, 
-                          color: '#4caf50',
-                          animation: 'pulse 2s infinite'
-                        }} />
-                      </Tooltip>
-                    )}
                   </Box>
                 </Box>
 

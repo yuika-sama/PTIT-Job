@@ -183,65 +183,8 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ onPlayVideo }) => {
         </Box>
 
         {/* Action Buttons */}
-        <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-          <Button
-            variant="contained"
-            startIcon={<TrendingUpIcon />}
-            sx={{
-              background: 'rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.3)',
-              color: 'white',
-              fontWeight: 600,
-              '&:hover': {
-                background: 'rgba(255,255,255,0.25)',
-                transform: 'translateY(-2px)'
-              },
-              transition: 'all 0.3s ease'
-            }}
-          >
-            Khám phá ngay
-          </Button>
-          
-          <Button
-            variant="outlined"
-            sx={{
-              borderColor: 'rgba(255,255,255,0.5)',
-              color: 'white',
-              fontWeight: 500,
-              '&:hover': {
-                borderColor: 'white',
-                backgroundColor: 'rgba(255,255,255,0.1)'
-              }
-            }}
-          >
-            Tìm hiểu thêm
-          </Button>
+        <Box sx={{ display: 'flex', gap: 2, mt: 3, height: 40 }}>
         </Box>
-
-        {/* Play Button */}
-        <IconButton 
-          className="play-button"
-          onClick={handlePlayClick}
-          sx={{ 
-            position: 'absolute', 
-            top: 32, 
-            right: 32, 
-            width: 72, 
-            height: 72, 
-            background: 'rgba(255,255,255,0.15)', 
-            backdropFilter: 'blur(15px)',
-            border: '2px solid rgba(255,255,255,0.3)',
-            '&:hover': { 
-              background: 'rgba(255,255,255,0.25)',
-              transform: 'scale(1.05)',
-              borderColor: 'rgba(255,255,255,0.5)'
-            },
-            transition: 'all 0.3s ease'
-          }}
-        >
-          <PlayArrowIcon sx={{ fontSize: 32, color: 'white', ml: 0.5 }} />
-        </IconButton>
       </CardContent>
 
       {/* Bottom Gradient Accent */}
