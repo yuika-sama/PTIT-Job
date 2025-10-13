@@ -1,8 +1,8 @@
-import pool from '../config/config.js';
+import {supabase} from '../config/supabase.js';
 import type { UserRole } from './types/Types.js';
 
-export interface User  {
-    reset_token_expiry:  Date | null;
+export interface User {
+    reset_token_expiry: Date | null;
     id: string;
     email: string;
     password_hash: string;
@@ -14,199 +14,258 @@ export interface User  {
     created_at: Date;
     updated_at: Date;
     refresh_token?: string | null;
+    reset_token?: string | null;
 }
+
 export class UserModel {
     static async findAll(): Promise<User[]> {
         try {
-            const result = await pool.query(`SELECT 
-                    u.*, 
-                    c.name AS company_name
-                FROM users u
-                LEFT JOIN companies c ON u.company_id = c.id
-                ORDER BY created_at DESC`
-            );
-            return result.rows;
+            const { data, error } = await supabase
+                .from('users')
+                .select(`
+                    *,
+                    companies!company_id (
+                        name
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Supabase error in findAll:', error);
+                throw error;
+            }
+
+            // Transform data to match expected format
+            return data?.map(user => ({
+                ...user,
+                company_name: user.companies?.name || null
+            })) || [];
         } catch (error) {
             console.error('Error fetching users:', error);
             throw error;
         }
     }
 
-    static async findById(id: string): Promise<User | null>{
+    static async findById(id: string): Promise<User | null> {
         try {
-            const result = await pool.query('SELECT * FROM ptitjob.users WHERE id = $1', [id]);
-            if (result.rows.length === 0) {
-                return null;
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    return null; // Not found
+                }
+                throw error;
             }
-            return result.rows[0];
+
+            return data;
         } catch (error) {
-            console.error(`Error fetching user with id ${id}:`, error);
+            console.error('Error finding user by ID:', error);
             throw error;
         }
     }
 
     static async findByEmail(email: string): Promise<User | null> {
         try {
-            const result = await pool.query('SELECT * FROM ptitjob.users WHERE email = $1', [email]);
-            if (result.rows.length === 0) {
-                return null;
-            }
-            return result.rows[0];
-        } catch (error) {
-            console.error(`Error fetching user with email ${email}:`, error);
-            throw error;
-        }   
-    }
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('email', email)
+                .single();
 
-    static async getUserCompany(id: string): Promise<{ name: string | null }> {
-        try {
-            const result = await pool.query(
-                `SELECT ptitjob.companies.name FROM ptitjob.users 
-                JOIN ptitjob.companies ON ptitjob.users.company_id = ptitjob.companies.id
-                 WHERE ptitjob.users.id = $1`, 
-            [id]);
-            if (result.rows.length === 0) {
-                return { name: null };
-            }   
-            return result.rows[0];
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    return null; // Not found
+                }
+                throw error;
+            }
+
+            return data;
         } catch (error) {
-            console.error(`Error fetching company info for user with id ${id}:`, error);
+            console.error('Error finding user by email:', error);
             throw error;
         }
     }
 
-    static async create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
-        const { email, password_hash, full_name, phone_number, role, company_id, is_active } = user;
-        return pool.query(
-            `INSERT INTO ptitjob.users (email, password_hash, full_name, phone_number, role, company_id, is_active, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-             RETURNING *`,
-            [email, password_hash, full_name, phone_number, role, company_id, is_active]
-        ).then(result => result.rows[0]);
+    static async create(userData: {
+        email: string;
+        password_hash: string;
+        full_name: string;
+        phone_number?: string;
+        role: UserRole;
+        company_id?: string;
+    }): Promise<User> {
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .insert([{
+                    ...userData,
+                    is_active: true,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }])
+                .select()
+                .single();
+
+            if (error) {
+                throw error;
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error creating user:', error);
+            throw error;
+        }
     }
 
-    static async update(id: string, userData: Partial<User>): Promise<User | null> {
+    static async update(id: string, updates: Partial<User>): Promise<User> {
         try {
-            const result = await pool.query(
-                `UPDATE ptitjob.users SET 
-                 email = COALESCE($2, email),
-                 password_hash = COALESCE($3, password_hash),
-                full_name = COALESCE($4, full_name),
-                phone_number = COALESCE($5, phone_number),
-                role = COALESCE($6, role),
-                company_id = COALESCE($7, company_id),
-                is_active = COALESCE($8, is_active),
-                updated_at = NOW()
-                WHERE id = $1
-                RETURNING *`,
-                [id, userData.email, userData.password_hash, userData.full_name, userData.phone_number,
-                 userData.role, userData.company_id, userData.is_active]
-            );
-            return result.rows[0] || null;
+            const { data, error } = await supabase
+                .from('users')
+                .update({
+                    ...updates,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) {
+                throw error;
+            }
+
+            return data;
         } catch (error) {
             console.error('Error updating user:', error);
             throw error;
         }
     }
 
-    static async updateAccountStatus(id: string, isActive: boolean): Promise<User | null> {
-        try {
-            const result = await pool.query(
-                `UPDATE ptitjob.users SET 
-                 is_active = $2,
-                 updated_at = NOW()
-                    WHERE id = $1
-                RETURNING *`,
-                [id, isActive]
-            );
-            return result.rows[0] || null;
-        } catch (error) {
-            console.error('Error updating account status:', error);
-            throw error;
-        }
-    }
-
     static async delete(id: string): Promise<boolean> {
         try {
-            const result = await pool.query('DELETE FROM ptitjob.users WHERE id = $1', [id]);
-            return (result.rowCount ?? 0) > 0;
+            const { error } = await supabase
+                .from('users')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                throw error;
+            }
+
+            return true;
         } catch (error) {
             console.error('Error deleting user:', error);
             throw error;
         }
     }
 
-    static async updateRefreshToken(id: string, refreshToken: string | null): Promise<boolean> {
+    static async getUserCompany(userId: string): Promise<{ name: string | null }> {
         try {
-            const result = await pool.query(
-                'UPDATE ptitjob.users SET refresh_token = $1, updated_at = NOW() WHERE id = $2',
-                [refreshToken, id]
-            );
-            return (result.rowCount ?? 0) > 0;
+            const { data, error } = await supabase
+                .from('users')
+                .select(`
+                    companies!company_id (
+                        name
+                    )
+                `)
+                .eq('id', userId)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    return { name: null };
+                }
+                throw error;
+            }
+
+            return { name: (data?.companies as any)?.name || null };
+        } catch (error) {
+            console.error('Error getting user company:', error);
+            return { name: null };
+        }
+    }
+
+    static async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
+        try {
+            const { error } = await supabase
+                .from('users')
+                .update({
+                    refresh_token: refreshToken,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            if (error) {
+                throw error;
+            }
         } catch (error) {
             console.error('Error updating refresh token:', error);
             throw error;
         }
     }
 
-    static async findByRefreshToken(refreshToken: string): Promise<User | null> {
+    static async setResetToken(email: string, token: string, expiry: Date): Promise<void> {
         try {
-            const result = await pool.query(
-                'SELECT * FROM ptitjob.users WHERE refresh_token = $1 AND is_active = true',
-                [refreshToken]
-            );
-            if (result.rows.length === 0) {
-                return null;
+            const { error } = await supabase
+                .from('users')
+                .update({
+                    reset_token: token,
+                    reset_token_expiry: expiry.toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('email', email);
+
+            if (error) {
+                throw error;
             }
-            return result.rows[0];
         } catch (error) {
-            console.error('Error finding user by refresh token:', error);
+            console.error('Error setting reset token:', error);
             throw error;
         }
     }
 
-    static async updateResetToken(id: string, resetToken: string, resetTokenExpiry: Date): Promise<void> {
+    static async findByResetToken(token: string): Promise<User | null> {
         try {
-            await pool.query(
-                'UPDATE ptitjob.users SET reset_token = $1, reset_token_expiry = $2, updated_at = NOW() WHERE id = $3',
-                [resetToken, resetTokenExpiry, id]
-            );
-        } catch (error) {
-            console.error('Error updating reset token:', error);
-            throw error;
-        }
-    }
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('reset_token', token)
+                .gt('reset_token_expiry', new Date().toISOString())
+                .single();
 
-    static async findByResetToken(resetToken: string): Promise<User | null> {
-        try {
-            const result = await pool.query(
-                'SELECT * FROM ptitjob.users WHERE reset_token = $1',
-                [resetToken]
-            );
-            if (result.rows.length === 0) {
-                return null;
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    return null; // Not found or expired
+                }
+                throw error;
             }
-            return result.rows[0];
+
+            return data;
         } catch (error) {
             console.error('Error finding user by reset token:', error);
             throw error;
         }
     }
 
-    static async updatePasswordAndClearResetToken(id: string, passwordHash: string): Promise<void> {
+    static async clearResetToken(userId: string): Promise<void> {
         try {
-            console.log(`🔄 Updating password for user ID: ${id}`);
-            const result = await pool.query(
-                'UPDATE ptitjob.users SET password_hash = $1, reset_token = NULL, reset_token_expiry = NULL, updated_at = NOW() WHERE id = $2',
-                [passwordHash, id]
-            );
-            console.log(`✅ Password updated successfully. Rows affected: ${result.rowCount}`);
-            
-            if (result.rowCount === 0) {
-                throw new Error('No user found with the provided ID');
+            const { error } = await supabase
+                .from('users')
+                .update({
+                    reset_token: null,
+                    reset_token_expiry: null,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            if (error) {
+                throw error;
             }
         } catch (error) {
-            console.error('❌ Error updating password and clearing reset token:', error);
+            console.error('Error clearing reset token:', error);
             throw error;
         }
     }

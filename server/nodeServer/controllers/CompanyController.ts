@@ -1,4 +1,3 @@
-// filepath: f:\codingSpace\Asm\PJob\server\nodeServer\controllers\CompanyController.ts
 import { CompanyModel } from '../models/CompanyModel.js';
 import { validateUUID } from '../utils/uuid.js';
 

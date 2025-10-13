@@ -1,6 +1,4 @@
 import jwt from 'jsonwebtoken';
-import type { Context } from 'elysia';
-
 export interface JwtPayload {
     userId: string;
     email: string;
@@ -100,7 +98,6 @@ export class AuthMiddleware {
         };
     }
 
-    // Middleware để check ownership (user chỉ có thể truy cập data của chính mình)
     static requireOwnership() {
         return async (context: any) => {
             const authResult = await this.verifyToken(context);

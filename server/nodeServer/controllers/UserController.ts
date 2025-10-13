@@ -149,12 +149,8 @@ export class UserController {
                 password_hash: save_password_hash,
                 full_name,
                 phone_number,
-                reset_token_expiry: null,
                 role: role as UserRole,
-                company_id,
-                is_active: is_active ?? true,
-                created_at: new Date(),
-                updated_at: new Date()
+                company_id
             });
 
             return {

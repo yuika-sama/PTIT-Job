@@ -1,5 +1,4 @@
 import { JobModel } from '../models/JobModel.js';
-import type { JobType, JobStatus } from '../models/types/Types.js';
 import { validateUUID } from '../utils/uuid.js';
 
 export class JobController {
