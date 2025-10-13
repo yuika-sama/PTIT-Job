@@ -250,6 +250,28 @@ export class UserModel {
         }
     }
 
+    static async findByRefreshToken(token: string): Promise<User | null> {
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('refresh_token', token)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    return null; // Not found or expired
+                }
+                throw error;
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error finding user by refresh token:', error);
+            throw error;
+        }
+    }
+
     static async clearResetToken(userId: string): Promise<void> {
         try {
             const { error } = await supabase
