@@ -3,6 +3,9 @@ export { default as JobsGridSection } from './JobsGridSection';
 export { default as CompaniesSection } from './CompaniesSection';
 export { default as IndustriesSection } from './IndustriesSection';
 export { default as ToolsSection } from './ToolsSection_new';
+
+// Export types
+export type { Job, Company, Category, JobSummary, GeneralInfo, RelatedJob } from './types';
 export { default as JobRecommendationsSection } from './JobRecommendationsSection';
 export { default as FeaturedEmployersSection } from './FeaturedEmployersSection';
 export { default as JobCard } from './JobCard';

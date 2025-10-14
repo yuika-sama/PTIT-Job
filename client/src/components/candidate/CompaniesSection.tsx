@@ -8,10 +8,12 @@ import {
   Tooltip,
   useTheme,
   CircularProgress,
-  Chip
+  Chip,
+  Button
 } from '@mui/material';
 import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material';
 import { Company } from '../../services/types';
+import { useNavigate } from 'react-router-dom';
 
 const thuongHieuLonBg = new URL('../../assets/thuong_hieu_lon_bg.jpg', import.meta.url).href;
 
@@ -22,7 +24,7 @@ interface CompaniesSectionProps {
 }
 
 interface CompanyItem {
-  id: number;
+  id: string;
   name: string;
   category: string;
   jobs: number;
@@ -92,9 +94,9 @@ const CompaniesSection: React.FC<CompaniesSectionProps> = ({
   maxCompanies = DEFAULT_MAX_COMPANIES
 }) => {
   const theme = useTheme();
+  const navigate = useNavigate(); 
   const [page, setPage] = React.useState(0);
-  const [regionFilter, setRegionFilter] = React.useState<RegionFilter>('Tất cả');
-
+  const [regionFilter, setRegionFilter] = React.useState<RegionFilter>('Tất cả'); 
   const limitedCompanies = React.useMemo(() => {
     return companies.slice(0, maxCompanies);
   }, [companies, maxCompanies]);
@@ -114,7 +116,7 @@ const CompaniesSection: React.FC<CompaniesSectionProps> = ({
       }
       
       return {
-        id: parseInt(company.id),
+        id: company.id,
         name: company.name,
         category: company.description || 'N/A',
         jobs: jobCount,
@@ -278,6 +280,7 @@ const CompaniesSection: React.FC<CompaniesSectionProps> = ({
               <Typography variant="caption" color="text.secondary" sx={{ mx: 1 }}>
                 Trang {page + 1} / {totalPages}
               </Typography>
+              <Button size="small" variant="text" onClick={() => navigate('/candidate/companies')}>Xem tất cả</Button>
               <IconButton 
                 size="small" 
                 onClick={handlePrev} 
@@ -300,6 +303,7 @@ const CompaniesSection: React.FC<CompaniesSectionProps> = ({
               >
                 <ArrowForwardIos fontSize="inherit" />
               </IconButton>
+              
             </>
           )}
         </Box>
@@ -386,6 +390,8 @@ const CompaniesSection: React.FC<CompaniesSectionProps> = ({
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden'
                     }}
+                    onClick={() => window.open(`/candidate/company/${c.id}`, '_blank')}
+                    style={{ cursor: 'pointer' }}
                   >
                     {c.name}
                   </Typography>

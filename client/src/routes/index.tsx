@@ -31,7 +31,7 @@ import BHXHCalculatorPage from '../pages/Candidate/BHXHCalculatorPage';
 import SalaryCalculatorPage from '../pages/Candidate/SalaryCalculatorPage';
 import UnemploymentInsurancePage from '../pages/Candidate/UnemploymentInsurancePage';
 import JobSearchPage from '../pages/Candidate/JobSearchPage';
-import { CompoundInterestPage } from '../pages/Candidate';
+import { CompoundInterestPage, JobDetailsPage } from '../pages/Candidate';
 
 // Shared Pages
 import Profile from '../pages/Shared/Profile';
@@ -251,6 +251,7 @@ const AppRoutes: React.FC = () => {
               <Route path="best-jobs" element={<BestJobsPage />} />
               <Route path="attractive-jobs" element={<AttractiveJobsPage />} />
               <Route path="companies" element={<CompaniesPage />} />
+              <Route path="companies/:companyId" element={<CompaniesPage />} />
               <Route path="top-companies" element={<TopCompaniesPage />} />
               <Route path="company/:id" element={<CompanyDetailPage />} />
               <Route path="bhxh-calculator" element={<BHXHCalculatorPage />} />
@@ -258,6 +259,7 @@ const AppRoutes: React.FC = () => {
               <Route path="salary-calculator" element={<SalaryCalculatorPage />} />
               <Route path="unemployment-insurance" element={<UnemploymentInsurancePage />} />
               <Route path="compound-interest" element={<CompoundInterestPage />} />
+              <Route path="/job/:jobId" element={<JobDetailsPage />} />
               <Route path="" element={<Navigate to="/candidate/dashboard" replace />} />
               <Route path="*" element={<NotFound404 />} />
             </Routes>

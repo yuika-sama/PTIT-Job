@@ -21,6 +21,8 @@ const CandidateDashboard: React.FC = () => {
   const { data: categories, loading: categoriesLoading, error: categoriesError } = useJobCategories();
   const { data: locations, loading: locationsLoading, error: locationsError } = useLocations();
 
+  console.log('Featured Jobs:', featuredJobs);
+
   // Check if có lỗi nào không
   const hasError = jobsError || companiesError || categoriesError || locationsError;
 

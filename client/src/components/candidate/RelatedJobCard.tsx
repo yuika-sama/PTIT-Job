@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { Paper, Typography, Chip, Stack } from '@mui/material';
 import { MonetizationOn, LocationOn } from '@mui/icons-material';
-import { RelatedJob } from './types';
+import type { RelatedJob } from './types';
 
 interface RelatedJobCardProps {
   job: RelatedJob;

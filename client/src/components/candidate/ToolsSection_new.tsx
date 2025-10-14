@@ -2,15 +2,11 @@ import React from 'react';
 import { Box, Typography, Button, Paper, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
-import PsychologyAltOutlinedIcon from '@mui/icons-material/PsychologyAltOutlined';
-import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
+import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
+import SavingsOutlinedIcon from '@mui/icons-material/SavingsOutlined';
+import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
 import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
-import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
-import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 
-// Data model for the redesigned feature cards
 interface FeatureTool {
   id: string;
   title: string;
@@ -19,46 +15,44 @@ interface FeatureTool {
   icon: React.ReactElement;
   accent?: string;
 }
-
 const profileTools: FeatureTool[] = [
   {
-    id: 'profile',
-    title: 'PTIT Profile',
+    id: 'unemployment-insurance',
+    title: 'Tính trợ cấp thất nghiệp',
     description:
-      'PTIT Profile là bản hồ sơ năng lực giúp bạn xây dựng thương hiệu cá nhân, thể hiện thế mạnh của bạn hơn thông qua việc đính kèm học vấn, kinh nghiệm, dự án, kỹ năng của mình',
-    cta: 'Tạo Profile',
-    icon: <PersonOutlineIcon fontSize="large" />
+      'Công cụ giúp bạn tính toán mức trợ cấp thất nghiệp dựa trên thời gian đóng bảo hiểm, mức lương trung bình và quy định hiện hành. Dễ dàng ước lượng số tiền bạn có thể nhận được khi mất việc.',
+    cta: 'Tính ngay',
+    icon: <AssignmentTurnedInOutlinedIcon fontSize="large" />,
   },
   {
-    id: 'cv-builder',
-    title: 'CV Builder 2.0',
+    id: 'compound-interest',
+    title: 'Tính lãi suất kép',
     description:
-      'Một chiếc CV chuyên nghiệp sẽ giúp bạn gây ấn tượng với nhà tuyển dụng và tăng khả năng vượt qua vòng lọc CV tại PTIT Job.',
-    cta: 'Tạo CV ngay',
-    icon: <ArticleOutlinedIcon fontSize="large" />
-  }
+      'Tìm hiểu sức mạnh của lãi kép! Nhập số vốn ban đầu, lãi suất và thời gian để biết số tiền bạn sẽ nhận được sau nhiều năm đầu tư hoặc tiết kiệm.',
+    cta: 'Khám phá lãi kép',
+    icon: <SavingsOutlinedIcon fontSize="large" />,
+  },
 ];
 
 const selfInsightTools: FeatureTool[] = [
   {
-    id: 'mbti',
-    title: 'Trắc nghiệm tính cách MBTI',
+    id: 'salary-calculator',
+    title: 'Tính lương thực nhận',
     description:
-      'Kết quả trắc nghiệm MBTI chỉ ra cách bạn nhận thức thế giới xung quanh và ra quyết định trong cuộc sống, từ đó, giúp bạn có thêm thông tin để lựa chọn nghề nghiệp chính xác hơn.',
-    cta: 'Khám phá ngay',
-    icon: <PsychologyAltOutlinedIcon fontSize="large" />
+      'Công cụ tính lương giúp bạn biết chính xác số tiền thực nhận sau khi trừ các khoản bảo hiểm và thuế thu nhập cá nhân, dựa trên mức lương gross hoặc net.',
+    cta: 'Tính lương ngay',
+    icon: <AttachMoneyOutlinedIcon fontSize="large" />,
   },
   {
-    id: 'mi-test',
-    title: 'Trắc nghiệm đa trí thông minh MI',
+    id: 'personal-income-tax',
+    title: 'Tính thuế thu nhập cá nhân',
     description:
-      'Trả lời cho câu hỏi "Bạn có trí thông minh nổi trội trong lĩnh vực nào?", từ đó bạn có thể hiểu bản thân mình hơn và đưa ra các quyết định nghề nghiệp phù hợp.',
-    cta: 'Khám phá ngay',
-    icon: <InsightsOutlinedIcon fontSize="large" />
-  }
+      'Tính nhanh số tiền thuế TNCN phải nộp dựa trên thu nhập hàng tháng hoặc hàng năm, giúp bạn lập kế hoạch tài chính hiệu quả hơn.',
+    cta: 'Tính thuế ngay',
+    icon: <CalculateOutlinedIcon fontSize="large" />,
+  },
 ];
 
-// Shared card component with PTIT theme
 const FeatureCard: React.FC<{ tool: FeatureTool }> = ({ tool }) => {
   const theme = useTheme();
   const navigate = useNavigate();

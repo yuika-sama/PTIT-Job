@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { Box, Typography, Stack, Divider, Paper } from '@mui/material';
 import { WorkOutline, School, Group, AccessTime } from '@mui/icons-material';
-import { GeneralInfo } from './types';
+import type { GeneralInfo } from './types.js';
 
 const greenColor = '#00b14f';
 
@@ -12,7 +12,6 @@ interface JobInfoSidebarProps {
 const JobInfoSidebar: FC<JobInfoSidebarProps> = ({ generalInfo }) => {
   return (
     <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
-      {/* ...Nội dung component giữ nguyên... */}
         <Typography variant="h6" fontWeight="bold" gutterBottom>Thông tin chung</Typography>
         <Divider />
         <Stack spacing={2} mt={2}>

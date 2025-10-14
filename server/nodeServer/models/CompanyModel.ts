@@ -8,7 +8,7 @@ export interface Company {
   website?: string
   company_size?: string
   address?: string
-  logoUrl?: string
+  logo_url?: string
   jobs_count?: number | null | undefined
   job_count?: number | null | undefined
   createdAt: Date
@@ -48,7 +48,7 @@ function mapDBToCompany(row: DBCompany): Company {
   if (row.website !== null && row.website !== undefined) company.website = row.website
   if (row.company_size !== null && row.company_size !== undefined) company.company_size = row.company_size
   if (row.address !== null && row.address !== undefined) company.address = row.address
-  if (row.logo_url !== null && row.logo_url !== undefined) company.logoUrl = row.logo_url
+  if (row.logo_url !== null && row.logo_url !== undefined) company.logo_url = row.logo_url
 
   return company
 }
@@ -94,7 +94,7 @@ export class CompanyModel {
       website: company.website ?? null,
       company_size: company.company_size ?? null,
       address: company.address ?? null,
-      logo_url: company.logoUrl ?? null,
+      logo_url: company.logo_url ?? null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
@@ -120,7 +120,7 @@ export class CompanyModel {
       ...(companyData.website !== undefined && { website: companyData.website }),
       ...(companyData.company_size !== undefined && { company_size: companyData.company_size }),
       ...(companyData.address !== undefined && { address: companyData.address }),
-      ...(companyData.logoUrl !== undefined && { logo_url: companyData.logoUrl }),
+      ...(companyData.logo_url !== undefined && { logo_url: companyData.logo_url }),
       updated_at: new Date().toISOString(),
     }
 

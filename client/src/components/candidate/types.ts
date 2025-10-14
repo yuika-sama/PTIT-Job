@@ -23,7 +23,6 @@ export interface Job {
   requirements: string[];
   benefits: string[];
   workLocation: string;
-  
   level: string;
   education: string;
   quantity: string;

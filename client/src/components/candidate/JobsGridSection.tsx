@@ -23,7 +23,7 @@ import {
   ArrowForwardIos as ArrowForwardIosIcon,
   Tune as TuneIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Job } from '../../services/types';
 
 interface JobsGridSectionProps {
@@ -33,7 +33,7 @@ interface JobsGridSectionProps {
 }
 
 interface JobItem {
-  id: number;
+  id: string;
   title: string;
   company: string;
   location: string;
@@ -115,7 +115,7 @@ const JobsGridSection: React.FC<JobsGridSectionProps> = ({
   // Convert Job[] to JobItem[] format với limit data
   const displayJobs: JobItem[] = React.useMemo(() => {
     return limitedJobs.map((job, index) => ({
-      id: parseInt(job.id),
+      id: job.id,
       title: job.title,
       company: job.company_name || 'N/A',
       location: job.location_name || 'N/A',
@@ -124,16 +124,16 @@ const JobsGridSection: React.FC<JobsGridSectionProps> = ({
         : 'Thoả thuận',
       tags: [job.location_name || 'N/A'],
       region: getRegionByLocation(job.location_name || ''),
-      logo: job.company_logo || null,
+      logo: job.logo_url || null,
       uniqueKey: `${job.id}-${index}` // Thêm unique key
     }));
   }, [limitedJobs]);
 
-  const [favorites, setFavorites] = React.useState<Record<number, boolean>>({});
+  const location = useLocation();
+  const isDashboard = () => {
+    return location.pathname.toLowerCase().includes('/candidate/dashboard');
+  }
 
-  const handleToggleFav = (id: number) => {
-    setFavorites(f => ({ ...f, [id]: !f[id] }));
-  };
 
   // Filter theo region
   const filteredJobs = React.useMemo(() => {
@@ -172,8 +172,8 @@ const JobsGridSection: React.FC<JobsGridSectionProps> = ({
   }, [limitedJobs.length, page, totalPages]);
 
   const navigate = useNavigate();
-  const handleCardClick = () => {
-    navigate('/candidate/jobs');
+  const handleCardClick = (id: string) => {
+    navigate(`/candidate/job/${id}`);
   }
 
   if (isLoading) {
@@ -221,23 +221,6 @@ const JobsGridSection: React.FC<JobsGridSectionProps> = ({
         }}>
           Việc làm tốt nhất
         </Typography>
-        <Divider orientation="vertical" flexItem sx={{ mr: 1 }} />
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel>Lọc theo vùng miền:</InputLabel>
-          <Select
-            label="Lọc theo vùng miền"
-            value={regionFilter === 'Tất cả' ? '' : regionFilter}
-            onChange={(e) => setRegionFilter((e.target.value || 'Tất cả') as RegionFilter)}
-            renderValue={(selected: string) => {
-              if (selected === '') {
-                return <Typography color="text.secondary">Vùng miền</Typography>;
-              }
-              return selected;
-            }}
-          >
-            {REGIONS.filter(r => r !== 'Tất cả').map(r => <MenuItem key={r} value={r}>{r}</MenuItem>)}
-          </Select>
-        </FormControl>
         <Box sx={{ flexGrow: 1 }} />
         {filteredJobs.length > PAGE_SIZE && (
           <>
@@ -246,7 +229,8 @@ const JobsGridSection: React.FC<JobsGridSectionProps> = ({
             </Typography>
           </>
         )}
-        <Button size="small" variant="text">Xem tất cả</Button>
+        {isDashboard() && (<Button size="small" variant="text" onClick={() => navigate('/candidate/jobs')}>Xem tất cả</Button>)}
+        
         <IconButton 
           size="small" 
           onClick={handlePrev}
@@ -337,7 +321,6 @@ const JobsGridSection: React.FC<JobsGridSectionProps> = ({
         gridTemplateColumns: 'repeat(auto-fill,minmax(250px,1fr))'
       }}>
         {currentItems.map(job => {
-          const fav = favorites[job.id];
             return (
               <Paper
                 key={job.uniqueKey || `job-${job.id}`}
@@ -399,7 +382,8 @@ const JobsGridSection: React.FC<JobsGridSectionProps> = ({
                           WebkitBoxOrient: 'vertical',
                           overflow: 'hidden'
                         }}
-                        onClick={handleCardClick}
+                        onClick={() => handleCardClick(job.id)}
+                        style={{ cursor: 'pointer' }}
                       >
                         {job.title}
                       </Typography>
@@ -408,9 +392,6 @@ const JobsGridSection: React.FC<JobsGridSectionProps> = ({
                       {job.company}
                     </Typography>
                   </Box>
-                  <IconButton size="small" onClick={() => handleToggleFav(job.id)}>
-                    {fav ? <FavoriteIcon color="error" fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
-                  </IconButton>
                 </Box>
 
                 {/* Salary & tags */}

@@ -6,6 +6,7 @@ export { default as AttractiveJobsPage } from './AttractiveJobsPage';
 export { default as CompaniesPage } from './CompaniesPage';
 export { default as TopCompaniesPage } from './TopCompaniesPage';
 export { default as CompanyDetailPage } from './CompanyDetailPage';
+export { default as JobDetailsPage } from './JobDetailsPage';
 export { default as BHXHCalculatorPage } from './BHXHCalculatorPage';
 export { default as PersonalIncomeTaxPage } from './PersonalIncomeTaxPage';
 export { default as CompoundInterestPage } from './CompoundInterestPage';

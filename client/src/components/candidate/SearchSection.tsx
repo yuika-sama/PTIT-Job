@@ -46,6 +46,8 @@ const SearchSection: React.FC<SearchSectionProps> = ({
 
   const handleSuggestionClick = (keyword: string) => {
     setSearchKeyword(keyword);
+    const searchParams = new URLSearchParams({ categorySlug: keyword });
+    window.location.href = `/candidate/job-search?${searchParams.toString()}`;
   };
 
   const handleClearCategory = () => {
@@ -132,33 +134,39 @@ const SearchSection: React.FC<SearchSectionProps> = ({
             }}>
               {/* Logo Circle */}
               <Box sx={{
-                width: { xs: 70, sm: 85, md: 100 },
-                height: { xs: 70, sm: 85, md: 100 },
+              width: { xs: 70, sm: 85, md: 100 },
+              height: { xs: 70, sm: 85, md: 100 },
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05))',
+              backdropFilter: 'blur(20px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '3px solid rgba(255,255,255,0.3)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2), inset 0 2px 16px rgba(255,255,255,0.1)',
+              position: 'relative',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: -5,
+                left: -5,
+                right: -5,
+                bottom: -5,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05))',
-                backdropFilter: 'blur(20px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-                fontWeight: 'bold',
-                color: 'white',
-                border: '3px solid rgba(255,255,255,0.3)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.2), inset 0 2px 16px rgba(255,255,255,0.1)',
-                position: 'relative',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: -5,
-                  left: -5,
-                  right: -5,
-                  bottom: -5,
-                  borderRadius: '50%',
-                  background: 'linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent)',
-                  animation: 'rotate 4s linear infinite'
-                }
+                background: 'linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent)',
+                animation: 'rotate 4s linear infinite'
+              }
               }}>
-                �️
+              <img 
+                src="https://bizweb.dktcdn.net/thumb/grande/100/390/135/files/logo-white-circle.png?v=1749438223850" 
+                alt="PTIT Logo" 
+                style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                objectFit: 'cover'
+                }} 
+              />
               </Box>
               
               {/* PTIT Text Brand */}

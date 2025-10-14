@@ -5,6 +5,7 @@ export { jobService } from './jobService';
 export { jobApplicationService } from './jobApplicationService';
 export { resumeService } from './resumeService';
 export { jobCategoryService, locationService } from './categoryLocationService';
+export { statsService } from './statsService';
 
 // Export base service and types
 export { BaseApiService } from './baseApi';

@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { Typography, Chip } from '@mui/material';
-import { Job } from './types';
+import type { Job } from './types';
 
 interface JobDescriptionProps {
   job: Pick<Job, 'category' | 'description' | 'requirements' | 'benefits' | 'workLocation'>;

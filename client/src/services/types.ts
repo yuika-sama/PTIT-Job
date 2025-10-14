@@ -15,6 +15,14 @@ export interface User {
 
 export type UserRole = 'candidate' | 'employer' | 'admin';
 
+// Stats interfaces
+export interface StatsData {
+  totalJobs: number;
+  newJobsToday: number;
+  totalCompanies: number;
+  activeApplicants: number;
+}
+
 export interface AuthResponse {
   user: User;
   accessToken: string;
@@ -72,7 +80,8 @@ export interface Company {
   logo_url?: string;
   created_at: string;
   updated_at: string;
-  job_count?: number;
+  job_count?: number | null | undefined;
+  jobs_count?: number | null | undefined;
 }
 
 export interface CreateCompanyRequest {
@@ -110,7 +119,7 @@ export interface Job {
   company_name: string;
   category_name: string;
   location_name: string;
-  company_logo?: string | null;
+  logo_url?: string | null;
   created_at: string; 
   updated_at: string;
   company_id: string;

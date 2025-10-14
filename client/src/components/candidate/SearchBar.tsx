@@ -173,40 +173,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
             }
           }}
         />
-        
-        {/* Search History Dropdown */}
-        {searchHistory.length > 0 && keyword === '' && (
-          <Box sx={{ 
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-            mt: 1
-          }}>
-            <Paper sx={{ 
-              border: `1px solid ${theme.palette.divider}`,
-              borderRadius: 2,
-              overflow: 'hidden'
-            }}>
-              <Box sx={{ p: 1, bgcolor: 'grey.50' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <HistoryIcon sx={{ fontSize: 14 }} />
-                  Tìm kiếm gần đây
-                </Typography>
-              </Box>
-              {searchHistory.map((item, index) => (
-                <MenuItem 
-                  key={index}
-                  onClick={() => handleHistorySelect(item)}
-                  sx={{ fontSize: '0.875rem' }}
-                >
-                  {item}
-                </MenuItem>
-              ))}
-            </Paper>
-          </Box>
-        )}
       </Box>
 
       <Divider orientation="vertical" flexItem sx={{ mx: 2, borderColor: theme.palette.divider }} />
@@ -286,7 +252,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                       }}
                     >
                       <Typography variant="body2" color="text.secondary">
-                        🌍 Tất cả địa điểm
+                        Tất cả địa điểm
                       </Typography>
                     </MenuItem>
                     <Divider />
@@ -302,7 +268,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                       >
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                           <Typography variant="body2">
-                            📍 {location.city}
+                            {location.city}
                           </Typography>
                           {location.job_count && (
                             <Typography variant="caption" color="primary.main" sx={{ fontWeight: 600 }}>

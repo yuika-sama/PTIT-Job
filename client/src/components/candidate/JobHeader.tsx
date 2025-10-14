@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { Box, Typography, Button, Stack, Divider } from '@mui/material';
 import { LocationOn, MonetizationOn, Work, AccessTime, BookmarkBorder, Send } from '@mui/icons-material';
-import { Job } from './types';
+import type { Job } from './types.js';
 
 const greenColor = '#00b14f';
 

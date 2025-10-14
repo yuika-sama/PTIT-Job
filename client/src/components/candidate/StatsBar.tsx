@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Paper,
   Box,
@@ -21,17 +21,12 @@ import {
   Refresh as RefreshIcon,
   School as SchoolIcon
 } from '@mui/icons-material';
-
-interface StatsData {
-  totalJobs: number;
-  newJobsToday: number;
-  totalCompanies: number;
-  activeApplicants: number;
-}
+import { statsService } from '../../services';
+import type { StatsData as ApiStatsData } from '../../services/types';
 
 interface StatsBarProps {
   onRefresh?: () => void;
-  statsData?: StatsData;
+  statsData?: ApiStatsData;
   isLoading?: boolean;
   error?: string;
 }
@@ -39,10 +34,14 @@ interface StatsBarProps {
 const StatsBar: React.FC<StatsBarProps> = ({
   onRefresh,
   statsData,
-  isLoading = false,
-  error
+  isLoading: propIsLoading = false,
+  error: propError
 }) => {
   const theme = useTheme();
+  const [internalStatsData, setInternalStatsData] = useState<ApiStatsData | null>(null);
+  const [internalIsLoading, setInternalIsLoading] = useState(false);
+  const [internalError, setInternalError] = useState<string | null>(null);
+
   const today = new Date().toLocaleDateString('vi-VN', { 
     day: '2-digit', 
     month: '2-digit', 
@@ -50,14 +49,63 @@ const StatsBar: React.FC<StatsBarProps> = ({
   });
 
   // Default stats data if not provided
-  const defaultStats: StatsData = {
+  const defaultStats: ApiStatsData = {
     totalJobs: 53540,
     newJobsToday: 3502,
     totalCompanies: 2840,
     activeApplicants: 12450
   };
 
-  const stats = statsData || defaultStats;
+  // Fetch stats from API
+  const fetchStats = async () => {
+    if (statsData) return; // Don't fetch if data is already provided
+
+    try {
+      setInternalIsLoading(true);
+      setInternalError(null);
+      
+      console.log('🔄 Fetching stats from API...');
+      const response = await statsService.getGeneralStats();
+      
+      if (response.success && response.data) {
+        setInternalStatsData(response.data);
+        console.log('✅ Stats fetched successfully:', response.data);
+      } else {
+        throw new Error(response.message || 'Failed to fetch stats');
+      }
+    } catch (error: any) {
+      console.error('❌ Error fetching stats:', error);
+      setInternalError(error.message || 'Không thể tải dữ liệu thống kê');
+      // Use default stats as fallback
+      setInternalStatsData(defaultStats);
+    } finally {
+      setInternalIsLoading(false);
+    }
+  };
+
+  // Handle refresh
+  const handleRefresh = async () => {
+    if (onRefresh) {
+      onRefresh();
+    } else {
+      await fetchStats();
+    }
+  };
+
+  // Load stats on component mount
+  useEffect(() => {
+    if (!statsData) {
+      fetchStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statsData]);
+
+  // Determine which data, loading state, and error to use
+  const finalStatsData = statsData || internalStatsData || defaultStats;
+  const finalIsLoading = propIsLoading || internalIsLoading;
+  const finalError = propError || internalError;
+
+  const stats = finalStatsData;
 
   const statItems = [
     {
@@ -98,10 +146,10 @@ const StatsBar: React.FC<StatsBarProps> = ({
     }
   ];
 
-  if (error) {
+  if (finalError) {
     return (
       <Alert severity="error" sx={{ borderRadius: 3 }}>
-        Không thể tải dữ liệu thống kê: {error}
+        Không thể tải dữ liệu thống kê: {finalError}
       </Alert>
     );
   }
@@ -168,8 +216,8 @@ const StatsBar: React.FC<StatsBarProps> = ({
         
         <Tooltip title="Làm mới dữ liệu">
           <IconButton 
-            onClick={onRefresh}
-            disabled={isLoading}
+            onClick={handleRefresh}
+            disabled={finalIsLoading}
             sx={{ 
               color: 'white',
               '&:hover': {
@@ -182,7 +230,7 @@ const StatsBar: React.FC<StatsBarProps> = ({
               transition: 'all 0.3s ease'
             }}
           >
-            {isLoading ? (
+            {finalIsLoading ? (
               <CircularProgress size={24} sx={{ color: 'white' }} />
             ) : (
               <RefreshIcon />

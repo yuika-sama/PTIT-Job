@@ -103,52 +103,55 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
           }}>
             {trendingKeywords.map((keyword, index) => (
               <Tooltip 
-                key={index}
-                title={`Tìm kiếm việc làm: ${keyword.text} (${keyword.count} việc làm)`}
-                placement="top"
+              key={index}
+              title={`Tìm kiếm việc làm: ${keyword.text} (${keyword.count} việc làm)`}
+              placement="top"
               >
-                <Chip
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      {keyword.hot && <StarIcon sx={{ fontSize: 14, color: '#ff9800' }} />}
-                      <span>{keyword.text}</span>
-                      <Box component="span" sx={{
-                        ml: 0.5,
-                        px: 0.8,
-                        py: 0.2,
-                        borderRadius: 1,
-                        background: 'rgba(255,255,255,0.9)',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        color: keyword.hot ? '#d32f2f' : '#666'
-                      }}>
-                        {keyword.count}
-                      </Box>
-                    </Box>
-                  }
-                  onClick={() => handleSuggestionClick(keyword.text)}
-                  sx={{
-                    background: keyword.hot 
-                      ? 'linear-gradient(135deg, #d32f2f 0%, #1976d2 100%)'
-                      : 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
-                    color: keyword.hot ? 'white' : 'text.primary',
-                    fontWeight: 600,
-                    fontSize: '0.875rem',
-                    height: 40,
-                    px: 2,
-                    cursor: 'pointer',
-                    '&:hover': {
-                      background: keyword.hot
-                        ? 'linear-gradient(135deg, #b71c1c 0%, #1565c0 100%)'
-                        : 'linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%)',
-                      transform: 'translateY(-2px)',
-                      boxShadow: keyword.hot
-                        ? '0 4px 12px rgba(211, 47, 47, 0.3)'
-                        : '0 4px 12px rgba(0,0,0,0.1)'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                />
+              <Chip
+                label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {keyword.hot && <StarIcon sx={{ fontSize: 14, color: '#ff9800' }} />}
+                  <span>{keyword.text}</span>
+                  <Box component="span" sx={{
+                  ml: 0.5,
+                  px: 0.8,
+                  py: 0.2,
+                  borderRadius: 1,
+                  background: 'rgba(255,255,255,0.9)',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: keyword.hot ? '#d32f2f' : '#666'
+                  }}>
+                  {keyword.count}
+                  </Box>
+                </Box>
+                }
+                onClick={() => {
+                  const searchParams = new URLSearchParams({ job: keyword.text });
+                  window.location.href = `/candidate/job-search?${searchParams.toString()}`;
+                }}
+                sx={{
+                background: keyword.hot 
+                  ? 'linear-gradient(135deg, #d32f2f 0%, #1976d2 100%)'
+                  : 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
+                color: keyword.hot ? 'white' : 'text.primary',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                height: 40,
+                px: 2,
+                cursor: 'pointer',
+                '&:hover': {
+                  background: keyword.hot
+                  ? 'linear-gradient(135deg, #b71c1c 0%, #1565c0 100%)'
+                  : 'linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: keyword.hot
+                  ? '0 4px 12px rgba(211, 47, 47, 0.3)'
+                  : '0 4px 12px rgba(0,0,0,0.1)'
+                },
+                transition: 'all 0.3s ease'
+                }}
+              />
               </Tooltip>
             ))}
           </Box>
@@ -208,8 +211,10 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
                       alignItems: 'center',
                       justifyContent: 'center',
                       borderRadius: 2,
-                      background: alpha(category.color, 0.1)
-                    }}>
+                      background: alpha(category.color, 0.1),
+                    }}
+                      
+                    >
                       {category.icon}
                     </Box>
                     
