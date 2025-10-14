@@ -5,20 +5,24 @@ interface Job {
     id: string;
     title: string;
     description: string;
-    requirements?: string;
-    benefits?: string;
-    salary_min?: number;
-    salary_max?: number;
+    requirements: string;
+    benefits: string;
+    salary_min: number;
+    salary_max: number;
     currency: string;
     job_type: JobType;
     status: JobStatus;
-    expiry_date?: Date;
+    expiry_date: string;
+    company_name: string;
+    category_name: string;
+    location_name: string;
+    logo_url?: string | null;
+    created_at: string;
+    updated_at: string;
     company_id: string;
-    category_id?: string;
-    location_id?: string;
-    company_logo?: string;
-    created_at: Date;
-    updated_at: Date;
+    category_id: string;
+    location_id: string;
+    job_count?: number;
 }
 
 export class JobModel {
@@ -46,7 +50,30 @@ export class JobModel {
                 throw error;
             }
 
-            return data || [];
+            const transformedData = data?.map((job: any) => ({
+                id: job.id,
+                title: job.title,
+                description: job.description || '',
+                requirements: job.requirements || '',
+                benefits: job.benefits || '',
+                salary_min: job.salary_min || 0,
+                salary_max: job.salary_max || 0,
+                currency: job.currency,
+                job_type: job.job_type,
+                status: job.status,
+                expiry_date: job.expiry_date || '',
+                company_name: job.companies?.name || '',
+                category_name: job.job_categories?.name || '',
+                location_name: job.locations?.city || '',
+                logo_url: job.companies?.logo_url || null,
+                created_at: job.created_at,
+                updated_at: job.updated_at,
+                company_id: job.company_id,
+                category_id: job.category_id || '',
+                location_id: job.location_id || ''
+            })) || [];
+
+            return transformedData;
         } catch (error) {
             console.error('Error fetching jobs:', error);
             throw error;
@@ -77,12 +104,35 @@ export class JobModel {
 
             if (error) {
                 if (error.code === 'PGRST116') {
-                    return null; // Not found
+                    return null;
                 }
                 throw error;
             }
 
-            return data;
+            const transformedJob: Job = {
+                id: data.id,
+                title: data.title,
+                description: data.description || '',
+                requirements: data.requirements || '',
+                benefits: data.benefits || '',
+                salary_min: data.salary_min || 0,
+                salary_max: data.salary_max || 0,
+                currency: data.currency,
+                job_type: data.job_type,
+                status: data.status,
+                expiry_date: data.expiry_date || '',
+                company_name: data.companies?.name || '',
+                category_name: data.job_categories?.name || '',
+                location_name: data.locations?.city || '',
+                logo_url: data.companies?.logo_url || null,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                company_id: data.company_id,
+                category_id: data.category_id || '',
+                location_id: data.location_id || ''
+            };
+
+            return transformedJob;
         } catch (error) {
             console.error('Error finding job by ID:', error);
             throw error;
@@ -115,7 +165,6 @@ export class JobModel {
                     )
                 `)
 
-            // Apply filters
             if (criteria.title) {
                 query = query.ilike('title', `%${criteria.title}%`);
             }
@@ -144,7 +193,30 @@ export class JobModel {
                 throw error;
             }
 
-            return data || [];
+            const transformedData = data?.map((job: any) => ({
+                id: job.id,
+                title: job.title,
+                description: job.description || '',
+                requirements: job.requirements || '',
+                benefits: job.benefits || '',
+                salary_min: job.salary_min || 0,
+                salary_max: job.salary_max || 0,
+                currency: job.currency,
+                job_type: job.job_type,
+                status: job.status,
+                expiry_date: job.expiry_date || '',
+                company_name: job.companies?.name || '',
+                category_name: job.job_categories?.name || '',
+                location_name: job.locations?.city || '',
+                logo_url: job.companies?.logo_url || null,
+                created_at: job.created_at,
+                updated_at: job.updated_at,
+                company_id: job.company_id,
+                category_id: job.category_id || '',
+                location_id: job.location_id || ''
+            })) || [];
+
+            return transformedData;
         } catch (error) {
             console.error('Error searching jobs:', error);
             throw error;
@@ -170,18 +242,53 @@ export class JobModel {
                 .from('jobs')
                 .insert([{
                     ...jobData,
-                    status: 'active' as JobStatus,
+                    status: 'published' as JobStatus,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 }])
-                .select()
+                .select(`
+                    *,
+                    companies!company_id (
+                        name,
+                        logo_url
+                    ),
+                    job_categories!category_id (
+                        name
+                    ),
+                    locations!location_id (
+                        city
+                    )
+                `)
                 .single();
 
             if (error) {
                 throw error;
             }
 
-            return data;
+            const transformedJob: Job = {
+                id: data.id,
+                title: data.title,
+                description: data.description || '',
+                requirements: data.requirements || '',
+                benefits: data.benefits || '',
+                salary_min: data.salary_min || 0,
+                salary_max: data.salary_max || 0,
+                currency: data.currency,
+                job_type: data.job_type,
+                status: data.status,
+                expiry_date: data.expiry_date || '',
+                company_name: data.companies?.name || '',
+                category_name: data.job_categories?.name || '',
+                location_name: data.locations?.city || '',
+                logo_url: data.companies?.logo_url || null,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                company_id: data.company_id,
+                category_id: data.category_id || '',
+                location_id: data.location_id || ''
+            };
+
+            return transformedJob;
         } catch (error) {
             console.error('Error creating job:', error);
             throw error;
@@ -197,14 +304,49 @@ export class JobModel {
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', id)
-                .select()
+                .select(`
+                    *,
+                    companies!company_id (
+                        name,
+                        logo_url
+                    ),
+                    job_categories!category_id (
+                        name
+                    ),
+                    locations!location_id (
+                        city
+                    )
+                `)
                 .single();
 
             if (error) {
                 throw error;
             }
 
-            return data;
+            const transformedJob: Job = {
+                id: data.id,
+                title: data.title,
+                description: data.description || '',
+                requirements: data.requirements || '',
+                benefits: data.benefits || '',
+                salary_min: data.salary_min || 0,
+                salary_max: data.salary_max || 0,
+                currency: data.currency,
+                job_type: data.job_type,
+                status: data.status,
+                expiry_date: data.expiry_date || '',
+                company_name: data.companies?.name || '',
+                category_name: data.job_categories?.name || '',
+                location_name: data.locations?.city || '',
+                logo_url: data.companies?.logo_url || null,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                company_id: data.company_id,
+                category_id: data.category_id || '',
+                location_id: data.location_id || ''
+            };
+
+            return transformedJob;
         } catch (error) {
             console.error('Error updating job:', error);
             throw error;
@@ -249,7 +391,30 @@ export class JobModel {
                 throw error;
             }
 
-            return data || [];
+            const transformedData = data?.map((job: any) => ({
+                id: job.id,
+                title: job.title,
+                description: job.description || '',
+                requirements: job.requirements || '',
+                benefits: job.benefits || '',
+                salary_min: job.salary_min || 0,
+                salary_max: job.salary_max || 0,
+                currency: job.currency,
+                job_type: job.job_type,
+                status: job.status,
+                expiry_date: job.expiry_date || '',
+                company_name: '',
+                category_name: job.job_categories?.name || '',
+                location_name: job.locations?.city || '',
+                logo_url: null,
+                created_at: job.created_at,
+                updated_at: job.updated_at,
+                company_id: job.company_id,
+                category_id: job.category_id || '',
+                location_id: job.location_id || ''
+            })) || [];
+
+            return transformedData;
         } catch (error) {
             console.error('Error getting jobs by company:', error);
             throw error;
@@ -265,14 +430,49 @@ export class JobModel {
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', id)
-                .select()
+                .select(`
+                    *,
+                    companies!company_id (
+                        name,
+                        logo_url
+                    ),
+                    job_categories!category_id (
+                        name
+                    ),
+                    locations!location_id (
+                        city
+                    )
+                `)
                 .single();
 
             if (error) {
                 throw error;
             }
 
-            return data;
+            const transformedJob: Job = {
+                id: data.id,
+                title: data.title,
+                description: data.description || '',
+                requirements: data.requirements || '',
+                benefits: data.benefits || '',
+                salary_min: data.salary_min || 0,
+                salary_max: data.salary_max || 0,
+                currency: data.currency,
+                job_type: data.job_type,
+                status: data.status,
+                expiry_date: data.expiry_date || '',
+                company_name: data.companies?.name || '',
+                category_name: data.job_categories?.name || '',
+                location_name: data.locations?.city || '',
+                logo_url: data.companies?.logo_url || null,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                company_id: data.company_id,
+                category_id: data.category_id || '',
+                location_id: data.location_id || ''
+            };
+
+            return transformedJob;
         } catch (error) {
             console.error('Error updating job status:', error);
             throw error;

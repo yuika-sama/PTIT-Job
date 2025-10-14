@@ -4,7 +4,6 @@ import { UserController } from '../controllers/UserController.js';
 export const userRoutes = new Elysia()
     .group('/users', (app) => 
         app
-            // Get all users - no auth required for testing
             .get('', async (context: any) => {
                 try {
                     console.log('🔍 GET /users request (no auth) with query:', context.query);
@@ -26,7 +25,6 @@ export const userRoutes = new Elysia()
                 }
             })
             
-            // Get user by id - no auth required for testing
             .get('/:id', async (context: any) => {
                 try {
                     console.log('🔍 GET /users/:id request (no auth):', context.params.id);
@@ -45,7 +43,6 @@ export const userRoutes = new Elysia()
                 }
             })
 
-            // Get user statistics - no auth required for testing
             .get('/stats', async (context: any) => {
                 try {
                     console.log('🔍 GET /users/stats request (no auth)');
@@ -65,7 +62,6 @@ export const userRoutes = new Elysia()
                 }
             })  
             
-            // Create user - no auth required for testing
             .post('', async (context: any) => {
                 try {
                     console.log('🔍 POST /users request (no auth)', context.body);
@@ -84,7 +80,6 @@ export const userRoutes = new Elysia()
                 }
             })
             
-            // Update user - no auth required for testing
             .put('/:id', async (context: any) => {
                 try {
                     console.log('🔍 PUT /users/:id request (no auth):', context.params.id);
@@ -106,7 +101,6 @@ export const userRoutes = new Elysia()
                 }
             })
 
-            // Toggle user status - no auth required for testing
             .patch('/:id/toggle-status', async (context: any) => {
                 try {
                     console.log('🔍 PATCH /users/:id/toggle-status request (no auth):', context.params.id);
@@ -125,7 +119,6 @@ export const userRoutes = new Elysia()
                 }
             })
             
-            // Delete user - no auth required for testing
             .delete('/:id', async (context: any) => {
                 try {
                     console.log('🔍 DELETE /users/:id request (no auth):', context.params.id);

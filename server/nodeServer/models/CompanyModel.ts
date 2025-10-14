@@ -9,12 +9,12 @@ export interface Company {
   company_size?: string
   address?: string
   logoUrl?: string
-  jobs_count?: number | 0
+  jobs_count?: number | null | undefined
+  job_count?: number | null | undefined
   createdAt: Date
   updatedAt: Date
 }
 
-// Kiểu thô (raw) lấy từ DB (snake_case)
 type DBCompany = {
   id: string
   name: string
@@ -25,7 +25,6 @@ type DBCompany = {
   logo_url?: string | null
   created_at: string
   updated_at: string
-  // Kết quả aggregate từ PostgREST: jobs(count) sẽ trả mảng [{ count: number }]
   jobs?: { count: number }[]
 }
 
@@ -40,6 +39,7 @@ function mapDBToCompany(row: DBCompany): Company {
     id: row.id,
     name: row.name,
     jobs_count: jobsCount,
+    job_count: jobsCount,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   }
@@ -54,9 +54,7 @@ function mapDBToCompany(row: DBCompany): Company {
 }
 
 export class CompanyModel {
-  // Lấy tất cả company + số job liên quan, order by created_at desc
   static async findAll(): Promise<Company[]> {
-    // Sử dụng quan hệ jobs(count). Yêu cầu FK jobs.company_id -> companies.id đã tồn tại.
     const { data, error } = await supabase
       .from('companies')
       .select('id,name,description,website,company_size,address,logo_url,created_at,updated_at,jobs(count)')
@@ -79,7 +77,7 @@ export class CompanyModel {
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116' /* Row not found */) return null
+      if (error.code === 'PGRST116') return null
       console.error(`Error fetching company with id ${id}:`, error)
       throw error
     }
@@ -87,7 +85,6 @@ export class CompanyModel {
     return data ? mapDBToCompany(data as DBCompany) : null
   }
 
-  // Tạo company mới
   static async create(
     company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<Company> {
@@ -98,7 +95,6 @@ export class CompanyModel {
       company_size: company.company_size ?? null,
       address: company.address ?? null,
       logo_url: company.logoUrl ?? null,
-      // Nếu DB có default NOW() cho created_at/updated_at, có thể bỏ 2 trường này
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
@@ -117,10 +113,8 @@ export class CompanyModel {
     return mapDBToCompany(data as DBCompany)
   }
 
-  // Cập nhật một phần (partial)
   static async update(id: string, companyData: Partial<Company>): Promise<Company | null> {
     const payload: Record<string, unknown> = {
-      // COALESCE tương đương: chỉ set nếu có giá trị
       ...(companyData.name !== undefined && { name: companyData.name }),
       ...(companyData.description !== undefined && { description: companyData.description }),
       ...(companyData.website !== undefined && { website: companyData.website }),

@@ -9,13 +9,11 @@ interface JobCategory {
   icon_url?: string | undefined
 }
 
-// Dữ liệu “thô” từ DB (snake_case + embed)
 type DBJobCategory = {
   id: string
   name: string
   slug: string
   icon_url?: string | null
-  // jobs(count) trả về mảng 1 phần tử [{ count: number }] (PostgREST)
   jobs?: { count: number }[] | null
 }
 
@@ -44,7 +42,7 @@ export class JobCategoryModel {
           'name',
           'slug',
           'icon_url',
-          'jobs(count)', // LEFT JOIN theo FK jobs.category_id -> job_categories.id
+          'jobs(count)', 
         ].join(',')
       )
       .returns<DBJobCategory[]>()
@@ -54,7 +52,6 @@ export class JobCategoryModel {
       throw error
     }
 
-    // Map + sort theo job_count DESC (sort client để tránh khác biệt API)
     return (data ?? []).map(mapDBToCategory).sort((a, b) => (b.job_count ?? 0) - (a.job_count ?? 0))
   }
 

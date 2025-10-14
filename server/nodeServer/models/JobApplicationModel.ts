@@ -16,7 +16,6 @@ export interface JobApplication {
   file_url?: string | undefined
 }
 
-// “raw” từ Supabase (snake_case + embedded)
 type DBJobApplication = {
   id: string
   job_id: string
@@ -60,9 +59,9 @@ export class JobApplicationModel {
           'cover_letter',
           'status',
           'applied_at',
-          'users(full_name,email)',  // embed theo FK ja.user_id -> users.id
-          'jobs(title)',             // embed theo FK ja.job_id -> jobs.id
-          'resumes(file_url)',       // embed theo FK ja.resume_id -> resumes.id
+          'users(full_name,email)',  
+          'jobs(title)',             
+          'resumes(file_url)',       
         ].join(',')
       )
       .returns<DBJobApplication[]>()
@@ -88,7 +87,7 @@ export class JobApplicationModel {
           'cover_letter',
           'status',
           'applied_at',
-          'users(full_name,email)', // applicant info
+          'users(full_name,email)', 
         ].join(',')
       )
       .eq('job_id', jobId)
@@ -122,7 +121,7 @@ export class JobApplicationModel {
           'cover_letter',
           'status',
           'applied_at',
-          'jobs(title,companies(name))', // job_title (+ company nếu cần)
+          'jobs(title,companies(name))', 
         ].join(',')
       )
       .eq('user_id', userId)
@@ -139,7 +138,6 @@ export class JobApplicationModel {
       return {
         ...base,
         job_name: r.jobs?.title ?? base.job_name,
-        // Nếu muốn trả thêm company_name:
         // company_name: r.jobs?.companies?.name ?? undefined,
       }
     })

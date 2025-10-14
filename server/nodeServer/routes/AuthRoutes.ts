@@ -5,7 +5,6 @@ import { AuthMiddleware } from '../middlewares/auth.js';
 export const authRoutes = new Elysia()
     .group('/auth', (app) => 
         app
-            // Public routes - không cần authentication
             .post('/register', async (context) => {
                 try {
                     return await AuthController.register({ body: context.body as any });
@@ -75,7 +74,6 @@ export const authRoutes = new Elysia()
                 }
             })
             
-            // Protected routes - cần authentication
             .get('/me', async (context) => {
                 try {
                     const authResult = await AuthMiddleware.verifyToken(context);

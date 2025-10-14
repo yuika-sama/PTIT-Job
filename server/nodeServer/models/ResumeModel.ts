@@ -67,7 +67,6 @@ export class ResumeModel {
     fileName: string,
     isDefault: boolean
   ): Promise<Resume> {
-    // Nếu đánh dấu default, unset các resume khác trước
     if (isDefault) {
       const { error: unsetErr } = await supabase
         .from('resumes')
@@ -82,7 +81,6 @@ export class ResumeModel {
       file_url: fileUrl,
       file_name: fileName,
       is_default: isDefault,
-      // Nếu DB có DEFAULT now() thì có thể bỏ uploaded_at
       uploaded_at: new Date().toISOString(),
     }
 
@@ -97,7 +95,6 @@ export class ResumeModel {
   }
 
   static async setDefaultResume(userId: string, resumeId: string): Promise<void> {
-    // Unset tất cả
     const { error: unsetErr } = await supabase
       .from('resumes')
       .update({ is_default: false })
@@ -105,7 +102,6 @@ export class ResumeModel {
 
     if (unsetErr) throw unsetErr
 
-    // Set resume được chọn thành default
     const { error: setErr } = await supabase
       .from('resumes')
       .update({ is_default: true })

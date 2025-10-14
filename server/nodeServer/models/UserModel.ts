@@ -2,7 +2,6 @@ import {supabase} from '../config/supabase.js';
 import type { UserRole } from './types/Types.js';
 
 export interface User {
-    reset_token_expiry: Date | null;
     id: string;
     email: string;
     password_hash: string;
@@ -10,11 +9,13 @@ export interface User {
     phone_number?: string;
     role: UserRole;
     company_id?: string;
+    company_name?: string;
     is_active: boolean;
-    created_at: Date;
-    updated_at: Date;
-    refresh_token?: string | null;
+    created_at: string;
+    updated_at: string;
+    refresh_token?: string;
     reset_token?: string | null;
+    reset_token_expiry: Date | null;
 }
 
 export class UserModel {
@@ -35,11 +36,24 @@ export class UserModel {
                 throw error;
             }
 
-            // Transform data to match expected format
-            return data?.map(user => ({
-                ...user,
-                company_name: user.companies?.name || null
+            const transformedData = data?.map((user: any) => ({
+                id: user.id,
+                email: user.email,
+                password_hash: user.password_hash,
+                full_name: user.full_name,
+                phone_number: user.phone_number || undefined,
+                role: user.role,
+                company_id: user.company_id || undefined,
+                company_name: user.companies?.name || undefined,
+                is_active: user.is_active,
+                created_at: user.created_at,
+                updated_at: user.updated_at,
+                refresh_token: user.refresh_token || undefined,
+                reset_token: user.reset_token || null,
+                reset_token_expiry: user.reset_token_expiry ? new Date(user.reset_token_expiry) : null
             })) || [];
+
+            return transformedData;
         } catch (error) {
             console.error('Error fetching users:', error);
             throw error;
@@ -50,18 +64,40 @@ export class UserModel {
         try {
             const { data, error } = await supabase
                 .from('users')
-                .select('*')
+                .select(`
+                    *,
+                    companies!company_id (
+                        name
+                    )
+                `)
                 .eq('id', id)
                 .single();
 
             if (error) {
                 if (error.code === 'PGRST116') {
-                    return null; // Not found
+                    return null;
                 }
                 throw error;
             }
 
-            return data;
+            const transformedUser: User = {
+                id: data.id,
+                email: data.email,
+                password_hash: data.password_hash,
+                full_name: data.full_name,
+                phone_number: data.phone_number || undefined,
+                role: data.role,
+                company_id: data.company_id || undefined,
+                company_name: data.companies?.name || undefined,
+                is_active: data.is_active,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                refresh_token: data.refresh_token || undefined,
+                reset_token: data.reset_token || null,
+                reset_token_expiry: data.reset_token_expiry ? new Date(data.reset_token_expiry) : null
+            };
+
+            return transformedUser;
         } catch (error) {
             console.error('Error finding user by ID:', error);
             throw error;
@@ -72,18 +108,40 @@ export class UserModel {
         try {
             const { data, error } = await supabase
                 .from('users')
-                .select('*')
+                .select(`
+                    *,
+                    companies!company_id (
+                        name
+                    )
+                `)
                 .eq('email', email)
                 .single();
 
             if (error) {
                 if (error.code === 'PGRST116') {
-                    return null; // Not found
+                    return null;  
                 }
                 throw error;
             }
 
-            return data;
+            const transformedUser: User = {
+                id: data.id,
+                email: data.email,
+                password_hash: data.password_hash,
+                full_name: data.full_name,
+                phone_number: data.phone_number || undefined,
+                role: data.role,
+                company_id: data.company_id || undefined,
+                company_name: data.companies?.name || undefined,
+                is_active: data.is_active,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                refresh_token: data.refresh_token || undefined,
+                reset_token: data.reset_token || null,
+                reset_token_expiry: data.reset_token_expiry ? new Date(data.reset_token_expiry) : null
+            };
+
+            return transformedUser;
         } catch (error) {
             console.error('Error finding user by email:', error);
             throw error;
@@ -107,14 +165,36 @@ export class UserModel {
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 }])
-                .select()
+                .select(`
+                    *,
+                    companies!company_id (
+                        name
+                    )
+                `)
                 .single();
 
             if (error) {
                 throw error;
             }
 
-            return data;
+            const transformedUser: User = {
+                id: data.id,
+                email: data.email,
+                password_hash: data.password_hash,
+                full_name: data.full_name,
+                phone_number: data.phone_number || undefined,
+                role: data.role,
+                company_id: data.company_id || undefined,
+                company_name: data.companies?.name || undefined,
+                is_active: data.is_active,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                refresh_token: data.refresh_token || undefined,
+                reset_token: data.reset_token || null,
+                reset_token_expiry: data.reset_token_expiry ? new Date(data.reset_token_expiry) : null
+            };
+
+            return transformedUser;
         } catch (error) {
             console.error('Error creating user:', error);
             throw error;
@@ -130,14 +210,36 @@ export class UserModel {
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', id)
-                .select()
+                .select(`
+                    *,
+                    companies!company_id (
+                        name
+                    )
+                `)
                 .single();
 
             if (error) {
                 throw error;
             }
 
-            return data;
+            const transformedUser: User = {
+                id: data.id,
+                email: data.email,
+                password_hash: data.password_hash,
+                full_name: data.full_name,
+                phone_number: data.phone_number || undefined,
+                role: data.role,
+                company_id: data.company_id || undefined,
+                company_name: data.companies?.name || undefined,
+                is_active: data.is_active,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                refresh_token: data.refresh_token || undefined,
+                reset_token: data.reset_token || null,
+                reset_token_expiry: data.reset_token_expiry ? new Date(data.reset_token_expiry) : null
+            };
+
+            return transformedUser;
         } catch (error) {
             console.error('Error updating user:', error);
             throw error;
@@ -231,19 +333,41 @@ export class UserModel {
         try {
             const { data, error } = await supabase
                 .from('users')
-                .select('*')
+                .select(`
+                    *,
+                    companies!company_id (
+                        name
+                    )
+                `)
                 .eq('reset_token', token)
                 .gt('reset_token_expiry', new Date().toISOString())
                 .single();
 
             if (error) {
                 if (error.code === 'PGRST116') {
-                    return null; // Not found or expired
+                    return null;
                 }
                 throw error;
             }
 
-            return data;
+            const transformedUser: User = {
+                id: data.id,
+                email: data.email,
+                password_hash: data.password_hash,
+                full_name: data.full_name,
+                phone_number: data.phone_number || undefined,
+                role: data.role,
+                company_id: data.company_id || undefined,
+                company_name: data.companies?.name || undefined,
+                is_active: data.is_active,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                refresh_token: data.refresh_token || undefined,
+                reset_token: data.reset_token || null,
+                reset_token_expiry: data.reset_token_expiry ? new Date(data.reset_token_expiry) : null
+            };
+
+            return transformedUser;
         } catch (error) {
             console.error('Error finding user by reset token:', error);
             throw error;
@@ -254,18 +378,40 @@ export class UserModel {
         try {
             const { data, error } = await supabase
                 .from('users')
-                .select('*')
+                .select(`
+                    *,
+                    companies!company_id (
+                        name
+                    )
+                `)
                 .eq('refresh_token', token)
                 .single();
 
             if (error) {
                 if (error.code === 'PGRST116') {
-                    return null; // Not found or expired
+                    return null; 
                 }
                 throw error;
             }
 
-            return data;
+            const transformedUser: User = {
+                id: data.id,
+                email: data.email,
+                password_hash: data.password_hash,
+                full_name: data.full_name,
+                phone_number: data.phone_number || undefined,
+                role: data.role,
+                company_id: data.company_id || undefined,
+                company_name: data.companies?.name || undefined,
+                is_active: data.is_active,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                refresh_token: data.refresh_token || undefined,
+                reset_token: data.reset_token || null,
+                reset_token_expiry: data.reset_token_expiry ? new Date(data.reset_token_expiry) : null
+            };
+
+            return transformedUser;
         } catch (error) {
             console.error('Error finding user by refresh token:', error);
             throw error;
@@ -288,6 +434,47 @@ export class UserModel {
             }
         } catch (error) {
             console.error('Error clearing reset token:', error);
+            throw error;
+        }
+    }
+
+    static async updateResetToken(userId: string, token: string, expiry: Date): Promise<void> {
+        try {
+            const { error } = await supabase
+                .from('users')
+                .update({
+                    reset_token: token,
+                    reset_token_expiry: expiry.toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            if (error) {
+                throw error;
+            }
+        } catch (error) {
+            console.error('Error updating reset token:', error);
+            throw error;
+        }
+    }
+
+    static async updatePasswordAndClearResetToken(userId: string, newPasswordHash: string): Promise<void> {
+        try {
+            const { error } = await supabase
+                .from('users')
+                .update({
+                    password_hash: newPasswordHash,
+                    reset_token: null,
+                    reset_token_expiry: null,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            if (error) {
+                throw error;
+            }
+        } catch (error) {
+            console.error('Error updating password and clearing reset token:', error);
             throw error;
         }
     }

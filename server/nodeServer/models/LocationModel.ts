@@ -8,7 +8,6 @@ interface Location {
   job_count?: number
 }
 
-// “raw” từ DB (snake_case + embed)
 type DBLocation = {
   id: string
   city: string
@@ -44,7 +43,7 @@ export class LocationModel {
 
     return (data ?? [])
       .map(mapDBToLocation)
-      .sort((a, b) => (b.job_count ?? 0) - (a.job_count ?? 0)) // order by job_count desc (client)
+      .sort((a, b) => (b.job_count ?? 0) - (a.job_count ?? 0)) 
   }
 
   static async findById(id: string): Promise<Location | null> {

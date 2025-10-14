@@ -110,7 +110,6 @@ export class AuthController {
 
             await UserModel.updateRefreshToken(newUser.id, refreshToken);
 
-            // Gửi welcome email (không chờ để không làm chậm response)
             emailService.sendWelcomeEmail(newUser.email, newUser.full_name)
                 .catch(error => console.error('Failed to send welcome email:', error));
 
@@ -135,7 +134,6 @@ export class AuthController {
         try {
             const { email, password } = body;
             console.log(email, password);
-            // Validate required fields
             if (!email || !password) {
                 return {
                 success: false,
@@ -148,7 +146,6 @@ export class AuthController {
             };
             }
 
-            // Find user by email
             const user = await UserModel.findByEmail(email);
             console.log(user);
             if (!user) {
@@ -163,7 +160,6 @@ export class AuthController {
                 };
             }
 
-            // Check if user is active
             if (!user.is_active) {
                 return {
                     success: false,
@@ -176,7 +172,6 @@ export class AuthController {
                 };
             }
 
-            // Verify password
             const isValidPassword = await bcrypt.compare(password, user.password_hash);
             if (!isValidPassword) {
                 return {
@@ -190,7 +185,6 @@ export class AuthController {
                 };
             }
 
-            // Check if user is active
             if (!user.is_active) {
                 return {
                     success: false,
@@ -203,7 +197,6 @@ export class AuthController {
                 };
             }
 
-            // Generate tokens
             const jwtPayload: JwtPayload = {
                 userId: user.id,
                 email: user.email,
@@ -213,10 +206,8 @@ export class AuthController {
             const accessToken = AuthMiddleware.generateAccessToken(jwtPayload);
             const refreshToken = AuthMiddleware.generateRefreshToken(jwtPayload);
 
-            // Save refresh token to database
             await UserModel.updateRefreshToken(user.id, refreshToken);
 
-            // Remove sensitive data from response
             const { password_hash: _, refresh_token: __, ...userResponse } = user;
             console.log('getUserFromAuthMiddleware', userResponse);
 
@@ -243,7 +234,6 @@ export class AuthController {
                 throw new Error('Refresh token is required');
             }
 
-            // Verify refresh token
             let decoded: JwtPayload;
             try {
                 decoded = AuthMiddleware.verifyRefreshToken(refreshToken);
@@ -251,13 +241,11 @@ export class AuthController {
                 throw new Error('Invalid or expired refresh token');
             }
 
-            // Find user by refresh token
             const user = await UserModel.findByRefreshToken(refreshToken);
             if (!user || !user.is_active) {
                 throw new Error('Invalid refresh token or user not found');
             }
 
-            // Generate new tokens
             const jwtPayload: JwtPayload = {
                 userId: user.id,
                 email: user.email,
@@ -267,7 +255,6 @@ export class AuthController {
             const newAccessToken = AuthMiddleware.generateAccessToken(jwtPayload);
             const newRefreshToken = AuthMiddleware.generateRefreshToken(jwtPayload);
 
-            // Update refresh token in database
             await UserModel.updateRefreshToken(user.id, newRefreshToken);
 
             return {
@@ -292,7 +279,6 @@ export class AuthController {
                 throw new Error('Refresh token is required');
             }
 
-            // Find user by refresh token and clear it
             const user = await UserModel.findByRefreshToken(refreshToken);
             if (user) {
                 await UserModel.updateRefreshToken(user.id, null);
@@ -315,7 +301,6 @@ export class AuthController {
                 throw new Error('User not found');
             }
 
-            // Remove sensitive data from response
             const { password_hash: _, refresh_token: __, ...userResponse } = currentUser;
 
             return {
@@ -341,26 +326,20 @@ export class AuthController {
                 throw new Error('New password must be at least 6 characters long');
             }
 
-            // Get current user
             const currentUser = await UserModel.findById(user.userId);
             if (!currentUser) {
                 throw new Error('User not found');
             }
-
-            // Verify current password
             const isValidPassword = await bcrypt.compare(currentPassword, currentUser.password_hash);
             if (!isValidPassword) {
                 throw new Error('Current password is incorrect');
             }
 
-            // Hash new password
             const saltRounds = 12;
             const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
 
-            // Update password
             await UserModel.update(user.userId, { password_hash: newPasswordHash });
 
-            // Clear refresh token to force re-login
             await UserModel.updateRefreshToken(user.userId, null);
 
             return {
@@ -392,10 +371,8 @@ export class AuthController {
                 };
             }
 
-            // Find user by email
             const user = await UserModel.findByEmail(email);
             if (!user) {
-                // Don't reveal if email exists or not for security
                 return {
                     success: true,
                     message: 'Nếu email tồn tại trong hệ thống, chúng tôi đã gửi hướng dẫn đặt lại mật khẩu'
@@ -409,14 +386,11 @@ export class AuthController {
                 };
             }
 
-            // Generate reset token (valid for 1 hour)
             const resetToken = crypto.randomBytes(32).toString('hex');
-            const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+            const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
 
-            // Save reset token to database first
             await UserModel.updateResetToken(user.id, resetToken, resetTokenExpiry);
 
-            // Gửi email đặt lại mật khẩu (ASYNC - không chờ để response nhanh)
             emailService.sendResetPasswordEmail(user.email, resetToken)
                 .then(emailSent => {
                     if (emailSent) {
@@ -435,7 +409,6 @@ export class AuthController {
             return {
                 success: true,
                 message: 'Nếu email tồn tại trong hệ thống, chúng tôi đã gửi hướng dẫn đặt lại mật khẩu',
-                // Remove this in production - only for testing
                 data: process.env.NODE_ENV === 'development' ? { resetToken } : undefined
             };
         } catch (error: any) {
@@ -462,7 +435,6 @@ export class AuthController {
                 };
             }
 
-            // Password strength validation
             if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
                 return {
                     success: false,
@@ -470,7 +442,6 @@ export class AuthController {
                 };
             }
 
-            // Find user by reset token
             const user = await UserModel.findByResetToken(token);
             if (!user) {
                 return {
@@ -486,7 +457,6 @@ export class AuthController {
                 };
             }
 
-            // Check if token is expired
             if (user.reset_token_expiry && new Date() > user.reset_token_expiry) {
                 return {
                     success: false,
@@ -498,13 +468,10 @@ export class AuthController {
             const saltRounds = 12;
             const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
 
-            // Update password and clear reset token
             await UserModel.updatePasswordAndClearResetToken(user.id, newPasswordHash);
 
-            // Clear all refresh tokens to force re-login
             await UserModel.updateRefreshToken(user.id, null);
 
-            // Gửi email xác nhận đặt lại mật khẩu thành công (ASYNC - không chờ)
             emailService.sendPasswordResetSuccessEmail(user.email)
                 .then(emailSent => {
                     if (emailSent) {
@@ -538,7 +505,6 @@ export class AuthController {
                 };
             }
 
-            // Find user by reset token
             const user = await UserModel.findByResetToken(token);
             if (!user) {
                 return {
@@ -547,7 +513,6 @@ export class AuthController {
                 };
             }
 
-            // Check if token is expired
             if (user.reset_token_expiry && new Date() > user.reset_token_expiry) {
                 return {
                     success: false,

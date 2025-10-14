@@ -11,26 +11,24 @@ class EmailService {
     private transporter: nodemailer.Transporter;
 
     constructor() {
-        // Cấu hình Mailtrap cho development, fallback sang các provider khác
         const isMailtrap = process.env.EMAIL_SERVICE === 'mailtrap';
         
         if (isMailtrap) {
-            // Cấu hình Mailtrap
             this.transporter = nodemailer.createTransport({
                 host: process.env.EMAIL_HOST || 'sandbox.smtp.mailtrap.io',
                 port: parseInt(process.env.EMAIL_PORT || '2525'),
-                secure: false, // Mailtrap không dùng SSL
+                secure: false, 
                 auth: {
-                    user: process.env.EMAIL_USER, // Mailtrap username
-                    pass: process.env.EMAIL_PASS  // Mailtrap password
+                    user: process.env.EMAIL_USER, 
+                    pass: process.env.EMAIL_PASS  
                 }
             });
         } else {
-            // Cấu hình cho Gmail và các provider khác
+
             this.transporter = nodemailer.createTransport({
                 host: process.env.EMAIL_HOST || 'smtp.gmail.com',
                 port: parseInt(process.env.EMAIL_PORT || '587'),
-                secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
+                secure: process.env.EMAIL_PORT === '465', 
                 auth: {
                     user: process.env.EMAIL_USER,
                     pass: process.env.EMAIL_PASS
@@ -41,7 +39,7 @@ class EmailService {
             });
         }
 
-        // Verify connection configuration
+
         this.verifyConnection();
     }
 
@@ -68,14 +66,14 @@ class EmailService {
 
     async sendEmail(options: EmailOptions): Promise<boolean> {
         try {
-            // Kiểm tra xem có cấu hình email không
+
             if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
                 console.log('📧 Email credentials not configured, logging email content:');
                 console.log(`To: ${options.to}`);
                 console.log(`Subject: ${options.subject}`);
                 console.log(`Content: ${options.textContent || 'HTML content provided'}`);
                 console.log('💡 For Mailtrap setup, check MAILTRAP_SETUP.md');
-                return true; // Return success for development
+                return true; 
             }
 
             const mailOptions = {
@@ -101,7 +99,6 @@ class EmailService {
         } catch (error: any) {
             console.error(`❌ Failed to send email to ${options.to}:`, error.message);
             
-            // Trong development, log email content thay vì fail
             if (process.env.NODE_ENV === 'development') {
                 console.log('📧 Development mode: logging email content instead:');
                 console.log(`To: ${options.to}`);
@@ -274,7 +271,6 @@ Trân trọng,
             .trim();
     }
 
-    // Test email functionality
     async testEmailConnection(): Promise<boolean> {
         try {
             await this.transporter.verify();
@@ -287,6 +283,5 @@ Trân trọng,
     }
 }
 
-// Export singleton instance
 export const emailService = new EmailService();
 export default emailService;

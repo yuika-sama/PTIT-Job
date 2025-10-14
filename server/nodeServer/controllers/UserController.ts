@@ -9,7 +9,6 @@ export class UserController {
             console.log('🔍 UserController.getAllUsers called with query:', query);
             const users = await UserModel.findAll();
             
-            // Get company information for each user
             const usersWithCompany = await Promise.all(
                 users.map(async (user) => {
                     try {
@@ -103,7 +102,6 @@ export class UserController {
                 throw new Error('User not found');
             }
 
-            // Get company information
             try {
                 const companyInfo = await UserModel.getUserCompany(userId);
                 const userWithCompany = {
@@ -132,13 +130,12 @@ export class UserController {
     static async createUser({ body }: { body: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
             const { email, password_hash, full_name, phone_number, role, company_id, is_active } = body;
-            const save_password_hash = bcrypt.hashSync(password_hash, 10); // In real implementation, hash the password
-            // Validate required fields
+            const save_password_hash = bcrypt.hashSync(password_hash, 10);
+
             if (!email || !save_password_hash || !full_name || !role) {
                 throw new Error('Missing required fields: email, password_hash, full_name, role');
             }
 
-            // Check if user already exists
             const existingUser = await UserModel.findByEmail(email);
             if (existingUser) {
                 throw new Error('User with this email already exists');

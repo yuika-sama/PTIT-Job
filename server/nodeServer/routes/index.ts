@@ -7,9 +7,9 @@ import { jobApplicationRoutes } from './JobApplicationRoutes.js';
 import { jobCategoryRoutes } from './JobCategoryRoutes.js';
 import { locationRoutes } from './LocationRoutes.js';
 import { resumeRoutes } from './ResumeRoutes.js';
+import { statsRoutes } from './StatsRoutes.js';
 
 export function setupApiRoutes(app: Elysia) {
-    // Setup API routes with proper grouping
     app.group('/api', (api) => {
         return api
             .use(authRoutes)
@@ -20,6 +20,7 @@ export function setupApiRoutes(app: Elysia) {
             .use(jobCategoryRoutes)
             .use(locationRoutes)
             .use(resumeRoutes)
+            .use(statsRoutes)
     });
     
     return app;
