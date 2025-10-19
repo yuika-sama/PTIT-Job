@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Alert, Pagination } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Add as AddIcon } from '@mui/icons-material';
 import JobStatsCards from './components/JobStatsCards';
 import JobSearchFilters from './components/JobSearchFilters';
@@ -36,6 +37,7 @@ interface JobFormData {
 }
 
 const Jobs: React.FC = () => {
+  const theme = useTheme();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [totalJobs, setTotalJobs] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -74,21 +76,25 @@ const Jobs: React.FC = () => {
 
   const itemsPerPage = 8;
 
-  const fetchJobs = React.useCallback(async () => {
+const fetchJobs = React.useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await jobService.getAllJobs({
         page,
         limit: itemsPerPage,
-        search: filters.search || undefined
+        search: filters.search || undefined,
+        jobType: filters.jobType || undefined,
+        location: filters.location || undefined,
+        status: filters.status || undefined,
+        experienceLevel: filters.experienceLevel || undefined
       });
       
-      console.log('Jobs response:', response.data);
+      console.log('Jobs response:', response);
       
       if (response.success && response.data) {
         setJobs(response.data || []);
-        setTotalJobs(response.data.length || 0);
+        setTotalJobs(response.count || 0); 
       } else {
         setError(response.message || 'Lỗi khi tải danh sách việc làm');
       }
@@ -98,7 +104,7 @@ const Jobs: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, filters.search, itemsPerPage]);
+  }, [page, filters, itemsPerPage]);
 
   useEffect(() => {
     fetchJobs();
@@ -242,7 +248,7 @@ const Jobs: React.FC = () => {
   return (
     <Box sx={{ p: { xs: 2, sm: 2.5 }, height: '100%' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h4" component="h1">
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
           Quản lý việc làm
         </Typography>
         <Button

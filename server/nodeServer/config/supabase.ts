@@ -12,7 +12,6 @@ if (!url) throw new Error('Missing SUPABASE_URL')
 if (!anon) console.warn('[WARN] Missing SUPABASE_ANON_KEY')
 if (!service) console.warn('[WARN] Missing SUPABASE_SERVICE_ROLE_KEY')
 
-// ⚠️ Đừng fallback '' cho server client
 export const supabaseAdmin = (() => {
   if (!service) throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing')
   const c = createClient(url, service, {
@@ -31,6 +30,5 @@ export const supabasePublic = (() => {
   return c
 })()
 
-// giữ export cũ nếu code khác đang import { supabase }
 const supabase = supabasePublic
 export { supabase }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Alert, Pagination } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Add as AddIcon } from '@mui/icons-material';
 import CompanyStatsCards from './components/CompanyStatsCards';
 import CompanySearchFilters from './components/CompanySearchFilters';
@@ -25,6 +26,7 @@ interface CompanyFormData {
 }
 
 const Companies: React.FC = () => {
+  const theme = useTheme();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [totalCompanies, setTotalCompanies] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,9 @@ const Companies: React.FC = () => {
       const response = await companyService.getAllCompanies({
         page,
         limit: itemsPerPage,
-        search: filters.search || undefined
+        search: filters.search || undefined,
+        size: filters.size || undefined,
+        status: filters.status || undefined
       });
       
       if (response.success && response.data) {
@@ -183,7 +187,7 @@ const Companies: React.FC = () => {
   return (
     <Box p={3}>
     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" component="h1">
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
         Quản lý công ty
         </Typography>
         <Button

@@ -6,6 +6,7 @@ import {
   Alert,
   IconButton
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Refresh as RefreshIcon } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import DashboardStats from '../../components/DashboardStats';
@@ -13,16 +14,17 @@ import SecondaryStats from '../../components/SecondaryStats';
 import SystemHealth from '../../components/SystemHealth';
 import RecentActivities from '../../components/RecentActivities';
 
+
 const AdminDashboard: React.FC = () => {
+  const theme = useTheme();
   const { user } = useAuth();
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  // Check if user is admin
   const isAdmin = user?.role === 'admin';
 
   const handleRefresh = () => {
     setLastUpdated(new Date());
-    // Force refresh of all components by updating key
+ 
     window.location.reload();
   };
 
@@ -39,13 +41,15 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* <AdminHeader /> */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Box>
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+          <Typography 
+            variant="h4" 
+            gutterBottom 
+            sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
             Bảng điều khiển quản trị viên
           </Typography>
-          <Typography variant="subtitle1" color="textSecondary">
+          <Typography variant="subtitle1" color="primary">
             Tổng quan hoạt động hệ thống PTIT Job
           </Typography>
         </Box>
@@ -59,20 +63,15 @@ const AdminDashboard: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Main Statistics Cards */}
       <DashboardStats />
 
-      {/* Secondary Statistics */}
       <SecondaryStats />
 
-      {/* Main Content Row */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-        {/* System Health */}
         <Box sx={{ flex: '1 1 300px', minWidth: 300 }}>
           <SystemHealth />
         </Box>
 
-        {/* Recent Activities */}
         <Box sx={{ flex: '2 1 500px', minWidth: 500 }}>
           <RecentActivities />
         </Box>

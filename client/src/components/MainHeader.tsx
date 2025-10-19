@@ -11,19 +11,57 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-  Tooltip
+  Tooltip,
+  Stack, 
+  Dialog, 
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Logout,
   Person,
   DarkMode,
-  LightMode
+  LightMode,
+  AdminPanelSettings, 
+  Work,
+  Badge
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import {useNavigate} from "react-router";
+import { useNavigate } from "react-router";
 
+interface LogoutConfirmationDialogProps {
+  open: boolean;          
+  onClose: () => void;      
+  onConfirm: () => void;    
+}
+
+
+const LogoutConfirmationDialog: React.FC<LogoutConfirmationDialogProps> = ({ open, onClose, onConfirm }) => (
+  <Dialog
+    open={open}
+    onClose={onClose}
+    aria-labelledby="alert-dialog-title"
+    aria-describedby="alert-dialog-description"
+  >
+    <DialogTitle id="alert-dialog-title">Xác nhận đăng xuất</DialogTitle>
+    <DialogContent>
+      <DialogContentText id="alert-dialog-description">
+        Bạn có chắc chắn muốn kết thúc phiên làm việc này không?
+      </DialogContentText>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={onClose}>Hủy</Button>
+      <Button onClick={onConfirm} color="primary" autoFocus>
+        Đăng xuất
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
 interface MainHeaderProps {
   onSidebarToggle: () => void;
 }
@@ -32,6 +70,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({ onSidebarToggle }) => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleColorMode } = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false); 
   const navigate = useNavigate();
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -47,142 +86,105 @@ const MainHeader: React.FC<MainHeaderProps> = ({ onSidebarToggle }) => {
     navigate('/profile');
   };
 
-
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
     handleProfileMenuClose();
-    
-    // Hiển thị dialog xác nhận
-    const confirmLogout = window.confirm('Bạn có chắc chắn muốn đăng xuất không?');
-    
-    if (confirmLogout && logout) {
+    setOpenConfirmDialog(true); 
+  };
+
+  const handleConfirmLogout = async () => {
+    setOpenConfirmDialog(false);
+    if (logout) {
       try {
         await logout();
-        // Chuyển hướng về trang login
         navigate('/login');
       } catch (error) {
         console.error('Logout error:', error);
-        // Có thể hiển thị thông báo lỗi ở đây
       }
     }
   };
 
   const isMenuOpen = Boolean(anchorEl);
+  
 
-  // Get role-based title
-  const getRoleBasedTitle = () => {
-    return 'PTIT Job - Hệ thống tuyển dụng';
+  const getRoleInfo = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return { icon: <AdminPanelSettings fontSize="small" />, name: 'Quản trị viên' };
+      case 'employer':
+        return { icon: <Work fontSize="small" />, name: 'Nhà tuyển dụng' };
+      case 'candidate':
+        return { icon: <Badge fontSize="small" />, name: 'Ứng viên' };
+      default:
+        return { icon: <Person fontSize="small" />, name: 'User' };
+    }
   };
+
+  const roleInfo = getRoleInfo(user?.role || ''); 
+
 
   return (
     <>
       <AppBar
         position="fixed"
+        elevation={0} 
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          // Theme colors will be applied automatically from ThemeContext
+      
+          background: isDarkMode 
+            ? 'rgba(18, 18, 18, 0.7)' 
+            : 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          color: 'text.primary', 
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <IconButton
               color="inherit"
-              aria-label="toggle sidebar"
               edge="start"
               onClick={onSidebarToggle}
-              sx={{ 
-                mr: 2,
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                }
-              }}
+              sx={{ mr: { xs: 1, sm: 2 } }}
             >
               <MenuIcon />
             </IconButton>
             
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <img
-                src="http://tracuu.ptit.edu.vn/_next/static/images/ptit-logo-c5be62e95f69e6f8285d1fd2ee0688ca.png"
-                alt="PTIT Logo"
-                style={{
-                  height: '40px',
-                  width: 'auto',
-                  marginRight: '8px'
-                }}
-              />
-              <Typography 
-                variant="h6" 
-                noWrap 
-                component="div"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: { xs: '1rem', sm: '1.25rem' },
-                  color: 'white'
-                }}
-              >
-                {getRoleBasedTitle()}
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography
-              variant="body2"
+            <img
+              src="http://tracuu.ptit.edu.vn/_next/static/images/ptit-logo-c5be62e95f69e6f8285d1fd2ee0688ca.png"
+              alt="PTIT Logo"
+              style={{ height: '32px', width: 'auto' }}
+            />
+            <Typography 
+              variant="h6" 
+              noWrap
               sx={{
-                display: { xs: 'none', sm: 'block' },
-                color: 'rgba(255, 255, 255, 0.8)',
-                mr: 1
+                fontWeight: 700,
+                ml: 2,
+                display: { xs: 'none', md: 'block' }
               }}
             >
-              Xin chào, {user?.full_name || 'User'}
+              PTIT Job - Hệ thống quản lý việc làm
             </Typography>
+          </Box>
 
-            {/* Dark Mode Toggle */}
-            <Tooltip title={isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}>
-              <IconButton
-                size="medium"
-                edge="start"
-                color="inherit"
-                onClick={toggleColorMode}
-                sx={{
-                  mr: 1,
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  }
-                }}
-              >
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Tooltip title={isDarkMode ? 'Chế độ sáng' : 'Chế độ tối'}>
+              <IconButton color="inherit" onClick={toggleColorMode}>
                 {isDarkMode ? <LightMode /> : <DarkMode />}
               </IconButton>
             </Tooltip>
             
-            <IconButton
-              size="large"
-              edge="end"
-              aria-label="account menu"
-              aria-controls="profile-menu"
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-              sx={{
-                p: 0.5,
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                }
-              }}
-            >
-              <Avatar
-                sx={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
-              >
-                {user?.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
-              </Avatar>
-            </IconButton>
-          </Box>
+            <Tooltip title="Tài khoản">
+              <IconButton onClick={handleProfileMenuOpen} sx={{ p: 0 }}>
+                <Avatar
+                  sx={{ width: 36, height: 36 }}
+                  alt={user?.full_name}
+                >
+                  {user?.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Toolbar>
       </AppBar>
 
@@ -191,12 +193,14 @@ const MainHeader: React.FC<MainHeaderProps> = ({ onSidebarToggle }) => {
         anchorEl={anchorEl}
         open={isMenuOpen}
         onClose={handleProfileMenuClose}
-        onClick={handleProfileMenuClose}
         PaperProps={{
-          elevation: 3,
+          elevation: 0,
           sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
             mt: 1.5,
-            minWidth: 200,
+            minWidth: 240,
+            borderRadius: '12px',
             '& .MuiAvatar-root': {
               width: 32,
               height: 32,
@@ -220,97 +224,38 @@ const MainHeader: React.FC<MainHeaderProps> = ({ onSidebarToggle }) => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <Box sx={{ px: 2, py: 1 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {user?.full_name || 'User'}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {user?.email || 'user@ptit.edu.vn'}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {user?.email || ''}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Role: {user?.role === 'admin' ? 'Quản trị viên' : 
-                  user?.role === 'employer' ? 'Nhà tuyển dụng' : 
-                  user?.role === 'candidate' ? 'Ứng viên' : 'User'}
-          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center" color="text.secondary">
+            {roleInfo.icon}
+            <Typography variant="caption">{roleInfo.name}</Typography>
+          </Stack>
         </Box>
         
-        <Divider />
+        <Divider sx={{ my: 1 }} />
         
-        <MenuItem 
-          onClick={handleProfile} 
-          sx={{ 
-            py: 1.5,
-            borderRadius: 1,
-            mx: 1,
-            mb: 0.5,
-            '&:hover': {
-              backgroundColor: 'primary.light',
-              color: 'primary.contrastText',
-              transform: 'translateX(2px)',
-              transition: 'all 0.2s ease-in-out',
-            },
-            '&:active': {
-              transform: 'translateX(0px)',
-            }
-          }}
-        >
-          <ListItemIcon>
-            <Person 
-              fontSize="small" 
-              sx={{ 
-                color: 'primary.main',
-                transition: 'color 0.2s ease-in-out',
-              }} 
-            />
-          </ListItemIcon>
-          <ListItemText 
-            primary="Hồ sơ cá nhân" 
-            primaryTypographyProps={{
-              fontWeight: 500,
-              fontSize: '0.9rem'
-            }}
-          />
+        <MenuItem onClick={handleProfile} sx={{ m: 1, borderRadius: '8px' }}>
+          <ListItemIcon><Person fontSize="small" /></ListItemIcon>
+          Hồ sơ cá nhân
         </MenuItem>
         
-        <Divider />
-        
-        <MenuItem 
-          onClick={handleLogout} 
-          sx={{ 
-            py: 1.5,
-            color: 'error.main',
-            borderRadius: 1,
-            mx: 1,
-            mb: 0.5,
-            '&:hover': {
-              backgroundColor: 'error.light',
-              color: 'error.contrastText',
-              transform: 'translateX(2px)',
-              transition: 'all 0.2s ease-in-out',
-            },
-            '&:active': {
-              transform: 'translateX(0px)',
-            }
-          }}
-        >
-          <ListItemIcon>
-            <Logout 
-              fontSize="small" 
-              sx={{ 
-                color: 'inherit',
-                transition: 'transform 0.2s ease-in-out',
-              }} 
-            />
-          </ListItemIcon>
-          <ListItemText 
-            primary="Đăng xuất" 
-            primaryTypographyProps={{
-              fontWeight: 500,
-              fontSize: '0.9rem'
-            }}
-          />
+        <MenuItem onClick={handleLogoutClick} sx={{ m: 1, borderRadius: '8px', color: 'error.main' }}>
+          <ListItemIcon><Logout fontSize="small" sx={{ color: 'error.main' }} /></ListItemIcon>
+          Đăng xuất
         </MenuItem>
       </Menu>
+
+ 
+      <LogoutConfirmationDialog 
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+        onConfirm={handleConfirmLogout}
+      />
     </>
   );
 };

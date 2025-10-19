@@ -11,12 +11,14 @@ import {
   Add as AddIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 import { userService } from '../../services/userService';
 import { User } from '../../services/types';
 import UserStatsCards from './components/UserStatsCards';
 import UserSearchFilters from './components/UserSearchFilters';
 import UserTable from './components/UserTable';
 import UserDialog from './components/UserDialog';
+import { C } from 'react-router/dist/development/index-react-server-client-DKvU8YRr';
 
 interface UserFormData {
   email: string;
@@ -29,6 +31,7 @@ interface UserFormData {
 }
 
 const Users: React.FC = () => {
+  const theme = useTheme();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -244,7 +247,7 @@ const Users: React.FC = () => {
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Box>
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
             Quản lý người dùng
           </Typography>
         </Box>

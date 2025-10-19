@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Alert, Pagination } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Add as AddIcon } from '@mui/icons-material';
 import CategoryStatsCards from './components/CategoryStatsCards';
 import CategorySearchFilters from './components/CategorySearchFilters';
@@ -9,6 +10,7 @@ import { jobCategoryService } from '../../services';
 import { JobCategory, CreateJobCategoryRequest, CategoryFilters } from '../../services/types';
 
 const JobCategories: React.FC = () => {
+  const theme = useTheme();
   const [categories, setCategories] = useState<JobCategory[]>([]);
   const [totalCategories, setTotalCategories] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -170,7 +172,7 @@ const JobCategories: React.FC = () => {
   return (
     <Box sx={{ p: { xs: 2, sm: 2.5 }, height: '100%' }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h4" component="h1">
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
               Quản lý danh mục việc làm
             </Typography>
             <Button
