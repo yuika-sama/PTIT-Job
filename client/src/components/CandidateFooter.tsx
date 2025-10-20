@@ -32,7 +32,7 @@ const CandidateFooter: React.FC = () => {
     tools: [
       { label: 'Tạo CV online', href: '/candidate/cv-builder' },
       { label: 'Đánh giá CV', href: '/candidate/cv-review' },
-      { label: 'Luyện tập phỏng vấn', href: '/candidate/interview-practice' },
+      { label: 'Giả lập phỏng vấn AI', href: '/candidate/interview-emulate' },
       { label: 'Tìm khóa học', href: '/candidate/courses' }
     ],
     support: [

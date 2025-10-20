@@ -142,13 +142,13 @@ const CandidateHeader: React.FC = () => {
         { 
           label: 'Đánh giá CV', 
           icon: <AssignmentIcon />, 
-          path: '/candidate/cv-review',
+          path: '/candidate/cv-evaluation',
           category: 'cv'
         },
         { 
-          label: 'Luyện tập phỏng vấn', 
+          label: 'Giả lập phỏng vấn AI', 
           icon: <PsychologyIcon />, 
-          path: '/candidate/interview-practice',
+          path: '/candidate/interview-emulate',
           category: 'cv'
         },
         { 
@@ -186,12 +186,12 @@ const CandidateHeader: React.FC = () => {
     {
       label: 'Đánh giá CV',
       icon: <AssignmentIcon />,
-      path: '/candidate/cv-review'
+      path: '/candidate/cv-evaluation'
     },
     {
       label: 'Giả lập phỏng vấn',
       icon: <PsychologyIcon />,
-      path: '/candidate/interview-simulator'
+      path: '/candidate/interview-emulate'
     }
   ];
 

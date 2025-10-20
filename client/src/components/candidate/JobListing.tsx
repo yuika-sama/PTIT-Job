@@ -213,8 +213,8 @@ const JobListing: React.FC<JobListingProps> = ({
                 position: 'absolute',
                 top: 12,
                 right: 60,
-                backgroundColor: '#e8f5e8',
-                color: '#4caf50',
+                backgroundColor: `${theme.palette.primary.main}15`,
+                color: theme.palette.primary.main,
                 fontSize: '0.75rem'
               }}
             />

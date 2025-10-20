@@ -8,6 +8,7 @@ import {
   InputAdornment,
   Container
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   Search as SearchIcon,
   LocationOn as LocationOnIcon,
@@ -23,6 +24,7 @@ interface JobSearchHeaderProps {
 }
 
 const JobSearchHeader: React.FC<JobSearchHeaderProps> = ({ onSearch }) => {
+  const theme = useTheme();
   const [category, setCategory] = React.useState('Danh mục Nghề');
   const [keyword, setKeyword] = React.useState('');
   const [location, setLocation] = React.useState('Địa điểm');
@@ -66,7 +68,7 @@ const JobSearchHeader: React.FC<JobSearchHeaderProps> = ({ onSearch }) => {
   return (
     <Box
       sx={{
-        background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)',
+        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
         py: 4,
         px: 2
       }}
@@ -133,7 +135,7 @@ const JobSearchHeader: React.FC<JobSearchHeaderProps> = ({ onSearch }) => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <WorkIcon sx={{ color: '#666' }} />
+                  <WorkIcon sx={{ color: theme.palette.text.secondary }} />
                 </InputAdornment>
               )
             }}
@@ -161,7 +163,7 @@ const JobSearchHeader: React.FC<JobSearchHeaderProps> = ({ onSearch }) => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: '#666' }} />
+                  <SearchIcon sx={{ color: theme.palette.text.secondary }} />
                 </InputAdornment>
               )
             }}
@@ -182,7 +184,7 @@ const JobSearchHeader: React.FC<JobSearchHeaderProps> = ({ onSearch }) => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <LocationOnIcon sx={{ color: '#666' }} />
+                  <LocationOnIcon sx={{ color: theme.palette.text.secondary }} />
                 </InputAdornment>
               )
             }}
@@ -199,14 +201,18 @@ const JobSearchHeader: React.FC<JobSearchHeaderProps> = ({ onSearch }) => {
             variant="contained"
             onClick={handleSearch}
             sx={{
-              backgroundColor: '#4caf50',
-              color: 'white',
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.primary.main,
               px: 4,
               minHeight: 56,
               fontWeight: 600,
               borderRadius: 1,
+              border: `2px solid ${theme.palette.background.paper}`,
               '&:hover': {
-                backgroundColor: '#2e7d32'
+                backgroundColor: theme.palette.background.paper,
+                opacity: 0.9,
+                transform: 'translateY(-1px)',
+                boxShadow: theme.shadows[4]
               }
             }}
           >
@@ -214,22 +220,6 @@ const JobSearchHeader: React.FC<JobSearchHeaderProps> = ({ onSearch }) => {
           </Button>
         </Box>
 
-        {/* Notification Button */}
-        <Box sx={{ mt: 2, textAlign: 'right' }}>
-          <Button
-            variant="outlined"
-            sx={{
-              color: 'white',
-              borderColor: 'white',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                borderColor: 'white'
-              }
-            }}
-          >
-            🔔 Tạo thông báo việc làm
-          </Button>
-        </Box>
       </Container>
     </Box>
   );

@@ -33,8 +33,8 @@ function mapDBToCategory(row: DBJobCategory): JobCategory {
 }
 
 export class JobCategoryModel {
-  static async findAll(): Promise<JobCategory[]> {
-    const { data, error } = await supabase
+  static async findAll(options?: { page?: number; limit?: number; search?: string; status?: string }): Promise<JobCategory[]> {
+    let baseQuery = supabase
       .from('job_categories')
       .select(
         [
@@ -44,8 +44,16 @@ export class JobCategoryModel {
           'icon_url',
           'jobs(count)', 
         ].join(',')
-      )
-      .returns<DBJobCategory[]>()
+      );
+
+    // Add pagination if provided
+    if (options?.page && options?.limit) {
+      const start = (options.page - 1) * options.limit;
+      const end = start + options.limit - 1;
+      baseQuery = baseQuery.range(start, end);
+    }
+
+    const { data, error } = await baseQuery.returns<DBJobCategory[]>();
 
     if (error) {
       console.error('Error finding all job categories:', error)

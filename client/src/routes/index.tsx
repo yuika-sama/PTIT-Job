@@ -31,6 +31,9 @@ import BHXHCalculatorPage from '../pages/Candidate/BHXHCalculatorPage';
 import SalaryCalculatorPage from '../pages/Candidate/SalaryCalculatorPage';
 import UnemploymentInsurancePage from '../pages/Candidate/UnemploymentInsurancePage';
 import JobSearchPage from '../pages/Candidate/JobSearchPage';
+import CVEvaluationPage from '../pages/Candidate/CVEvaluationPage';
+import CVUploaderPage from '../pages/Candidate/CVUploaderPage';
+import InterviewEmulate from '../pages/Candidate/InterviewEmulate';
 import { CompoundInterestPage, JobDetailsPage } from '../pages/Candidate';
 
 // Shared Pages
@@ -248,6 +251,8 @@ const AppRoutes: React.FC = () => {
               <Route path="profile" element={<Profile />} />
               <Route path="jobs" element={<CandidateJobList />} />
               <Route path="job-search" element={<JobSearchPage />} />
+              <Route path="cv-evaluation" element={<CVEvaluationPage />} />
+              <Route path="interview-emulate" element={<InterviewEmulate />} />
               <Route path="best-jobs" element={<BestJobsPage />} />
               <Route path="attractive-jobs" element={<AttractiveJobsPage />} />
               <Route path="companies" element={<CompaniesPage />} />

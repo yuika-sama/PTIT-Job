@@ -2,9 +2,10 @@ import { JobModel } from '../models/JobModel.js';
 import { validateUUID } from '../utils/uuid.js';
 
 export class JobController {
-    static async getAllJobs(): Promise<{ success: boolean; data: any; message: string }> {
+    static async getAllJobs({ query }: { query: any }): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const jobs = await JobModel.findAll();
+            const { page = 1, limit = 10, search } = query;
+            const jobs = await JobModel.findAll({ page: parseInt(page), limit: parseInt(limit), search });
             return {
                 success: true,
                 data: jobs,
@@ -95,6 +96,33 @@ export class JobController {
         } catch (error) {
             console.error('Error in deleteJob:', error);
             throw error;
+        }
+    }
+
+    static async searchJobs({ query }: { query: any }): Promise<{ success: boolean; data: any; message: string }> {
+        try {
+            const { title, category_id, location_id, job_type, experience_level, page = 1, limit = 10 } = query;
+            
+            const searchParams: any = { page: parseInt(page), limit: parseInt(limit) };
+            
+            // Build search terms
+            let searchTerms: string[] = [];
+            if (title) searchTerms.push(title);
+            if (searchTerms.length > 0) {
+                searchParams.search = searchTerms.join(' ');
+            }
+            
+            // For now, use findAll with search. We can extend this later with more specific filters
+            const jobs = await JobModel.findAll(searchParams);
+            
+            return {
+                success: true,
+                data: jobs,
+                message: 'Jobs search completed successfully'
+            };
+        } catch (error) {
+            console.error('Error in searchJobs:', error);
+            throw new Error('Internal server error');
         }
     }
 }

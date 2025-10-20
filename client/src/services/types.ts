@@ -82,6 +82,7 @@ export interface Company {
   updated_at: string;
   job_count?: number | null | undefined;
   jobs_count?: number | null | undefined;
+  jobs?: Job[]; // Add jobs array
 }
 
 export interface CreateCompanyRequest {

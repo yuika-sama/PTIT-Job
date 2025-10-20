@@ -7,6 +7,9 @@ export const jobRoutes = new Elysia()
             .get('/', JobController.getAllJobs, {
                 detail: { tags: ['Jobs'] }
             })
+            .get('/search', JobController.searchJobs, {
+                detail: { tags: ['Jobs'] }
+            })
             .get('/:id', JobController.getJobById, {
                 detail: { tags: ['Jobs'] }
             })

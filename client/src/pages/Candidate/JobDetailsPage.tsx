@@ -8,20 +8,26 @@ import {
 } from '@mui/material';
 import { jobService } from '../../services';
 import type { Job } from '../../services/types';
-import JobBreadcrumbs from '../../components/candidate/job-details/JobBreadcrumbs';
-import JobHeader from '../../components/candidate/job-details/JobHeader';
-import JobContent from '../../components/candidate/job-details/JobContent';
-import JobSidebar from '../../components/candidate/job-details/JobSidebar';
-import JobLoadingState from '../../components/candidate/job-details/JobLoadingState';
+import { useAuth } from '../../contexts/AuthContext';
+import {
+  JobBreadcrumbs,
+  JobHeader,
+  JobContent,
+  JobSidebar,
+  JobLoadingState,
+  JobApplicationModal
+} from '../../components/candidate/job-details';
 
 const JobDetailsPage: React.FC = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
 
   // Fetch job details
   useEffect(() => {
@@ -62,7 +68,19 @@ const JobDetailsPage: React.FC = () => {
 
   const handleApplyJob = () => {
     if (!job) return;
-    console.log('Apply for job:', job.id);
+    
+    // Check if user is logged in
+    if (!user) {
+      // Redirect to login page
+      navigate('/auth/login', { 
+        state: { from: `/jobs/${job.id}` } 
+      });
+      return;
+    }
+    
+    // Open application modal
+    setIsApplicationModalOpen(true);
+    console.log('Opening application modal for job:', job.id);
   };
 
   // Handle share job
@@ -131,6 +149,14 @@ const JobDetailsPage: React.FC = () => {
             Không tìm thấy công việc
           </Alert>
         )}
+
+        {/* Job Application Modal */}
+        <JobApplicationModal
+          open={isApplicationModalOpen}
+          onClose={() => setIsApplicationModalOpen(false)}
+          job={job}
+          userId={user?.id}
+        />
       </Container>
     </JobLoadingState>
   );

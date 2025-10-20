@@ -26,9 +26,9 @@ interface Job {
 }
 
 export class JobModel {
-    static async findAll(): Promise<Job[]> {
+    static async findAll(options?: { page?: number; limit?: number; search?: string }): Promise<Job[]> {
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('jobs')
                 .select(`
                     *,
@@ -44,6 +44,20 @@ export class JobModel {
                     )
                 `)
                 .order('created_at', { ascending: false });
+
+            // Add search filter if provided
+            if (options?.search) {
+                query = query.or(`title.ilike.%${options.search}%,description.ilike.%${options.search}%`);
+            }
+
+            // Add pagination if provided
+            if (options?.page && options?.limit) {
+                const start = (options.page - 1) * options.limit;
+                const end = start + options.limit - 1;
+                query = query.range(start, end);
+            }
+
+            const { data, error } = await query;
 
             if (error) {
                 console.error('Supabase error in findAll:', error);

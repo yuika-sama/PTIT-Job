@@ -11,8 +11,28 @@ export interface Company {
   logo_url?: string
   jobs_count?: number | null | undefined
   job_count?: number | null | undefined
+  jobs?: Job[] // Add jobs array
   createdAt: Date
   updatedAt: Date
+}
+
+export interface Job {
+  id: string
+  title: string
+  description?: string | undefined
+  requirements?: string | undefined
+  benefits?: string | undefined
+  salary_min?: number | undefined
+  salary_max?: number | undefined
+  currency?: string | undefined
+  job_type?: string | undefined
+  status?: string | undefined
+  expiry_date?: string | undefined
+  company_id: string
+  category_id?: string | undefined
+  location_id?: string | undefined
+  created_at: string
+  updated_at: string
 }
 
 type DBCompany = {
@@ -25,14 +45,34 @@ type DBCompany = {
   logo_url?: string | null
   created_at: string
   updated_at: string
-  jobs?: { count: number }[]
+  jobs?: Array<{
+    count?: number
+    id?: string
+    title?: string
+    description?: string
+    requirements?: string
+    benefits?: string
+    salary_min?: number
+    salary_max?: number
+    currency?: string
+    job_type?: string
+    status?: string
+    expiry_date?: string
+    company_id?: string
+    category_id?: string
+    location_id?: string
+    created_at?: string
+    updated_at?: string
+  }>
 }
 
 // helper: map DB -> App
-function mapDBToCompany(row: DBCompany): Company {
+function mapDBToCompany(row: DBCompany, includeJobs = false): Company {
   const jobsCount =
     Array.isArray(row.jobs) && row.jobs.length > 0 && typeof row.jobs[0]?.count === 'number'
       ? row.jobs[0].count
+      : Array.isArray(row.jobs) && includeJobs
+      ? row.jobs.filter(job => job.id).length
       : 0
 
   const company: Company = {
@@ -50,6 +90,30 @@ function mapDBToCompany(row: DBCompany): Company {
   if (row.address !== null && row.address !== undefined) company.address = row.address
   if (row.logo_url !== null && row.logo_url !== undefined) company.logo_url = row.logo_url
 
+  // Include jobs if requested and available
+  if (includeJobs && Array.isArray(row.jobs)) {
+    company.jobs = row.jobs
+      .filter(job => job.id) // Only include jobs with ID (actual job records)
+      .map(job => ({
+        id: job.id!,
+        title: job.title || '',
+        description: job.description || undefined,
+        requirements: job.requirements || undefined,
+        benefits: job.benefits || undefined,
+        salary_min: job.salary_min || undefined,
+        salary_max: job.salary_max || undefined,
+        currency: job.currency || 'VND',
+        job_type: job.job_type || undefined,
+        status: job.status || 'published',
+        expiry_date: job.expiry_date || undefined,
+        company_id: job.company_id || row.id,
+        category_id: job.category_id || undefined,
+        location_id: job.location_id || undefined,
+        created_at: job.created_at || new Date().toISOString(),
+        updated_at: job.updated_at || new Date().toISOString()
+      }))
+  }
+
   return company
 }
 
@@ -66,13 +130,17 @@ export class CompanyModel {
     }
 
     const rows = (data ?? []) as DBCompany[]
-    return rows.map(mapDBToCompany)
+    return rows.map(row => mapDBToCompany(row))
   }
 
-  static async findById(id: string): Promise<Company | null> {
+  static async findById(id: string, includeJobs = true): Promise<Company | null> {
+    const selectQuery = includeJobs 
+      ? 'id,name,description,website,company_size,address,logo_url,created_at,updated_at,jobs(id,title,description,requirements,benefits,salary_min,salary_max,currency,job_type,status,expiry_date,company_id,category_id,location_id,created_at,updated_at)'
+      : 'id,name,description,website,company_size,address,logo_url,created_at,updated_at,jobs(count)'
+
     const { data, error } = await supabase
       .from('companies')
-      .select('id,name,description,website,company_size,address,logo_url,created_at,updated_at,jobs(count)')
+      .select(selectQuery)
       .eq('id', id)
       .single()
 
@@ -82,7 +150,7 @@ export class CompanyModel {
       throw error
     }
 
-    return data ? mapDBToCompany(data as DBCompany) : null
+    return data ? mapDBToCompany(data as DBCompany, includeJobs) : null
   }
 
   static async create(
@@ -110,7 +178,7 @@ export class CompanyModel {
       throw error
     }
 
-    return mapDBToCompany(data as DBCompany)
+    return mapDBToCompany(data as DBCompany, false)
   }
 
   static async update(id: string, companyData: Partial<Company>): Promise<Company | null> {
@@ -137,7 +205,7 @@ export class CompanyModel {
       throw error
     }
 
-    return data ? mapDBToCompany(data as DBCompany) : null
+    return data ? mapDBToCompany(data as DBCompany, false) : null
   }
 
   static async delete(id: string): Promise<boolean> {
@@ -152,5 +220,39 @@ export class CompanyModel {
     }
 
     return (count ?? 0) > 0
+  }
+
+  // Get jobs for a specific company
+  static async getCompanyJobs(companyId: string): Promise<Job[]> {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('id,title,description,requirements,benefits,salary_min,salary_max,currency,job_type,status,expiry_date,company_id,category_id,location_id,created_at,updated_at')
+      .eq('company_id', companyId)
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error(`Error fetching jobs for company ${companyId}:`, error)
+      throw error
+    }
+
+    return (data ?? []).map(job => ({
+      id: job.id,
+      title: job.title,
+      description: job.description || undefined,
+      requirements: job.requirements || undefined,
+      benefits: job.benefits || undefined,
+      salary_min: job.salary_min || undefined,
+      salary_max: job.salary_max || undefined,
+      currency: job.currency || 'VND',
+      job_type: job.job_type || undefined,
+      status: job.status || 'published',
+      expiry_date: job.expiry_date || undefined,
+      company_id: job.company_id,
+      category_id: job.category_id || undefined,
+      location_id: job.location_id || undefined,
+      created_at: job.created_at,
+      updated_at: job.updated_at
+    }))
   }
 }

@@ -11,6 +11,16 @@ interface JobContentProps {
 }
 
 const JobContent: React.FC<JobContentProps> = ({ job }) => {
+  const renderMultilineText = (text?: string) => {
+    if (!text) return 'Chưa có nội dung.';
+    const lines = text.replace(/\\n/g, '\n').split('\n');
+    return lines.map((line, index) => (
+      <React.Fragment key={index}>
+        {line.trim()}
+        <br />
+      </React.Fragment>
+    ));
+  };
   return (
     <Box>
       {/* Job Description */}
@@ -26,7 +36,7 @@ const JobContent: React.FC<JobContentProps> = ({ job }) => {
             color: 'text.secondary'
           }}
         >
-          {job.description || 'Chưa có mô tả chi tiết.'}
+          {renderMultilineText(job.description)}
         </Typography>
       </Box>
 
@@ -45,7 +55,7 @@ const JobContent: React.FC<JobContentProps> = ({ job }) => {
             color: 'text.secondary'
           }}
         >
-          {job.requirements || 'Chưa có yêu cầu cụ thể.'}
+          {renderMultilineText(job.requirements)}
         </Typography>
       </Box>
 
@@ -64,7 +74,7 @@ const JobContent: React.FC<JobContentProps> = ({ job }) => {
             color: 'text.secondary'
           }}
         >
-          {job.benefits || 'Chưa có thông tin về quyền lợi.'}
+          {renderMultilineText(job.benefits)}
         </Typography>
       </Box>
     </Box>

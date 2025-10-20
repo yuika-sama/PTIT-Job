@@ -2,9 +2,10 @@ import { JobCategoryModel } from '../models/JobCategoryModel.js';
 import { validateUUID } from '../utils/uuid.js';
 
 export class JobCategoryController {
-    static async getAllCategories(): Promise<{ success: boolean; data: any; message: string }> {
+    static async getAllCategories({ query }: { query?: any } = {}): Promise<{ success: boolean; data: any; message: string }> {
         try {
-            const categories = await JobCategoryModel.findAll();
+            const { page, limit, search, status } = query || {};
+            const categories = await JobCategoryModel.findAll({ page, limit, search, status });
             return {
                 success: true,
                 data: categories,

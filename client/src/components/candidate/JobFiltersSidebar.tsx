@@ -13,6 +13,7 @@ import {
   TextField,
   Button
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   ExpandMore as ExpandMoreIcon,
   TrendingUp as TrendingUpIcon
@@ -31,6 +32,7 @@ interface JobFilters {
 }
 
 const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }) => {
+  const theme = useTheme();
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>([]);
   const [selectedLevels, setSelectedLevels] = React.useState<string[]>([]);
   const [salaryRange, setSalaryRange] = React.useState('Tất cả');
@@ -118,18 +120,23 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }
           gap: 1,
           mb: 2,
           p: 2,
-          backgroundColor: '#f5f5f5',
+          backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[800],
           borderRadius: 2
         }}
       >
-        <TrendingUpIcon sx={{ color: '#4caf50' }} />
+        <TrendingUpIcon sx={{ color: theme.palette.primary.main }} />
         <Typography variant="h6" fontWeight={600}>
           Lọc nâng cao
         </Typography>
       </Box>
 
       {/* Categories Filter */}
-      <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
+      <Accordion defaultExpanded sx={{ 
+        mb: 2, 
+        boxShadow: 'none', 
+        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper
+      }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="subtitle1" fontWeight={600}>
             Theo danh mục nghề
@@ -145,9 +152,9 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }
                     checked={selectedCategories.includes(category.name)}
                     onChange={() => handleCategoryChange(category.name)}
                     sx={{
-                      color: '#4caf50',
+                      color: theme.palette.primary.main,
                       '&.Mui-checked': {
-                        color: '#4caf50'
+                        color: theme.palette.primary.main
                       }
                     }}
                   />
@@ -166,7 +173,7 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }
               variant="text"
               sx={{ 
                 alignSelf: 'flex-start', 
-                color: '#4caf50',
+                color: theme.palette.primary.main,
                 fontSize: '0.875rem',
                 textTransform: 'none'
               }}
@@ -178,7 +185,12 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }
       </Accordion>
 
       {/* Level Filter */}
-      <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
+      <Accordion defaultExpanded sx={{ 
+        mb: 2, 
+        boxShadow: 'none', 
+        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper
+      }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="subtitle1" fontWeight={600}>
             Cấp bậc
@@ -194,9 +206,9 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }
                     checked={selectedLevels.includes(level)}
                     onChange={() => handleLevelChange(level)}
                     sx={{
-                      color: '#4caf50',
+                      color: theme.palette.primary.main,
                       '&.Mui-checked': {
-                        color: '#4caf50'
+                        color: theme.palette.primary.main
                       }
                     }}
                   />
@@ -209,7 +221,12 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }
       </Accordion>
 
       {/* Salary Filter */}
-      <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
+      <Accordion defaultExpanded sx={{ 
+        mb: 2, 
+        boxShadow: 'none', 
+        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper
+      }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="subtitle1" fontWeight={600}>
             Mức lương
@@ -224,9 +241,9 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }
                 control={
                   <Radio
                     sx={{
-                      color: '#4caf50',
+                      color: theme.palette.primary.main,
                       '&.Mui-checked': {
-                        color: '#4caf50'
+                        color: theme.palette.primary.main
                       }
                     }}
                   />
@@ -256,11 +273,11 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }
             size="small"
             sx={{ 
               mt: 1,
-              color: '#4caf50',
-              borderColor: '#4caf50',
+              color: theme.palette.primary.main,
+              borderColor: theme.palette.primary.main,
               '&:hover': {
-                backgroundColor: 'rgba(76, 175, 80, 0.04)',
-                borderColor: '#4caf50'
+                backgroundColor: `${theme.palette.primary.main}08`,
+                borderColor: theme.palette.primary.main
               }
             }}
           >
@@ -275,10 +292,10 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ onFiltersChange }
         fullWidth
         onClick={clearFilters}
         sx={{
-          backgroundColor: '#4caf50',
-          color: 'white',
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
           '&:hover': {
-            backgroundColor: '#2e7d32'
+            backgroundColor: theme.palette.primary.dark
           }
         }}
       >

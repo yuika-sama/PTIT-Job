@@ -51,6 +51,8 @@ export class JobService extends BaseApiService {
     category_id?: number;
     job_type?: string;
     experience_level?: string;
+    page?: number;
+    limit?: number;
   }): Promise<ApiResponse<Job[]>> {
     const params = new URLSearchParams();
     Object.entries(criteria).forEach(([key, value]) => {
