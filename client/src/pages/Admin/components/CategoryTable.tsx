@@ -12,7 +12,8 @@ import {
   Tooltip,
   Box,
   Typography,
-  CircularProgress
+  CircularProgress,
+  useTheme
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
@@ -44,6 +45,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
   onDelete,
   onToggleStatus
 }) => {
+  const theme = useTheme();
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" py={4}>
@@ -69,7 +71,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
     <TableContainer component={Paper} sx={{ mb: 3 }}>
       <Table>
         <TableHead>
-          <TableRow sx={{ backgroundColor: 'grey.50' }}>
+          <TableRow sx={{ backgroundColor: theme.palette.grey[200] === 'light' ? 'grey.50' : 'grey.850' }}>
             <TableCell><strong>STT</strong></TableCell>
             <TableCell><strong>Tên danh mục</strong></TableCell>
             <TableCell><strong>Slug</strong></TableCell>

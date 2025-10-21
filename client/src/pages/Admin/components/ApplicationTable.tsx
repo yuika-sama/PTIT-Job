@@ -13,7 +13,8 @@ import {
   Box,
   Typography,
   CircularProgress,
-  Avatar
+  Avatar,
+  useTheme
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
@@ -64,6 +65,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({
   onApprove,
   onReject
 }) => {
+  const theme = useTheme();
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" py={4}>
@@ -89,7 +91,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({
     <TableContainer component={Paper} sx={{ mb: 2 }}>
       <Table>
         <TableHead>
-          <TableRow sx={{ backgroundColor: 'grey.50' }}>
+          <TableRow sx={{ backgroundColor: theme.palette.mode === 'light' ? 'grey.50' : 'grey.850' }}>
             <TableCell><strong>STT</strong></TableCell>
             <TableCell><strong>Tên người dùng</strong></TableCell>
             <TableCell><strong>Tên công việc</strong></TableCell>

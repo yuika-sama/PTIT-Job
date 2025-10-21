@@ -12,7 +12,8 @@ import {
   Tooltip,
   Avatar,
   Typography,
-  Link
+  Link,
+  useTheme
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -43,6 +44,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
   onEdit,
   onDelete
 }) => {
+  const theme = useTheme();
   console.log("Table companies:", companies);
   const getCompanyInitials = (name?: string) => {
     if (!name) return 'C';
@@ -70,7 +72,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
       <TableContainer>
         <Table>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ backgroundColor: theme.palette.grey[200] === 'light' ? 'grey.50' : 'grey.850' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>STT</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Công ty</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Mô tả</TableCell>

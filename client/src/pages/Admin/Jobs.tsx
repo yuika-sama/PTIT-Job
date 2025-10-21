@@ -76,19 +76,19 @@ const Jobs: React.FC = () => {
 
   const itemsPerPage = 8;
 
-const fetchJobs = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await jobService.getAllJobs({
-        page,
-        limit: itemsPerPage,
-        search: filters.search || undefined,
-        jobType: filters.jobType || undefined,
-        location: filters.location || undefined,
-        status: filters.status || undefined,
-        experienceLevel: filters.experienceLevel || undefined
-      });
+  const fetchJobs = React.useCallback(async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    const response = await jobService.getAllJobs({
+      page,
+      limit: itemsPerPage,
+      search: filters.search || undefined,
+      jobType: filters.jobType || undefined,
+      location: filters.location || undefined,
+      status: filters.status || undefined,
+      experienceLevel: filters.experienceLevel || undefined
+    });
       
       console.log('Jobs response:', response);
       

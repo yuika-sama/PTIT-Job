@@ -83,7 +83,7 @@ const Companies: React.FC = () => {
   useEffect(() => {
     fetchCompanies();
   }, [fetchCompanies]);
-
+// viet bo loc ***** 
   const handleFilterChange = (newFilters: CompanyFilters) => {
     setFilters(newFilters);
     setPage(1);
