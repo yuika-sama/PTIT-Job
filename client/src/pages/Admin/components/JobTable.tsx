@@ -12,7 +12,8 @@ import {
   Chip,
   Tooltip,
   Typography,
-  CircularProgress
+  CircularProgress,
+  useTheme
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -44,6 +45,7 @@ const JobTable: React.FC<JobTableProps> = ({
   onEdit,
   onDelete
 }) => {
+  const theme = useTheme();
   const getJobTypeLabel = (jobType: string) => {
     const labels = {
       'full-time': 'Toàn thời gian',
@@ -110,7 +112,7 @@ const JobTable: React.FC<JobTableProps> = ({
       <TableContainer>
         <Table>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ backgroundColor: theme.palette.grey[200] === 'light' ? 'grey.50' : 'grey.850' }}>
               <TableCell>STT</TableCell>
               <TableCell>Thông tin việc làm</TableCell>
               <TableCell>Công ty</TableCell>

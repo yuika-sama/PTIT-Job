@@ -8,44 +8,40 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  InputAdornment
+  InputAdornment,
+  Typography
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 
-interface CompanyFilters {
-  search: string;
-  size: string;
-  status: string;
-}
-
 interface CompanySearchFiltersProps {
-  filters: CompanyFilters;
-  onFiltersChange: (filters: CompanyFilters) => void;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  sizeFilter: string;
+  setSizeFilter: (value: string) => void;
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  filteredCount: number;
+  totalCount: number;
 }
 
 const CompanySearchFilters: React.FC<CompanySearchFiltersProps> = ({
-  filters,
-  onFiltersChange
+  searchTerm,
+  setSearchTerm,
+  sizeFilter,
+  setSizeFilter,
+  statusFilter,
+  setStatusFilter,
+  filteredCount,
+  totalCount
 }) => {
-  const handleSearchChange = (value: string) => {
-    onFiltersChange({ ...filters, search: value });
-  };
-
-  const handleSizeChange = (value: string) => {
-    onFiltersChange({ ...filters, size: value });
-  };
-
-  const handleStatusChange = (value: string) => {
-    onFiltersChange({ ...filters, status: value });
-  };
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
           <TextField
             placeholder="Tìm kiếm theo tên công ty, website, email..."
-            value={filters.search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -59,32 +55,41 @@ const CompanySearchFilters: React.FC<CompanySearchFiltersProps> = ({
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Quy mô</InputLabel>
             <Select
-              value={filters.size}
+              value={sizeFilter}
               label="Quy mô"
-              onChange={(e) => handleSizeChange(e.target.value)}
+              onChange={(e) => setSizeFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
-              <MenuItem value="small">Nhỏ (1-50)</MenuItem>
-              <MenuItem value="medium">Trung bình (51-200)</MenuItem>
-              <MenuItem value="large">Lớn (201-1000)</MenuItem>
-              <MenuItem value="enterprise">Doanh nghiệp (1000+)</MenuItem>
+              <MenuItem value="all">Tất cả</MenuItem>
+              <MenuItem value="1-10">1-10 nhân viên</MenuItem>
+              <MenuItem value="11-50">11-50 nhân viên</MenuItem>
+              <MenuItem value="51-200">51-200 nhân viên</MenuItem>
+              <MenuItem value="201-500">201-500 nhân viên</MenuItem>
+              <MenuItem value="501-1000">501-1000 nhân viên</MenuItem>
+              <MenuItem value="1000+">1000+ nhân viên</MenuItem>
             </Select>
           </FormControl>
           
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Trạng thái</InputLabel>
             <Select
-              value={filters.status}
+              value={statusFilter}
               label="Trạng thái"
-              onChange={(e) => handleStatusChange(e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="all">Tất cả</MenuItem>
               <MenuItem value="with-website">Có website</MenuItem>
               <MenuItem value="with-logo">Có logo</MenuItem>
               <MenuItem value="with-email">Có email</MenuItem>
               <MenuItem value="complete">Đầy đủ thông tin</MenuItem>
             </Select>
           </FormControl>
+        </Box>
+
+        {/* Result Count */}
+        <Box display="flex" justifyContent="flex-end">
+          <Typography variant="body2" color="text.secondary">
+            Hiển thị <strong>{filteredCount}</strong> / {totalCount} công ty
+          </Typography>
         </Box>
       </CardContent>
     </Card>

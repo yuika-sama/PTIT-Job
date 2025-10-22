@@ -44,8 +44,11 @@ const SecondaryStats: React.FC = () => {
           </CardContent>
         </Card>
       </Box>
+      
+      
       <Box sx={{ flex: '1 1 250px', minWidth: 250 }}>
       </Box>
+
       <Box sx={{ flex: '1 1 250px', minWidth: 250 }}>
         <Card>
           <CardContent>
@@ -53,20 +56,24 @@ const SecondaryStats: React.FC = () => {
               Việc làm đang tuyển
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2196f3' }}>
-              {/* {activeJobs} */}
+              {jobs?.length || 0}
             </Typography>
+
             <Typography variant="caption" color="textSecondary">
               Từ {jobs?.length || 0} tổng số
             </Typography>
+
           </CardContent>
         </Card>
       </Box>
+
       <Box sx={{ flex: '1 1 250px', minWidth: 250 }}>
         <Card>
           <CardContent>
             <Typography variant="h6" color="textSecondary" gutterBottom>
               Đơn ứng tuyển hôm nay
             </Typography>
+
             <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#9c27b0' }}>
               {todayApplications}
             </Typography>

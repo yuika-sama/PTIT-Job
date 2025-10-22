@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Alert, Pagination } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Add as AddIcon } from '@mui/icons-material';
 import LocationStatsCards from './components/LocationStatsCards';
 import LocationSearchFilters from './components/LocationSearchFilters';
@@ -9,6 +10,7 @@ import { locationService } from '../../services';
 import { Location, CreateLocationRequest, LocationFilters } from '../../services/types';
 
 const Locations: React.FC = () => {
+  const theme = useTheme();
   const [locations, setLocations] = useState<Location[]>([]);
   const [totalLocations, setTotalLocations] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -172,7 +174,7 @@ const Locations: React.FC = () => {
   return (
     <Box sx={{ p: { xs: 2, sm: 2.5 }, height: '100%' }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h4" component="h1">
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
             Quản lý địa điểm
             </Typography>
             <Button

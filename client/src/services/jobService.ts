@@ -9,6 +9,11 @@ export class JobService extends BaseApiService {
     page?: number;
     limit?: number;
     search?: string;
+    jobType?: string;
+    location?: string;
+    status?: string;
+    experienceLevel?: string;
+
   }): Promise<ApiResponse<Job[]>> {
     console.log('🔄 Fetching all jobs with params:', params);
     

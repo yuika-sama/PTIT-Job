@@ -4,6 +4,7 @@ export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
   message: string;
+  count?: number;
 }
 
 export interface PaginatedResponse<T> {

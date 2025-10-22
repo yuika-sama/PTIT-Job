@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Pagination } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import ApplicationStatsCards from './components/ApplicationStatsCards';
 import ApplicationSearchFilters from './components/ApplicationSearchFilters';
 import ApplicationTable from './components/ApplicationTable';
@@ -8,6 +9,7 @@ import { jobApplicationService } from '../../services';
 import { JobApplication, ApplicationStatus, ApplicationFilters } from '../../services/types';
 
 const Applications: React.FC = () => {
+  const theme = useTheme();
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [totalApplications, setTotalApplications] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -130,11 +132,11 @@ const Applications: React.FC = () => {
   return (
       <Box sx={{ p: { xs: 2, sm: 2.5 }, height: '100%' }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h4" component="h1">
-            Quản lý đơn ứng tuyển
+          <Typography variant="h4" component="h1" 
+          sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
+          Quản lý đơn ứng tuyển
           </Typography>
         </Box>
-
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}

@@ -62,7 +62,11 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 2, px: { xs: 2, sm: 3 } }}>
+    <Container maxWidth="lg" sx={{ py: 8,
+        px: { xs: 2, sm: 3 },
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1, }} >
       <Fade in timeout={800}>
         <Paper 
           elevation={3}
@@ -185,7 +189,7 @@ const Profile: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <PersonIcon sx={{ mr: 2, color: 'primary.main' }} />
                   <Typography variant="h6" fontWeight="bold">
-                    Thông tin cá nhân
+                    Thông tin cá nhân 
                   </Typography>
                 </Box>
 

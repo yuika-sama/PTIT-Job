@@ -13,7 +13,8 @@ import {
   Tooltip,
   Avatar,
   Typography,
-  Pagination
+  Pagination,
+  useTheme
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -53,6 +54,7 @@ const UserTable: React.FC<UserTableProps> = ({
   totalCount,
   pageSize
 }) => {
+  const theme = useTheme();
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'admin': return <AdminIcon sx={{ fontSize: 16 }} />;
@@ -83,7 +85,7 @@ const UserTable: React.FC<UserTableProps> = ({
       <TableContainer>
         <Table>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ backgroundColor: theme.palette.grey[200] === 'light' ? 'grey.50' : 'grey.850' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>STT</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Người dùng</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Vai trò</TableCell>

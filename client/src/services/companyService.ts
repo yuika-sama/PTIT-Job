@@ -9,6 +9,8 @@ export class CompanyService extends BaseApiService {
     page?: number;
     limit?: number;
     search?: string;
+    size?: string;
+    status?: string;
   }): Promise<ApiResponse<Company[]>> {
     console.log('🔄 Fetching all companies with params:', params);
     
