@@ -4,7 +4,8 @@ import {
   Typography,
   Paper,
   Divider,
-  Chip
+  Chip,
+  useTheme
 } from '@mui/material';
 import { BHXHResult } from './BHXHCalculator';
 
@@ -14,11 +15,12 @@ interface BHXHResultDisplayProps {
 }
 
 const BHXHResultDisplay: React.FC<BHXHResultDisplayProps> = ({ result, type }) => {
+  const theme = useTheme();
   if (!result) {
     return (
         <>
             <Box sx={{width: '100%', height: 90, display: 'flex', textJustify: 'center' }}>
-                <Typography variant="h6" sx={{ mb: 3, color: '#009a3e', fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ mb: 3, color: theme.palette.primary.main, fontWeight: 600 }}>
                     Kết quả tính toán
                 </Typography>
             </Box>
@@ -59,17 +61,17 @@ const BHXHResultDisplay: React.FC<BHXHResultDisplayProps> = ({ result, type }) =
 
   const getTypeColor = () => {
     switch (type) {
-      case 'mandatory': return '#009a3e';
-      case 'voluntary': return '#009a3e';
-      case 'both': return '#009a3e';
-      default: return '#009a3e';
+      case 'mandatory': return theme.palette.primary.main;
+      case 'voluntary': return theme.palette.primary.main;
+      case 'both': return theme.palette.primary.main;
+      default: return theme.palette.primary.main;
     }
   };
 
   return (
     <Box>
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Typography variant="h6" sx={{ color: '#009a3e', fontWeight: 600 }}>
+        <Typography variant="h6" sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>
           Mức lương đóng BHXH
         </Typography>
         <Chip 
@@ -105,7 +107,7 @@ const BHXHResultDisplay: React.FC<BHXHResultDisplayProps> = ({ result, type }) =
       </Paper>
 
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ color: '#009a3e', fontWeight: 600, mb: 2 }}>
+        <Typography variant="h6" sx={{ color: theme.palette.primary.main, fontWeight: 600, mb: 2 }}>
           Đối tượng tham gia
         </Typography>
 
@@ -118,7 +120,7 @@ const BHXHResultDisplay: React.FC<BHXHResultDisplayProps> = ({ result, type }) =
             <Box 
               sx={{ 
                 backgroundColor: '#f8f9fa', 
-                border: '2px solid #009a3e', 
+                border: `2px solid ${theme.palette.primary.main}`, 
                 borderRadius: 2, 
                 p: 3,
                 mb: 2
@@ -128,7 +130,7 @@ const BHXHResultDisplay: React.FC<BHXHResultDisplayProps> = ({ result, type }) =
                 variant="h4" 
                 sx={{ 
                   fontWeight: 700, 
-                  color: '#009a3e',
+                  color: theme.palette.primary.main,
                   fontSize: { xs: '1.5rem', md: '2rem' }
                 }}
               >
@@ -157,7 +159,7 @@ const BHXHResultDisplay: React.FC<BHXHResultDisplayProps> = ({ result, type }) =
 
       {/* Detailed Breakdown */}
       <Paper elevation={2} sx={{ p: 3, border: '1px solid #e0e0e0' }}>
-        <Typography variant="h6" sx={{ color: '#009a3e', fontWeight: 600, mb: 2 }}>
+        <Typography variant="h6" sx={{ color: theme.palette.primary.main  , fontWeight: 600, mb: 2 }}>
           Chi tiết tính toán
         </Typography>
         

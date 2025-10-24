@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from "react"
 import {
   Box,
   Container,
@@ -6,8 +6,8 @@ import {
   Link,
   Divider,
   IconButton,
-  Tooltip
-} from '@mui/material';
+  Tooltip,
+} from "@mui/material"
 import {
   Facebook as FacebookIcon,
   LinkedIn as LinkedInIcon,
@@ -16,97 +16,108 @@ import {
   Email as EmailIcon,
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
-  Work as WorkIcon
-} from '@mui/icons-material';
+  Work as WorkIcon,
+  ArrowRight as ArrowRightIcon,
+} from "@mui/icons-material"
 
 const CandidateFooter: React.FC = () => {
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear()
 
   const footerLinks = {
     jobs: [
-      { label: 'Tìm việc làm', href: '/candidate/jobs' },
-      { label: 'Việc làm IT', href: '/candidate/jobs?category=it' },
-      { label: 'Việc làm part-time', href: '/candidate/jobs?type=part-time' },
-      { label: 'Thực tập sinh', href: '/candidate/jobs?level=intern' }
+      { label: "Tìm việc làm", href: "/candidate/jobs" },
+      { label: "Việc làm IT", href: "/candidate/jobs?category=it" },
+      { label: "Việc làm part-time", href: "/candidate/jobs?type=part-time" },
+      { label: "Thực tập sinh", href: "/candidate/jobs?level=intern" },
     ],
     tools: [
-      { label: 'Tạo CV online', href: '/candidate/cv-builder' },
-      { label: 'Đánh giá CV', href: '/candidate/cv-review' },
-      { label: 'Giả lập phỏng vấn AI', href: '/candidate/interview-emulate' },
-      { label: 'Tìm khóa học', href: '/candidate/courses' }
+      { label: "Đánh giá CV", href: "/candidate/cv-evaluation" },
+      { label: "Giả lập phỏng vấn AI", href: "/candidate/interview-emulate" },
     ],
     support: [
-      { label: 'Trung tâm hỗ trợ', href: '/support' },
-      { label: 'Hướng dẫn sử dụng', href: '/guide' },
-      { label: 'Liên hệ', href: '/contact' },
-      { label: 'FAQ', href: '/faq' }
+      { label: "Trung tâm hỗ trợ", href: "https://www.facebook.com/HocvienPTIT" },
+      { label: "Hướng dẫn sử dụng", href: "https://www.facebook.com/HocvienPTIT" },
+      { label: "Liên hệ", href: "https://www.facebook.com/HocvienPTIT" },
+      { label: "FAQ", href: "https://www.facebook.com/HocvienPTIT" },
     ],
     company: [
-      { label: 'Về PTIT Job', href: '/about' },
-      { label: 'Chính sách bảo mật', href: '/privacy' },
-      { label: 'Điều khoản sử dụng', href: '/terms' },
-      { label: 'Blog', href: '/blog' }
-    ]
-  };
+      { label: "Về PTIT Job", href: "https://www.facebook.com/HocvienPTIT" },
+      { label: "Chính sách bảo mật", href: "https://www.facebook.com/HocvienPTIT" },
+      { label: "Điều khoản sử dụng", href: "https://www.facebook.com/HocvienPTIT" },
+      { label: "Blog", href: "https://www.facebook.com/HocvienPTIT" },
+    ],
+  }
 
   const socialLinks = [
-    { icon: <FacebookIcon />, href: 'https://facebook.com/ptit', label: 'Facebook' },
-    { icon: <LinkedInIcon />, href: 'https://linkedin.com/school/ptit', label: 'LinkedIn' },
-    { icon: <TwitterIcon />, href: 'https://twitter.com/ptit', label: 'Twitter' },
-    { icon: <YouTubeIcon />, href: 'https://youtube.com/ptit', label: 'YouTube' }
-  ];
+    { icon: <FacebookIcon />, href: "https://www.facebook.com/HocvienPTIT", label: "Facebook" },
+    { icon: <LinkedInIcon />, href: "https://www.linkedin.com/school/posts-and-telecommunications-institute-of-technology/", label: "LinkedIn" },
+    { icon: <YouTubeIcon />, href: "https://www.youtube.com/@PChannels", label: "YouTube" },
+  ]
 
   return (
-    <Box 
-      component="footer" 
-      sx={{ 
-        bgcolor: 'background.paper',
-        borderTop: '1px solid',
-        borderTopColor: 'divider',
-        mt: 'auto'
+    <Box
+      component="footer"
+      sx={{
+        bgcolor: "background.paper",
+        borderTop: "1px solid",
+        borderTopColor: "divider",
+        mt: "auto",
+        pt: 6,
+        pb: 0,
       }}
     >
-      {/* Main Footer Content */}
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { 
-            xs: '1fr', 
-            sm: 'repeat(2, 1fr)', 
-            md: 'repeat(4, 1fr)' 
-          }, 
-          gap: 4,
-          mb: 4
-        }}>
+      <Container maxWidth="lg" sx={{ pb: 6 }}>
+        {/* --- Main Section --- */}
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            gap: 4,
+          }}
+        >
           {/* Company Info */}
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <WorkIcon sx={{ color: 'primary.main', fontSize: 28 }} />
-              <Typography variant="h6" fontWeight="bold" color="primary.main">
+          <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 45%", md: "1 1 23%" } }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2.5 }}>
+              <Box
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "10px",
+                  background: "linear-gradient(135deg, #DE221A 0%, #0A4D8C 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 4px 12px rgba(222, 34, 26, 0.3)",
+                }}
+              >
+                <WorkIcon sx={{ color: "white", fontSize: 24 }} />
+              </Box>
+              <Typography variant="h6" fontWeight="700" sx={{ fontSize: "1.1rem" }}>
                 PTIT Job
               </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Nền tảng tìm việc làm hàng đầu dành cho sinh viên và người đi làm, 
-              kết nối với hàng nghìn cơ hội việc làm chất lượng.
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.6 }}>
+              Nền tảng tìm việc làm hàng đầu dành cho sinh viên và người đi làm, kết nối với hàng
+              nghìn cơ hội việc làm chất lượng.
             </Typography>
-            
+
             {/* Contact Info */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <LocationIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
+                <LocationIcon sx={{ fontSize: 18, color: "primary.main", mt: 0.3 }} />
                 <Typography variant="caption" color="text.secondary">
-                  96 Định Công, Hoàng Mai, Hà Nội
+                  96A, Đường Trần Phú, Quận Hà Đông, Hà Nội
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <PhoneIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <PhoneIcon sx={{ fontSize: 18, color: "primary.main" }} />
                 <Typography variant="caption" color="text.secondary">
-                  (024) 3623 7033
+                  (024) 12 345 67
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EmailIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <EmailIcon sx={{ fontSize: 18, color: "primary.main" }} />
                 <Typography variant="caption" color="text.secondary">
                   support@ptitjob.edu.vn
                 </Typography>
@@ -114,126 +125,93 @@ const CandidateFooter: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Jobs Links */}
-          <Box>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Việc làm
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {footerLinks.jobs.map((link, index) => (
-                <Link
-                  key={index}
-                  href={link.href}
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    textDecoration: 'none',
-                    '&:hover': {
-                      color: 'primary.main',
-                      textDecoration: 'underline'
-                    }
-                  }}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </Box>
-          </Box>
-
-          {/* Tools Links */}
-          <Box>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Công cụ
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {footerLinks.tools.map((link, index) => (
-                <Link
-                  key={index}
-                  href={link.href}
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    textDecoration: 'none',
-                    '&:hover': {
-                      color: 'primary.main',
-                      textDecoration: 'underline'
-                    }
-                  }}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </Box>
-          </Box>
-
-          {/* Support & Company Links */}
-          <Box>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Hỗ trợ
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-              {footerLinks.support.map((link, index) => (
-                <Link
-                  key={index}
-                  href={link.href}
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    textDecoration: 'none',
-                    '&:hover': {
-                      color: 'primary.main',
-                      textDecoration: 'underline'
-                    }
-                  }}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </Box>
-
-            {/* Social Media */}
-            <Typography variant="body2" fontWeight="medium" gutterBottom>
-              Theo dõi chúng tôi
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {socialLinks.map((social, index) => (
-                <Tooltip key={index} title={social.label}>
-                  <IconButton
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    size="small"
+          {/* Links Group */}
+          {[
+            { title: "Việc làm", links: footerLinks.jobs },
+            { title: "Công cụ", links: footerLinks.tools },
+            { title: "Hỗ trợ", links: footerLinks.support },
+          ].map((section, i) => (
+            <Box key={i} sx={{ flex: { xs: "1 1 45%", md: "1 1 22%" } }}>
+              <Typography variant="h6" fontWeight="700" gutterBottom sx={{ fontSize: "0.95rem", mb: 2.5 }}>
+                {section.title}
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}>
+                {section.links.map((link, index) => (
+                  <Link
+                    key={index}
+                    href={link.href}
+                    variant="body2"
+                    color="text.secondary"
                     sx={{
-                      color: 'text.secondary',
-                      '&:hover': {
-                        color: 'primary.main',
-                        backgroundColor: 'primary.light',
-                      }
+                      textDecoration: "none",
+                      fontSize: "0.9rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        color: "primary.main",
+                        transform: "translateX(4px)",
+                      },
                     }}
                   >
-                    {social.icon}
-                  </IconButton>
-                </Tooltip>
-              ))}
+                    {link.label}
+                    <ArrowRightIcon sx={{ fontSize: 14 }} />
+                  </Link>
+                ))}
+              </Box>
+
+              {section.title === "Hỗ trợ" && (
+                <>
+                  <Typography variant="body2" fontWeight="600" sx={{ fontSize: "0.9rem", mt: 3, mb: 1.5 }}>
+                    Theo dõi chúng tôi
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    {socialLinks.map((social, index) => (
+                      <Tooltip key={index} title={social.label}>
+                        <IconButton
+                          href={social.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          size="small"
+                          sx={{
+                            color: "text.secondary",
+                            transition: "all 0.3s ease",
+                            "&:hover": {
+                              color: "white",
+                              backgroundColor: "primary.main",
+                              transform: "translateY(-4px)",
+                            },
+                          }}
+                        >
+                          {social.icon}
+                        </IconButton>
+                      </Tooltip>
+                    ))}
+                  </Box>
+                </>
+              )}
             </Box>
-          </Box>
+          ))}
         </Box>
 
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 4 }} />
 
         {/* Bottom Footer */}
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', sm: 'row' },
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 2
-        }}>
-          <Typography variant="body2" color="text.secondary">
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", sm: "center" },
+            gap: 2,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
             © {currentYear} PTIT Job. Bản quyền thuộc về Học viện Công nghệ Bưu chính Viễn thông.
           </Typography>
-          
-          <Box sx={{ display: 'flex', gap: 2 }}>
+
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
             {footerLinks.company.map((link, index) => (
               <Link
                 key={index}
@@ -241,11 +219,10 @@ const CandidateFooter: React.FC = () => {
                 variant="caption"
                 color="text.secondary"
                 sx={{
-                  textDecoration: 'none',
-                  '&:hover': {
-                    color: 'primary.main',
-                    textDecoration: 'underline'
-                  }
+                  textDecoration: "none",
+                  fontSize: "0.85rem",
+                  transition: "all 0.3s ease",
+                  "&:hover": { color: "primary.main" },
                 }}
               >
                 {link.label}
@@ -255,30 +232,32 @@ const CandidateFooter: React.FC = () => {
         </Box>
       </Container>
 
-      {/* PTIT Branding Strip */}
-      <Box 
-        sx={{ 
-          background: 'linear-gradient(135deg, #DE221A 0%, #B01B14 50%, #0A4D8C 100%)',
-          py: 1
+      <Box
+        sx={{
+          background: "linear-gradient(135deg, #DE221A 0%, #B01B14 50%, #0A4D8C 100%)",
+          py: 2,
+          mt: 2,
         }}
       >
         <Container maxWidth="lg">
-          <Typography 
-            variant="caption" 
-            color="white" 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              fontWeight: 500
+          <Typography
+            variant="caption"
+            color="white"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 500,
+              fontSize: "0.9rem",
+              letterSpacing: "0.3px",
             }}
           >
-            🎓 Được phát triển bởi sinh viên PTIT - Nơi ươm mầm tài năng công nghệ
+            Được phát triển bởi sinh viên PTIT - Nơi ươm mầm tài năng công nghệ
           </Typography>
         </Container>
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default CandidateFooter;
+export default CandidateFooter
