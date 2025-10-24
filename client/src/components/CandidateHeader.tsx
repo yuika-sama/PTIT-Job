@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -11,10 +11,7 @@ import {
   InputBase,
   Badge,
   Tooltip,
-  Divider,
-  Grow,
-  alpha,
-  useScrollTrigger
+  Divider
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -29,6 +26,7 @@ import {
   Logout as LogoutIcon,
   Settings as SettingsIcon,
   Person as PersonIcon,
+  School as SchoolIcon,
   Calculate as CalculateIcon,
   MonetizationOn as MonetizationOnIcon,
   AccountBalance as AccountBalanceIcon,
@@ -39,216 +37,83 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 
-/** =========================================
- *  ToolsButtonWithHoverMenu (tách riêng nút "Công cụ")
- *  Hover chuẩn xác, không nháy, xử lý delay mở/đóng,
- *  loại bỏ khoảng hở giữa nút & menu.
- *  =========================================
- */
-type DropdownItem = {
-  label: string;
-  icon: React.ReactNode;
-  path: string;
-  category: 'cv' | 'finance' | 'learning';
-};
-
-interface ToolsButtonWithHoverMenuProps {
-  items: DropdownItem[];
-  navigate: (path: string) => void;
-  isDarkMode?: boolean;
-  label?: string;
-  startIcon?: React.ReactNode;
-}
-
-const OPEN_DELAY = 60;
-const CLOSE_DELAY = 140;
-
-const ToolsButtonWithHoverMenu: React.FC<ToolsButtonWithHoverMenuProps> = ({
-  items,
-  navigate,
-  isDarkMode,
-  label = 'Công cụ',
-  startIcon = <BuildIcon />
-}) => {
-  const btnRef = useRef<HTMLButtonElement | null>(null);
-  const [open, setOpen] = useState(false);
-  const openTimer = useRef<number | null>(null);
-  const closeTimer = useRef<number | null>(null);
-
-  const clearTimers = () => {
-    if (openTimer.current) window.clearTimeout(openTimer.current);
-    if (closeTimer.current) window.clearTimeout(closeTimer.current);
-    openTimer.current = null;
-    closeTimer.current = null;
-  };
-
-  const openWithDelay = () => {
-    clearTimers();
-    openTimer.current = window.setTimeout(() => setOpen(true), OPEN_DELAY);
-  };
-
-  const closeWithDelay = () => {
-    clearTimers();
-    closeTimer.current = window.setTimeout(() => setOpen(false), CLOSE_DELAY);
-  };
-
-  const handleToggleClick = () => {
-    clearTimers();
-    setOpen((v) => !v);
-  };
-
-  const cvItems = items.filter((d) => d.category === 'cv');
-  const financeItems = items.filter((d) => d.category === 'finance');
-
-  return (
-    <Box
-      sx={{ position: 'relative', display: 'inline-block' }}
-      onMouseEnter={openWithDelay}
-      onMouseLeave={closeWithDelay}
-    >
-      <Button
-        ref={btnRef}
-        startIcon={startIcon}
-        onClick={handleToggleClick}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        sx={{
-          position: 'relative',
-          color: open ? 'primary.main' : 'text.primary',
-          backgroundColor: open ? 'action.hover' : 'transparent',
-          transition: 'all .2s ease',
-          '&:hover': { backgroundColor: 'action.hover', color: 'primary.main' },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            left: 16,
-            right: 16,
-            bottom: 6,
-            height: 2,
-            borderRadius: 1,
-            backgroundColor: 'primary.main',
-            transform: open ? 'scaleX(1)' : 'scaleX(0)',
-            transformOrigin: 'left',
-            transition: 'transform .2s ease'
-          }
-        }}
-      >
-        {label}
-      </Button>
-
-      <Menu
-        anchorEl={btnRef.current}
-        open={open}
-        onClose={closeWithDelay}
-        TransitionComponent={Grow}
-        transitionDuration={140}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        MenuListProps={{
-          onMouseEnter: openWithDelay,
-          onMouseLeave: closeWithDelay,
-          sx: { py: 1.25 }
-        }}
-        PaperProps={{
-          sx: (theme) => ({
-            mt: 0, // loại bỏ khoảng hở giữa nút và menu
-            px: 1,
-            minWidth: 560,
-            maxHeight: 520,
-            borderRadius: 2,
-            border: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
-            backgroundImage: 'none',
-            backdropFilter: 'saturate(120%) blur(8px)',
-            backgroundColor: alpha(theme.palette.background.paper, isDarkMode ? 0.9 : 0.95),
-            boxShadow: '0 8px 24px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.06)',
-            '& .MuiMenuItem-root': {
-              borderRadius: 1,
-              px: 1.25,
-              py: 1.1,
-              minHeight: 44,
-              transition: 'background-color .15s ease, transform .15s ease',
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.light, 0.25),
-                transform: 'translateX(2px)'
-              }
-            }
-          })
-        }}
-      >
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.25, p: 0.5, minHeight: 220 }}>
-          {/* Cột trái: CV & Interview */}
-          <Box>
-            <Typography variant="overline" sx={{ color: 'text.secondary', px: 1.25 }}>
-              CV & Phỏng vấn
-            </Typography>
-            {cvItems.map((d, i) => (
-              <MenuItem
-                key={`cv-${i}`}
-                onClick={() => {
-                  navigate(d.path);
-                  setOpen(false);
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                  {d.icon}
-                  <Typography variant="body2">{d.label}</Typography>
-                </Box>
-              </MenuItem>
-            ))}
-          </Box>
-
-          {/* Cột phải: Finance */}
-          <Box>
-            <Typography variant="overline" sx={{ color: 'text.secondary', px: 1.25 }}>
-              Công cụ tài chính
-            </Typography>
-            {financeItems.map((d, i) => (
-              <MenuItem
-                key={`finance-${i}`}
-                onClick={() => {
-                  navigate(d.path);
-                  setOpen(false);
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                  {d.icon}
-                  <Typography variant="body2">{d.label}</Typography>
-                </Box>
-              </MenuItem>
-            ))}
-          </Box>
-        </Box>
-      </Menu>
-    </Box>
-  );
-};
-
-/** =========================================
- *  CandidateHeader (file đầy đủ)
- *  =========================================
- */
 const CandidateHeader: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { isDarkMode, toggleColorMode } = useCustomTheme();
-
-  // Elevation & blur khi scroll
-  const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 6 });
-
-  // Profile menu
+  
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => setProfileAnchorEl(event.currentTarget);
-  const handleProfileMenuClose = () => setProfileAnchorEl(null);
+  const [toolsAnchorEl, setToolsAnchorEl] = useState<null | HTMLElement>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setProfileAnchorEl(null);
+  };
+
+  const handleToolsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
+    setToolsAnchorEl(event.currentTarget);
+  };
+
+  const handleToolsMenuClose = () => {
+    setToolsAnchorEl(null);
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
+  };
+
+  const handleToolsHover = (event: React.MouseEvent<HTMLElement>) => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
+    if (!toolsAnchorEl) {
+      setToolsAnchorEl(event.currentTarget);
+    }
+  };
+
+  const handleToolsLeave = () => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+    }
+    const timeout = setTimeout(() => {
+      setToolsAnchorEl(null);
+    }, 200);
+    setCloseTimeout(timeout);
+  };
+
+  const handleMenuEnter = () => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
+  };
+
+  const handleMenuLeave = () => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+    }
+    const timeout = setTimeout(() => {
+      setToolsAnchorEl(null);
+    }, 200);
+    setCloseTimeout(timeout);
+  };
 
   const handleLogout = () => {
     logout();
     handleProfileMenuClose();
-    navigate('/login');
+    navigate('/auth/login');
   };
 
-  // Search
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchFocused, setSearchFocused] = useState(false);
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     if (searchQuery.trim()) {
@@ -256,75 +121,113 @@ const CandidateHeader: React.FC = () => {
     }
   };
 
-  const navigationItems = useMemo(
-    () => [
-      {
-        label: 'Tìm việc làm',
-        icon: <WorkIcon />,
-        path: '/candidate/jobs'
-      },
-      {
-        label: 'Công cụ',
-        icon: <BuildIcon />,
-        hasDropdown: true,
-        dropdownItems: [
-          { label: 'Đánh giá CV', icon: <AssignmentIcon />, path: '/candidate/cv-evaluation', category: 'cv' },
-          { label: 'Giả lập phỏng vấn AI', icon: <PsychologyIcon />, path: '/candidate/interview-emulate', category: 'cv' },
-          { label: 'Tính lương Gross/Net', icon: <CalculateIcon />, path: '/candidate/salary-calculator', category: 'finance' },
-          { label: 'Tính thuế thu nhập cá nhân', icon: <MonetizationOnIcon />, path: '/candidate/personal-income-tax', category: 'finance' },
-          { label: 'Tính lãi suất kép', icon: <TrendingUpIcon />, path: '/candidate/compound-interest', category: 'finance' },
-          { label: 'Tính bảo hiểm thất nghiệp', icon: <SecurityIcon />, path: '/candidate/unemployment-insurance', category: 'finance' },
-          { label: 'Tính bảo hiểm xã hội một lần', icon: <AccountBalanceIcon />, path: '/candidate/bhxh-calculator', category: 'finance' }
-        ] as DropdownItem[]
-      },
-      {
-        label: 'Đánh giá CV',
-        icon: <AssignmentIcon />,
-        path: '/candidate/cv-evaluation'
-      },
-      {
-        label: 'Giả lập phỏng vấn',
-        icon: <PsychologyIcon />,
-        path: '/candidate/interview-emulate'
-      }
-    ],
-    []
-  );
+  const navigationItems = [
+    {
+      label: 'Tìm việc làm',
+      icon: <WorkIcon />,
+      path: '/candidate/jobs'
+    },
+    {
+      label: 'Công cụ',
+      icon: <BuildIcon />,
+      hasDropdown: true,
+      dropdownItems: [
+        // CV & Interview Tools
+        { 
+          label: 'Tạo CV', 
+          icon: <AssignmentIcon />, 
+          path: '/candidate/cv-builder',
+          category: 'cv'
+        },
+        { 
+          label: 'Đánh giá CV', 
+          icon: <AssignmentIcon />, 
+          path: '/candidate/cv-evaluation',
+          category: 'cv'
+        },
+        { 
+          label: 'Giả lập phỏng vấn AI', 
+          icon: <PsychologyIcon />, 
+          path: '/candidate/interview-emulate',
+          category: 'cv'
+        },
+        { 
+          label: 'Tính lương Gross/Net', 
+          icon: <CalculateIcon />, 
+          path: '/candidate/salary-calculator',
+          category: 'finance'
+        },
+        { 
+          label: 'Tính thuế thu nhập cá nhân', 
+          icon: <MonetizationOnIcon />, 
+          path: '/candidate/personal-income-tax',
+          category: 'finance'
+        },
+        { 
+          label: 'Tính lãi suất kép', 
+          icon: <TrendingUpIcon />, 
+          path: '/candidate/compound-interest',
+          category: 'finance'
+        },
+        { 
+          label: 'Tính bảo hiểm thất nghiệp', 
+          icon: <SecurityIcon />, 
+          path: '/candidate/unemployment-insurance',
+          category: 'finance'
+        },
+        { 
+          label: 'Tính bảo hiểm xã hội một lần', 
+          icon: <AccountBalanceIcon />, 
+          path: '/candidate/bhxh-calculator',
+          category: 'finance'
+        }
+      ]
+    },
+    {
+      label: 'Đánh giá CV',
+      icon: <AssignmentIcon />,
+      path: '/candidate/cv-evaluation'
+    },
+    {
+      label: 'Giả lập phỏng vấn',
+      icon: <PsychologyIcon />,
+      path: '/candidate/interview-emulate'
+    }
+  ];
 
   return (
-    <AppBar
-      position="sticky"
-      elevation={trigger ? 6 : 0}
-      sx={(theme) => ({
-        color: 'text.primary',
+    <AppBar 
+      position="sticky" 
+      elevation={1}
+      sx={{ 
+        bgcolor: 'background.paper',
         borderBottom: '1px solid',
-        borderBottomColor: trigger ? 'transparent' : 'divider',
-        backgroundColor: trigger
-          ? alpha(theme.palette.background.paper, isDarkMode ? 0.8 : 0.7)
-          : theme.palette.background.paper,
-        backdropFilter: trigger ? 'saturate(120%) blur(10px)' : 'none',
-        transition: 'background-color .2s ease, box-shadow .2s ease, backdrop-filter .2s ease'
-      })}
+        borderBottomColor: 'divider',
+        color: 'text.primary'
+      }}
     >
-      <Toolbar sx={{ px: { xs: 1, sm: 2 }, gap: 1 }}>
+      <Toolbar sx={{ px: { xs: 1, sm: 2 } }}>
         {/* Logo */}
-        <Box
-          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', mr: 1.5 }}
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            cursor: 'pointer',
+            mr: 3
+          }}
           onClick={() => navigate('/candidate/dashboard')}
         >
-          <WorkIcon
-            sx={{
-              fontSize: 32,
+          <WorkIcon 
+            sx={{ 
+              fontSize: 32, 
               color: 'primary.main',
-              mr: 1,
-              transition: 'transform .2s ease',
-              '&:hover': { transform: 'scale(1.05) rotate(-3deg)' }
-            }}
+              mr: 1
+            }} 
           />
-          <Typography
-            variant="h6"
+          <Typography 
+            variant="h6" 
             fontWeight="bold"
-            sx={{
+            sx={{ 
               background: 'linear-gradient(135deg, #DE221A 0%, #0A4D8C 100%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
@@ -336,19 +239,144 @@ const CandidateHeader: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* Navigation */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, mr: 'auto' }}>
-          {navigationItems.map((item, index) =>
-            // Dùng component riêng cho nút "Công cụ"
+        {/* Navigation Menu */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, mr: 'auto' }}>
+          {navigationItems.map((item, index) => (
             item.hasDropdown ? (
-              <ToolsButtonWithHoverMenu
-                key={index}
-                items={item.dropdownItems as DropdownItem[]}
-                navigate={(p) => navigate(p)}
-                isDarkMode={isDarkMode}
-                label={item.label}
-                startIcon={item.icon}
-              />
+              <Box key={index}>
+                <Button
+                  startIcon={item.icon}
+                  onClick={handleToolsMenuOpen}
+                  onMouseEnter={handleToolsHover}
+                  onMouseLeave={handleToolsLeave}
+                  sx={{
+                    backgroundColor: Boolean(toolsAnchorEl) ? 'primary.light' : 'transparent',
+                    color: Boolean(toolsAnchorEl) ? 'primary.main' : 'text.primary',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      backgroundColor: 'primary.light',
+                      color: 'primary.main'
+                    }
+                  }}
+                >
+                  {item.label}
+                </Button>
+                <Menu
+                  anchorEl={toolsAnchorEl}
+                  open={Boolean(toolsAnchorEl)}
+                  onClose={handleToolsMenuClose}
+                  onMouseEnter={handleMenuEnter}
+                  onMouseLeave={handleMenuLeave}
+                  MenuListProps={{
+                    onMouseEnter: handleMenuEnter,
+                    onMouseLeave: handleMenuLeave,
+                    sx: { py: 1 }
+                  }}
+                  PaperProps={{
+                    sx: {
+                      mt: 0.5,
+                      minWidth: 560,
+                      maxHeight: 500,
+                      '& .MuiMenuItem-root': {
+                        px: 2,
+                        py: 1.5,
+                        minHeight: 48
+                      }
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, p: 1 }}>
+                    {/* Left Column */}
+                    <Box>
+                      {/* CV & Interview Tools */}
+                      <Box sx={{ px: 1, py: 1 }}>
+                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                          CV & Phỏng vấn
+                        </Typography>
+                      </Box>
+                      {item.dropdownItems?.filter(dropdownItem => dropdownItem.category === 'cv').map((dropdownItem, dropdownIndex) => (
+                        <MenuItem
+                          key={`cv-${dropdownIndex}`}
+                          onClick={() => {
+                            navigate(dropdownItem.path);
+                            handleToolsMenuClose();
+                          }}
+                          sx={{
+                            mx: 1,
+                            borderRadius: 1,
+                            '&:hover': {
+                              backgroundColor: 'primary.light'
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            {dropdownItem.icon}
+                            <Typography variant="body2">
+                              {dropdownItem.label}
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                      {item.dropdownItems?.filter(dropdownItem => dropdownItem.category === 'learning').map((dropdownItem, dropdownIndex) => (
+                        <MenuItem
+                          key={`learning-${dropdownIndex}`}
+                          onClick={() => {
+                            navigate(dropdownItem.path);
+                            handleToolsMenuClose();
+                          }}
+                          sx={{
+                            mx: 1,
+                            borderRadius: 1,
+                            '&:hover': {
+                              backgroundColor: 'primary.light'
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            {dropdownItem.icon}
+                            <Typography variant="body2">
+                              {dropdownItem.label}
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Box>
+
+                    {/* Right Column */}
+                    <Box>
+                      {/* Financial Tools */}
+                      <Box sx={{ px: 1, py: 1 }}>
+                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                          Công cụ tài chính
+                        </Typography>
+                      </Box>
+                      {item.dropdownItems?.filter(dropdownItem => dropdownItem.category === 'finance').map((dropdownItem, dropdownIndex) => (
+                        <MenuItem
+                          key={`finance-${dropdownIndex}`}
+                          onClick={() => {
+                            navigate(dropdownItem.path);
+                            handleToolsMenuClose();
+                          }}
+                          sx={{
+                            mx: 1,
+                            borderRadius: 1,
+                            '&:hover': {
+                              backgroundColor: 'primary.light'
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            {dropdownItem.icon}
+                            <Typography variant="body2">
+                              {dropdownItem.label}
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Box>
+                  </Box>
+                </Menu>
+              </Box>
             ) : (
               <Button
                 key={index}
@@ -356,51 +384,38 @@ const CandidateHeader: React.FC = () => {
                 onClick={() => item.path && navigate(item.path)}
                 sx={{
                   color: 'text.primary',
-                  position: 'relative',
-                  '&:hover': { backgroundColor: 'action.hover', color: 'primary.main' },
-                  '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    left: 16,
-                    right: 16,
-                    bottom: 6,
-                    height: 2,
-                    borderRadius: 1,
-                    backgroundColor: 'primary.main',
-                    transform: 'scaleX(0)',
-                    transformOrigin: 'left',
-                    transition: 'transform .2s ease'
-                  },
-                  '&:hover::after': { transform: 'scaleX(1)' }
+                  '&:hover': {
+                    backgroundColor: 'primary.light',
+                    color: 'primary.main'
+                  }
                 }}
               >
                 {item.label}
               </Button>
             )
-          )}
+          ))}
         </Box>
 
-        {/* Search */}
-        <Box
+        {/* Search Bar */}
+        <Box 
           component="form"
           onSubmit={handleSearch}
-          sx={(theme) => ({
+          sx={{ 
             display: { xs: 'none', sm: 'flex' },
             alignItems: 'center',
-            borderRadius: 999,
-            px: 1.25,
-            py: 0.35,
-            mx: 1,
-            minWidth: 220,
+            backgroundColor: 'background.default',
+            borderRadius: 25,
+            px: 2,
+            py: 0.5,
+            mx: 2,
+            minWidth: 200,
             border: '1px solid',
-            borderColor: searchFocused ? 'primary.main' : 'divider',
-            boxShadow: searchFocused ? `0 0 0 3px ${alpha(theme.palette.primary.main, 0.12)}` : 'none',
-            transition: 'all .18s ease',
-            backgroundColor: alpha(theme.palette.background.default, isDarkMode ? 0.8 : 0.9),
-            backdropFilter: 'blur(6px)'
-          })}
-          onFocus={() => setSearchFocused(true)}
-          onBlur={() => setSearchFocused(false)}
+            borderColor: 'divider',
+            '&:focus-within': {
+              borderColor: 'primary.main',
+              boxShadow: '0 0 0 2px rgba(222, 34, 26, 0.1)'
+            }
+          }}
         >
           <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
           <InputBase
@@ -409,12 +424,9 @@ const CandidateHeader: React.FC = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             sx={{
               flex: 1,
-              minWidth: 0,
               '& .MuiInputBase-input': {
-                padding: '6px 0',
-                fontSize: '0.92rem',
-                width: searchFocused ? 360 : 200,
-                transition: 'width .18s ease'
+                padding: '4px 0',
+                fontSize: '0.875rem'
               }
             }}
           />
@@ -422,26 +434,49 @@ const CandidateHeader: React.FC = () => {
 
         {/* Actions */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Tooltip title={isDarkMode ? 'Chế độ sáng' : 'Chế độ tối'}>
+          {/* Notifications */}
+          <Tooltip title="Thông báo">
             <IconButton
-              onClick={toggleColorMode}
-              sx={{ color: 'text.primary', '&:hover': { backgroundColor: 'action.hover' } }}
+              sx={{
+                color: 'text.primary',
+                '&:hover': {
+                  backgroundColor: 'primary.light'
+                }
+              }}
             >
-              {isDarkMode ? (
-                <LightModeIcon sx={{ transition: 'transform .18s ease', '&:active': { transform: 'rotate(20deg)' } }} />
-              ) : (
-                <DarkModeIcon sx={{ transition: 'transform .18s ease', '&:active': { transform: 'rotate(-20deg)' } }} />
-              )}
+              <Badge badgeContent={3} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+
+          {/* Dark Mode Toggle */}
+          <Tooltip title={isDarkMode ? "Chế độ sáng" : "Chế độ tối"}>
+            <IconButton 
+              onClick={toggleColorMode}
+              sx={{
+                color: 'text.primary',
+                '&:hover': {
+                  backgroundColor: 'primary.light'
+                }
+              }}
+            >
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
 
           <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
 
-          {/* Profile */}
+          {/* Profile Menu */}
           <Tooltip title="Tài khoản">
             <IconButton
               onClick={handleProfileMenuOpen}
-              sx={{ color: 'text.primary', '&:hover': { backgroundColor: 'action.hover' } }}
+              sx={{
+                color: 'text.primary',
+                '&:hover': {
+                  backgroundColor: 'primary.light'
+                }
+              }}
             >
               <AccountCircleIcon />
             </IconButton>
@@ -451,21 +486,19 @@ const CandidateHeader: React.FC = () => {
             anchorEl={profileAnchorEl}
             open={Boolean(profileAnchorEl)}
             onClose={handleProfileMenuClose}
-            TransitionComponent={Grow}
             PaperProps={{
-              sx: (theme) => ({
+              sx: {
                 mt: 1,
-                minWidth: 240,
-                borderRadius: 2,
-                border: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
-                backgroundImage: 'none',
-                backdropFilter: 'blur(8px)',
-                backgroundColor: alpha(theme.palette.background.paper, isDarkMode ? 0.95 : 0.98),
-                '& .MuiMenuItem-root': { px: 2, py: 1 }
-              })
+                minWidth: 220,
+                '& .MuiMenuItem-root': {
+                  px: 2,
+                  py: 1
+                }
+              }
             }}
           >
-            <Box sx={{ px: 2, py: 1.25, borderBottom: '1px solid', borderBottomColor: 'divider' }}>
+            {/* User Info */}
+            <Box sx={{ px: 2, py: 1, borderBottom: '1px solid', borderBottomColor: 'divider' }}>
               <Typography variant="subtitle2" fontWeight="bold">
                 {user?.full_name || 'Người dùng'}
               </Typography>
@@ -479,9 +512,9 @@ const CandidateHeader: React.FC = () => {
                 navigate('/candidate/profile');
                 handleProfileMenuClose();
               }}
-              sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+              sx={{ '&:hover': { backgroundColor: 'primary.light' } }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <PersonIcon fontSize="small" />
                 <Typography variant="body2">Hồ sơ cá nhân</Typography>
               </Box>
@@ -492,9 +525,9 @@ const CandidateHeader: React.FC = () => {
                 navigate('/candidate/settings');
                 handleProfileMenuClose();
               }}
-              sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+              sx={{ '&:hover': { backgroundColor: 'primary.light' } }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <SettingsIcon fontSize="small" />
                 <Typography variant="body2">Cài đặt</Typography>
               </Box>
@@ -504,12 +537,15 @@ const CandidateHeader: React.FC = () => {
 
             <MenuItem
               onClick={handleLogout}
-              sx={{
+              sx={{ 
                 color: 'error.main',
-                '&:hover': { backgroundColor: 'error.light', color: 'error.dark' }
+                '&:hover': { 
+                  backgroundColor: 'error.light',
+                  color: 'error.dark'
+                }
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <LogoutIcon fontSize="small" />
                 <Typography variant="body2">Đăng xuất</Typography>
               </Box>
@@ -517,15 +553,6 @@ const CandidateHeader: React.FC = () => {
           </Menu>
         </Box>
       </Toolbar>
-
-      {/* keyframes cho badge pulse */}
-      <style>{`
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.15); }
-          100% { transform: scale(1); }
-        }
-      `}</style>
     </AppBar>
   );
 };
