@@ -73,60 +73,60 @@ const BHXHCalculatorPage: React.FC = () => {
       {/* Header */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+          background: theme.palette.background.paper,
           py: 6,
           position: 'relative',
           overflow: 'hidden'
         }}
       >
-        {/* Background Pattern */}
+        {/* Decorative circle using theme color for subtle branding */}
         <Box
           sx={{
             position: 'absolute',
-            top: -50,
-            right: -50,
-            width: 400,
-            height: 400,
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23009a3e" opacity="0.1"%3E%3Cpath d="M100 100l50 50v100h100l50-50v-100z"/%3E%3Cpath d="M200 150l30 30v60h60l30-30v-60z"/%3E%3C/g%3E%3C/svg%3E")',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'contain'
+            top: -80,
+            right: -80,
+            width: 360,
+            height: 360,
+            bgcolor: theme.palette.primary.light,
+            opacity: 0.08,
+            borderRadius: '50%'
           }}
         />
 
         <Container maxWidth="lg">
           <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-            <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: '#009a3e' }}>
+            <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
               Công cụ tính bảo hiểm xã hội một lần online miễn phí 2025
             </Typography>
           </Box>
         </Container>
       </Box>
 
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
         {/* Tabs */}
         <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
           <Tabs
             value={currentTab}
             onChange={handleTabChange}
             variant="fullWidth"
-            sx={{
-              backgroundColor: '#f8f9fa',
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: 16,
-                py: 2,
-                color: '#666',
-                borderBottom: '3px solid transparent',
-                '&.Mui-selected': {
-                  color: '#009a3e',
-                  borderBottom: '3px solid #009a3e'
+              sx={{
+                backgroundColor: theme.palette.background.default,
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: 16,
+                  py: 2,
+                  color: theme.palette.text.secondary,
+                  borderBottom: '3px solid transparent',
+                  '&.Mui-selected': {
+                    color: theme.palette.primary.main,
+                    borderBottom: `3px solid ${theme.palette.primary.main}`
+                  }
+                },
+                '& .MuiTabs-indicator': {
+                  display: 'none'
                 }
-              },
-              '& .MuiTabs-indicator': {
-                display: 'none'
-              }
-            }}
+              }}
           >
             <Tab label="BHXH bắt buộc" />
             <Tab label="BHXH tự nguyện" />
@@ -172,7 +172,7 @@ const BHXHCalculatorPage: React.FC = () => {
         {/* Information Section */}
         <Box sx={{ mt: 6 }}>
             <Paper elevation={2} sx={{ p: 4, borderRadius: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, color: '#009a3e' }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, color: theme.palette.primary.main }}>
                     Thông tin về bảo hiểm xã hội một lần
                 </Typography>
 

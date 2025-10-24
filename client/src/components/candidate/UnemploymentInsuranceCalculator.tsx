@@ -13,26 +13,34 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  InputAdornment,
   Alert,
   Chip,
   Divider,
   Card,
-  CardContent
+  CardContent,
+  Stack,
+  useTheme,
+  Tooltip,
+  IconButton
 } from '@mui/material';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { styled } from '@mui/material/styles';
 
 // Styled components
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   borderRadius: 16,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-  background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-  border: '1px solid #e8e8e8',
+  boxShadow: theme.shadows[4],
+  background: theme.palette.background.paper,
+  border: `1px solid ${theme.palette.divider}`,
 }));
 
 const HeaderSection = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%)',
-  color: 'white',
+  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+  color: theme.palette.getContrastText(theme.palette.primary.main),
   padding: theme.spacing(3),
   borderRadius: '16px 16px 0 0',
   marginBottom: theme.spacing(3),
@@ -44,15 +52,23 @@ const HeaderSection = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: 4,
-    background: 'linear-gradient(90deg, #1B5E20, #2E7D32, #4CAF50)',
+    background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
   }
 }));
 
 const ResultCard = styled(Card)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%)',
-  border: '2px solid #4CAF50',
-  borderRadius: 12,
+  // Use PTIT theme tokens for a consistent look
+  background: theme.palette.background.paper,
+  // subtle border using divider for neutral edge, keep accent via boxShadow
+  border: `1px solid ${theme.palette.divider}`,
+  boxShadow: theme.shadows[2],
+  borderRadius: Number(theme.shape.borderRadius ?? 8) * 1.25,
   marginTop: theme.spacing(2),
+  transition: 'transform 150ms ease, box-shadow 150ms ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: theme.shadows[4],  
+  }
 }));
 
 interface FormData {
@@ -72,6 +88,7 @@ interface CalculationResult {
 }
 
 const UnemploymentInsuranceCalculator: React.FC = () => {
+  const theme = useTheme();
   const [formData, setFormData] = useState<FormData>({
     applicableDate: 'new',
     salaryChangeType: 'noChange',
@@ -120,7 +137,7 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
         maxBenefit = baseSalary * 5;
       } else {
         // Tư nhân: không quá 5 lần lương tối thiểu vùng
-        maxBenefit = minWageByRegion[formData.region] * 5;
+        maxBenefit = (minWageByRegion as any)[formData.region] * 5;
       }
 
       // Mức hưởng thực tế (lấy số nhỏ hơn)
@@ -162,135 +179,154 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 1000, mx: 'auto', p: 2 }}>
+    <Box sx={{ maxWidth: 1100, mx: 'auto', p: { xs: 2, md: 3 } }}>
       <StyledPaper>
+        {/* Header: dùng Box + flex thay Grid */}
         <HeaderSection>
-          <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
-            Công cụ tính mức hưởng bảo hiểm thất nghiệp chính xác nhất 2025
-          </Typography>
-          <Typography variant="body1" sx={{ opacity: 0.9 }}>
-            Tính toán mức trợ cấp thất nghiệp theo quy định mới nhất
-          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              flexWrap: 'wrap'
+            }}
+          >
+            <Box sx={{ flex: '1 1 260px', minWidth: 0 }}>
+              <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
+                Công cụ tính mức hưởng bảo hiểm thất nghiệp — PTIT
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.95 }}>
+                Tính nhanh, chính xác theo quy định mới nhất. Điền thông tin dưới đây để nhận kết quả.
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Tooltip title="Thông tin luật và cập nhật">
+                  <IconButton
+                    size="small"
+                    aria-label="info"
+                    sx={{
+                      bgcolor: theme.palette.primary.light,
+                      color: theme.palette.getContrastText(theme.palette.primary.light),
+                      '&:hover': { bgcolor: theme.palette.primary.main }
+                    }}
+                  >
+                    <InfoOutlinedIcon />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            </Box>
+          </Box>
         </HeaderSection>
 
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
-          {/* Form Input */}
-          <Box sx={{ flex: 1 }}>
-            <Box sx={{ mb: 3 }}>
-              <FormControl component="fieldset" fullWidth sx={{ mb: 3 }}>
-                <FormLabel sx={{ fontWeight: 600, mb: 1, color: '#2E7D32' }}>
-                  Áp dụng quy định:
+        {/* Main content: thay Grid container bằng Box flex */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: 4
+          }}
+        >
+          {/* Left column (form) */}
+          <Box sx={{ flex: '1 1 0', minWidth: 0 }}>
+            <Stack spacing={2}>
+              <FormControl component="fieldset" fullWidth>
+                <FormLabel sx={{ fontWeight: 600, mb: 1, color: theme.palette.primary.main }}>
+                  Áp dụng quy định
                 </FormLabel>
                 <RadioGroup
                   value={formData.applicableDate}
-                  onChange={(e) => setFormData({...formData, applicableDate: e.target.value as 'old' | 'new'})}
+                  onChange={(e) => setFormData({ ...formData, applicableDate: e.target.value as 'old' | 'new' })}
                 >
-                  <FormControlLabel 
-                    value="old" 
-                    control={<Radio />} 
-                    label="Từ 01/07/2024 - 30/06/2025" 
-                  />
-                  <FormControlLabel 
-                    value="new" 
-                    control={<Radio />} 
-                    label="Từ 01/07/2025 (Mới nhất)" 
-                    sx={{ color: '#4CAF50', fontWeight: 600 }}
-                  />
+                  <FormControlLabel value="old" control={<Radio />} label="Từ 01/07/2024 - 30/06/2025" />
+                  <FormControlLabel value="new" control={<Radio />} label="Từ 01/07/2025 (Mới nhất)" />
                 </RadioGroup>
               </FormControl>
 
-              <Alert severity="info" sx={{ mb: 3 }}>
-                <Typography variant="body2">
-                  Áp dụng <strong>mức lương cơ sở</strong> mới nhất có hiệu lực từ ngày 01/07/2024 (Theo Nghị định số 73/2024/NĐ-CP)
-                  <br />
-                  Áp dụng <strong>mức lương tối thiểu vùng</strong> mới nhất có hiệu lực từ ngày 01/07/2025 (Theo Nghị định 128/2025/NĐ-CP)
-                </Typography>
+              <Alert severity="info" sx={{ mb: 0 }}>
+                Áp dụng <strong>mức lương cơ sở</strong> và <strong>mức lương tối thiểu vùng</strong> theo quy định cập nhật.
               </Alert>
 
-              <FormControl component="fieldset" fullWidth sx={{ mb: 3 }}>
-                <FormLabel sx={{ fontWeight: 600, mb: 1, color: '#2E7D32' }}>
-                  Lương đóng BH không thay đổi trong 6 tháng
+              <FormControl component="fieldset" fullWidth>
+                <FormLabel sx={{ fontWeight: 600, mb: 1, color: theme.palette.primary.main }}>
+                  Lương đóng BH
                 </FormLabel>
                 <RadioGroup
                   value={formData.salaryChangeType}
-                  onChange={(e) => setFormData({...formData, salaryChangeType: e.target.value as 'noChange' | 'hasChange'})}
+                  onChange={(e) => setFormData({ ...formData, salaryChangeType: e.target.value as 'noChange' | 'hasChange' })}
                 >
-                  <FormControlLabel 
-                    value="noChange" 
-                    control={<Radio />} 
-                    label="Lương đóng BH không thay đổi trong 6 tháng" 
-                  />
-                  <FormControlLabel 
-                    value="hasChange" 
-                    control={<Radio />} 
-                    label="Lương đóng BH thay đổi trong 6 tháng" 
-                  />
+                  <FormControlLabel value="noChange" control={<Radio />} label="Không thay đổi trong 6 tháng" />
+                  <FormControlLabel value="hasChange" control={<Radio />} label="Có thay đổi trong 6 tháng" />
                 </RadioGroup>
               </FormControl>
 
-              <TextField
+                <TextField
                 fullWidth
-                label="Tiền lương đóng BHTN:"
+                label="Tiền lương đóng BHTN (VND)"
                 type="number"
                 value={formData.monthlySalary}
-                onChange={(e) => setFormData({...formData, monthlySalary: Number(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, monthlySalary: Number(e.target.value) })}
                 InputProps={{
-                  endAdornment: <Typography variant="body2" color="text.secondary">(VND)</Typography>
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <MonetizationOnIcon sx={{ color: theme.palette.text.secondary }} />
+                    </InputAdornment>
+                  )
                 }}
-                sx={{ mb: 3 }}
+                inputProps={{
+                  'aria-label': 'Tiền lương đóng BHTN'
+                }}
+                  helperText="Bình quân 6 tháng liền kề trước khi thất nghiệp"
               />
-
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                (Bình quân tiền lương tháng đóng BHTN của 06 tháng liền kề trước khi thất nghiệp)
-              </Typography>
 
               <TextField
                 fullWidth
-                label="Tổng thời gian đóng BHTN chưa hưởng:"
+                label="Tổng thời gian đóng BHTN chưa hưởng (tháng)"
                 type="number"
                 value={formData.totalMonths}
-                onChange={(e) => setFormData({...formData, totalMonths: Number(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, totalMonths: Number(e.target.value) })}
                 InputProps={{
-                  endAdornment: <Typography variant="body2" color="text.secondary">(Tháng)</Typography>
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CalendarTodayIcon sx={{ color: theme.palette.text.secondary }} />
+                    </InputAdornment>
+                  )
                 }}
-                sx={{ mb: 3 }}
+                inputProps={{
+                  'aria-label': 'Tổng thời gian đóng BHTN'
+                }}
+                helperText="Thời gian đóng bảo hiểm chưa từng hưởng trợ cấp"
               />
 
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                (Thời gian đóng bảo hiểm thất nghiệp – Thời gian đã hưởng trợ cấp thất nghiệp)
-              </Typography>
-
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Box sx={{ flex: 1 }}>
-                  <FormControl fullWidth sx={{ mb: 3 }}>
-                    <FormLabel sx={{ fontWeight: 600, mb: 1, color: '#2E7D32' }}>
-                      Chế độ tiền lương
-                    </FormLabel>
+              {/* 2 cột nhỏ: employeeType + region */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 2
+                }}
+              >
+                <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)' } }}>
+                  <FormControl fullWidth>
+                    <FormLabel sx={{ fontWeight: 600, mb: 1 }}>Chế độ tiền lương</FormLabel>
                     <RadioGroup
                       value={formData.employeeType}
-                      onChange={(e) => setFormData({...formData, employeeType: e.target.value as 'state' | 'private'})}
+                      onChange={(e) => setFormData({ ...formData, employeeType: e.target.value as 'state' | 'private' })}
                     >
-                      <FormControlLabel 
-                        value="state" 
-                        control={<Radio />} 
-                        label="Doanh nghiệp nhà nước" 
-                      />
-                      <FormControlLabel 
-                        value="private" 
-                        control={<Radio />} 
-                        label="Doanh nghiệp tư nhân" 
-                      />
+                      <FormControlLabel value="state" control={<Radio />} label="Doanh nghiệp nhà nước" />
+                      <FormControlLabel value="private" control={<Radio />} label="Doanh nghiệp tư nhân" />
                     </RadioGroup>
                   </FormControl>
                 </Box>
 
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)' } }}>
                   <FormControl fullWidth>
-                    <InputLabel>Vùng (Địa thích):</InputLabel>
+                    <InputLabel>Vùng</InputLabel>
                     <Select
                       value={formData.region}
-                      label="Vùng (Địa thích):"
-                      onChange={(e) => setFormData({...formData, region: e.target.value as 1 | 2 | 3 | 4})}
+                      label="Vùng"
+                      onChange={(e) => setFormData({ ...formData, region: e.target.value as 1 | 2 | 3 | 4 })}
                     >
                       <MenuItem value={1}>Vùng 1</MenuItem>
                       <MenuItem value={2}>Vùng 2</MenuItem>
@@ -303,29 +339,21 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
 
               <Button
                 variant="contained"
+                color="primary"
                 fullWidth
                 size="large"
                 onClick={calculateBenefit}
-                sx={{
-                  mt: 3,
-                  py: 2,
-                  background: 'linear-gradient(135deg, #2E7D32, #4CAF50)',
-                  fontWeight: 700,
-                  fontSize: '1.1rem',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
-                  }
-                }}
+                sx={{ mt: 1, py: 1.6, fontWeight: 700 }}
               >
                 Tính bảo hiểm
               </Button>
-            </Box>
+            </Stack>
           </Box>
 
-          {/* Results */}
-          <Box sx={{ flex: 1 }}>
+          {/* Right column (results) */}
+          <Box sx={{ flex: '1 1 0', minWidth: 0 }}>
             {error && (
-              <Alert severity="error" sx={{ mb: 3 }}>
+              <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
               </Alert>
             )}
@@ -333,80 +361,99 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
             {result && (
               <ResultCard>
                 <CardContent>
-                  <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: '#2E7D32' }}>
-                    🎯 Kết quả tính toán
-                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
+                    <Box sx={{
+                      bgcolor: theme.palette.primary.main,
+                      color: theme.palette.getContrastText(theme.palette.primary.main),
+                      borderRadius: 1.5,
+                      width: 40,
+                      height: 40,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <MonetizationOnIcon fontSize="small" />
+                    </Box>
 
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Mức hưởng hàng tháng:
+                    <Typography variant="h6" fontWeight={700} sx={{ color: theme.palette.primary.dark }}>
+                      Kết quả tính toán
                     </Typography>
-                    <Typography variant="h5" fontWeight={700} color="#2E7D32">
-                      {formatCurrency(result.monthlyBenefit)}
-                    </Typography>
+
+                    <Box sx={{ flex: 1 }} />
+
+                    <Tooltip title="Công thức: 60% × lương bình quân; giới hạn theo mức tối đa">
+                      <IconButton size="small" aria-label="explain" sx={{ color: theme.palette.text.secondary }}>
+                        <InfoOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+
+                  {/* Hero number + small labels */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{
+                      flex: '1 1 220px',
+                      minWidth: 180,
+                      background: theme.palette.background.paper,
+                      borderRadius: 2,
+                      p: 2,
+                      boxShadow: theme.shadows[1]
+                    }}>
+                      <Typography variant="body2" color="text.secondary">Mức hưởng hàng tháng</Typography>
+                      <Typography variant="h4" fontWeight={900} sx={{ color: theme.palette.primary.dark }}>
+                        {formatCurrency(result.monthlyBenefit)}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">(Sau khi áp dụng giới hạn tối đa)</Typography>
+                    </Box>
+
+                    <Box sx={{ flex: '1 1 200px', minWidth: 160 }}>
+                      <Typography variant="body2" color="text.secondary">Mức hưởng tối đa</Typography>
+                      <Typography variant="subtitle1" fontWeight={700}>
+                        {formatCurrency(result.maxMonthlyBenefit)}
+                      </Typography>
+                    </Box>
                   </Box>
 
-                  <Divider sx={{ my: 2 }} />
+                  <Divider sx={{ my: 1.5 }} />
 
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Thời gian hưởng:
-                    </Typography>
-                    <Chip 
-                      label={`${result.benefitPeriod} tháng`}
-                      color="success"
-                      sx={{ fontWeight: 700 }}
-                    />
-                  </Box>
+                  {/* breakdown rows */}
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 1.25, alignItems: 'center', mt: 1 }}>
+                    <Typography variant="body2" color="text.secondary">Thời gian hưởng</Typography>
+                    <Chip label={`${result.benefitPeriod} tháng`} color="primary" sx={{ fontWeight: 700, borderRadius: 1 }} />
 
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Tổng số tiền được hưởng:
-                    </Typography>
-                    <Typography variant="h6" fontWeight={700} color="#1B5E20">
+                    <Typography variant="body2" color="text.secondary">Tổng số tiền được hưởng</Typography>
+                    <Typography variant="body1" fontWeight={800} sx={{ color: theme.palette.primary.dark }}>
                       {formatCurrency(result.totalBenefit)}
                     </Typography>
-                  </Box>
 
-                  <Divider sx={{ my: 2 }} />
-
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Mức hưởng tối đa:
-                    </Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {formatCurrency(result.maxMonthlyBenefit)}
-                    </Typography>
+                    <Typography variant="body2" color="text.secondary">Căn cứ</Typography>
+                    <Typography variant="body2" color="text.secondary">Điều 50, Luật việc làm 2013</Typography>
                   </Box>
 
                   <Alert severity="info" sx={{ mt: 2 }}>
-                    <Typography variant="body2">
-                      Mức hưởng bảo hiểm thất nghiệp được quy định tại Điều 50, Luật việc làm 2013 và được hướng dẫn chi tiết tại Nghị định 28/2015/NĐ-CP
-                    </Typography>
+                    Mức hưởng bảo hiểm thất nghiệp được quy định tại Điều 50, Luật việc làm 2013 và hướng dẫn liên quan.
                   </Alert>
                 </CardContent>
               </ResultCard>
             )}
 
-            {/* Additional Info */}
-            <Card sx={{ mt: 3, background: '#f8f9fa' }}>
+            <Card sx={{ mt: 3, background: theme.palette.background.default }}>
               <CardContent>
-                <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: '#1976d2' }}>
-                  📋 Thông tin quan trọng
+                <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: theme.palette.primary.main }}>
+                  Thông tin quan trọng
                 </Typography>
-                
-                <Typography variant="body2" sx={{ mb: 1 }}>
+
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
                   • <strong>Mức lương cơ sở:</strong> {formatCurrency(baseSalary)} (từ 01/07/2024)
                 </Typography>
-                
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  • <strong>Mức lương tối thiểu vùng {formData.region}:</strong> {formatCurrency(minWageByRegion[formData.region])}
+
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  • <strong>Mức lương tối thiểu vùng {formData.region}:</strong> {formatCurrency((minWageByRegion as any)[formData.region])}
                 </Typography>
-                
-                <Typography variant="body2" sx={{ mb: 1 }}>
+
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
                   • <strong>Công thức tính:</strong> 60% × lương bình quân 6 tháng
                 </Typography>
-                
+
                 <Typography variant="body2">
                   • <strong>Thời hạn nộp hồ sơ:</strong> Trong vòng 3 tháng kể từ ngày chấm dứt hợp đồng
                 </Typography>

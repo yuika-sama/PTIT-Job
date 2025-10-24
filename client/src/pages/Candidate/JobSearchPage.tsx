@@ -758,7 +758,7 @@ const JobSearchPage: React.FC = () => {
               <>
                 <JobListing 
                   jobs={searchState.jobs.map(convertJobForListing)}
-                  onJobClick={(jobId) => navigate(`/jobs/${jobId}`)}
+                  onJobClick={(jobId) => navigate(`/candidate/job/${jobId}`)}
                   onSaveJob={(jobId) => console.log('Job saved:', jobId)}
                   onCompanyClick={(companyId) => console.log('Company clicked:', companyId)}
                 />

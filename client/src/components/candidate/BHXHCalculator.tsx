@@ -11,9 +11,11 @@ import {
   Paper,
   Divider,
   InputAdornment,
-  IconButton
+  IconButton,
+  useTheme
 } from '@mui/material';
 import { Delete } from '@mui/icons-material';
+import { ThemeContext } from '@emotion/react';
 
 // Hệ số trượt giá theo năm (từ 2024)
 const INFLATION_RATES: { [key: number]: number } = {
@@ -46,6 +48,7 @@ interface BHXHResult {
 }
 
 const BHXHCalculator: React.FC<BHXHCalculatorProps> = ({ type, onCalculate }) => {
+  const theme = useTheme();
   const [periods, setPeriods] = useState<BHXHPeriod[]>([
     { id: '1', startYear: 2024, months: 1, salary: 5000000 }
   ]);
@@ -141,14 +144,14 @@ const BHXHCalculator: React.FC<BHXHCalculatorProps> = ({ type, onCalculate }) =>
                 mb: 4 
             }}
             >
-                <Typography variant="h6" sx={{ color: '#009a3e', fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>
                     Giai đoạn nộp BHXH
                 </Typography>
                 <Button
                     variant="contained"
                     onClick={calculateBHXH}
                     sx={{
-                        backgroundColor: '#009a3e',
+                        backgroundColor: theme.palette.primary.main,
                         color: 'white',
                         px: 6,
                         py: 1.5,
@@ -157,7 +160,7 @@ const BHXHCalculator: React.FC<BHXHCalculatorProps> = ({ type, onCalculate }) =>
                         textTransform: 'none',
                         borderRadius: 2,
                         '&:hover': {
-                            backgroundColor: '#008035'
+                            backgroundColor: theme.palette.primary.dark 
                         }
                     }}
                 >
@@ -234,11 +237,11 @@ const BHXHCalculator: React.FC<BHXHCalculatorProps> = ({ type, onCalculate }) =>
           variant="outlined"
           onClick={addPeriod}
           sx={{
-            borderColor: '#009a3e',
-            color: '#009a3e',
+            borderColor: theme.palette.primary.main,
+            color: theme.palette.primary.main,
             textTransform: 'none',
             '&:hover': {
-              borderColor: '#008035',
+              borderColor: theme.palette.primary.dark,
               backgroundColor: 'rgba(0, 154, 62, 0.04)'
             }
           }}
@@ -251,11 +254,11 @@ const BHXHCalculator: React.FC<BHXHCalculatorProps> = ({ type, onCalculate }) =>
             variant="outlined"
             onClick={addPregnancyPeriod}
             sx={{
-              borderColor: '#009a3e',
-              color: '#009a3e',
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
               textTransform: 'none',
               '&:hover': {
-                borderColor: '#008035',
+                borderColor: theme.palette.primary.dark,
                 backgroundColor: 'rgba(0, 154, 62, 0.04)'
               }
             }}
@@ -269,11 +272,11 @@ const BHXHCalculator: React.FC<BHXHCalculatorProps> = ({ type, onCalculate }) =>
             variant="outlined"
             onClick={addPregnancyPeriod}
             sx={{
-              borderColor: '#009a3e',
-              color: '#009a3e',
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
               textTransform: 'none',
               '&:hover': {
-                borderColor: '#008035',
+                borderColor: theme.palette.primary.dark,
                 backgroundColor: 'rgba(0, 154, 62, 0.04)'
               }
             }}
