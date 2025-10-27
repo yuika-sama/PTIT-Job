@@ -49,7 +49,7 @@ const SalaryResultDisplay: React.FC<SalaryResultDisplayProps> = ({
   };
 
   const resultBoxStyle = {
-    background: `linear-gradient(135deg, ${theme.palette.primary.main}15, ${theme.palette.secondary.main}08)`,
+    backgroundcolor: 'theme.palette.background.paper',
     border: `2px solid ${theme.palette.primary.main}`,
     borderRadius: 2,
     p: 3,
@@ -64,7 +64,7 @@ const SalaryResultDisplay: React.FC<SalaryResultDisplayProps> = ({
       left: 0,
       width: '100%',
       height: 4,
-      background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`
+      backgroundcolor: theme.palette.primary.main,
     }
   };
 
@@ -181,7 +181,7 @@ const SalaryResultDisplay: React.FC<SalaryResultDisplayProps> = ({
         p: 3, 
         mb: 3,
         borderRadius: 2,
-        background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.grey[50]})`,
+        backgroundColor: 'theme.palette.background.paper',
         boxShadow: 2
       }}>
         <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
@@ -239,7 +239,7 @@ const SalaryResultDisplay: React.FC<SalaryResultDisplayProps> = ({
       <Paper sx={{ 
         p: 3,
         borderRadius: 2,
-        background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.grey[50]})`,
+        backgroundColor: theme.palette.background.paper,
         boxShadow: 2
       }}>
         <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
@@ -295,7 +295,7 @@ const SalaryResultDisplay: React.FC<SalaryResultDisplayProps> = ({
       <Paper sx={{ 
         p: 3, 
         mt: 3, 
-        backgroundColor: theme.palette.grey[50],
+        backgroundColor: theme.palette.background.paper,
         borderRadius: 2,
         border: `1px solid ${theme.palette.divider}`,
         position: 'relative'
@@ -328,7 +328,7 @@ const SalaryResultDisplay: React.FC<SalaryResultDisplayProps> = ({
           • Mức đóng bảo hiểm: BHXH (8%) + BHYT (1.5%) + BHTN (1%)
         </Typography>
         
-        <Typography variant="body2" color="error">
+        <Typography variant="body2" color="theme.palette.error.main">
           • Kết quả chỉ mang tính chất tham khảo, không thay thế cho tư vấn chuyên môn
         </Typography>
       </Paper>

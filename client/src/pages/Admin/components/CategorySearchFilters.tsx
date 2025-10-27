@@ -8,36 +8,32 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Typography,
+  InputAdornment,
   Button
 } from '@mui/material';
 import { Search as SearchIcon, FilterList as FilterIcon } from '@mui/icons-material';
 
-interface CategoryFilters {
-  search: string;
-  status: string;
-}
-
 interface CategorySearchFiltersProps {
-  filters: CategoryFilters;
-  onFiltersChange: (filters: CategoryFilters) => void;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  filteredCount: number;
+  totalCount: number;
 }
 
 const CategorySearchFilters: React.FC<CategorySearchFiltersProps> = ({
-  filters,
-  onFiltersChange
+  searchTerm,
+  setSearchTerm,
+  statusFilter,
+  setStatusFilter,
+  filteredCount,
+  totalCount
 }) => {
-  const handleFilterChange = (field: keyof CategoryFilters, value: string) => {
-    onFiltersChange({
-      ...filters,
-      [field]: value
-    });
-  };
-
   const handleClearFilters = () => {
-    onFiltersChange({
-      search: '',
-      status: ''
-    });
+    setSearchTerm('');
+    setStatusFilter('all');
   };
 
   return (
@@ -48,42 +44,53 @@ const CategorySearchFilters: React.FC<CategorySearchFiltersProps> = ({
           gap: 2, 
           flexWrap: 'wrap',
           alignItems: 'center',
-          '& > *': { 
-            flex: '1 1 200px',
-            minWidth: 200
-          }
+          mb: 2
         }}>
+          {/* Search Box */}
           <TextField
-            label="Tìm kiếm"
-            placeholder="Tìm theo tên danh mục, slug..."
-            value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
+            placeholder="Tìm theo tên danh mục, slug, mô tả, số lượng việc làm..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              )
             }}
+            sx={{ flex: '1 1 300px', minWidth: 300 }}
           />
           
-          <FormControl>
+          {/* Status Filter */}
+          <FormControl sx={{ minWidth: 180 }}>
             <InputLabel>Trạng thái</InputLabel>
             <Select
-              value={filters.status}
+              value={statusFilter}
               label="Trạng thái"
-              onChange={(e) => handleFilterChange('status', e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="all">Tất cả</MenuItem>
               <MenuItem value="active">Hoạt động</MenuItem>
               <MenuItem value="inactive">Không hoạt động</MenuItem>
             </Select>
           </FormControl>
 
+          {/* Clear Filters Button */}
           <Button
             variant="outlined"
             startIcon={<FilterIcon />}
             onClick={handleClearFilters}
-            sx={{ flexShrink: 0, minWidth: 'auto' }}
+            sx={{ flexShrink: 0 }}
           >
             Xóa bộ lọc
           </Button>
+        </Box>
+
+        {/* Result Count */}
+        <Box display="flex" justifyContent="flex-end">
+          <Typography variant="body2" color="text.secondary">
+            Hiển thị <strong>{filteredCount}</strong> / {totalCount} danh mục
+          </Typography>
         </Box>
       </CardContent>
     </Card>

@@ -8,55 +8,49 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  InputAdornment
+  InputAdornment,
+  Typography
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 
-interface JobFilters {
-  search: string;
-  jobType: string;
-  location: string;
-  status: string;
-  experienceLevel: string;
-}
-
 interface JobSearchFiltersProps {
-  filters: JobFilters;
-  onFiltersChange: (filters: JobFilters) => void;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  jobTypeFilter: string;
+  setJobTypeFilter: (value: string) => void;
+  locationFilter: string;
+  setLocationFilter: (value: string) => void;
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  experienceFilter: string;
+  setExperienceFilter: (value: string) => void;
+  filteredCount: number;
+  totalCount: number;
 }
 
 const JobSearchFilters: React.FC<JobSearchFiltersProps> = ({
-  filters,
-  onFiltersChange
+  searchTerm,
+  setSearchTerm,
+  jobTypeFilter,
+  setJobTypeFilter,
+  locationFilter,
+  setLocationFilter,
+  statusFilter,
+  setStatusFilter,
+  experienceFilter,
+  setExperienceFilter,
+  filteredCount,
+  totalCount
 }) => {
-  const handleSearchChange = (value: string) => {
-    onFiltersChange({ ...filters, search: value });
-  };
-
-  const handleJobTypeChange = (value: string) => {
-    onFiltersChange({ ...filters, jobType: value });
-  };
-
-  const handleLocationChange = (value: string) => {
-    onFiltersChange({ ...filters, location: value });
-  };
-
-  const handleStatusChange = (value: string) => {
-    onFiltersChange({ ...filters, status: value });
-  };
-
-  const handleExperienceLevelChange = (value: string) => {
-    onFiltersChange({ ...filters, experienceLevel: value });
-  };
-
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+          {/* Search Box */}
           <TextField
-            placeholder="Tìm kiếm theo tiêu đề, mô tả, yêu cầu..."
-            value={filters.search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Tìm kiếm theo tiêu đề, mô tả, công ty, địa điểm..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -67,14 +61,15 @@ const JobSearchFilters: React.FC<JobSearchFiltersProps> = ({
             sx={{ flex: '1 1 300px', minWidth: 300 }}
           />
           
+          {/* Job Type Filter */}
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Loại hình</InputLabel>
             <Select
-              value={filters.jobType}
+              value={jobTypeFilter}
               label="Loại hình"
-              onChange={(e) => handleJobTypeChange(e.target.value)}
+              onChange={(e) => setJobTypeFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="all">Tất cả</MenuItem>
               <MenuItem value="full_time">Toàn thời gian</MenuItem>
               <MenuItem value="part_time">Bán thời gian</MenuItem>
               <MenuItem value="contract">Hợp đồng</MenuItem>
@@ -83,14 +78,15 @@ const JobSearchFilters: React.FC<JobSearchFiltersProps> = ({
             </Select>
           </FormControl>
           
+          {/* Experience Filter */}
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Kinh nghiệm</InputLabel>
             <Select
-              value={filters.experienceLevel}
+              value={experienceFilter}
               label="Kinh nghiệm"
-              onChange={(e) => handleExperienceLevelChange(e.target.value)}
+              onChange={(e) => setExperienceFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="all">Tất cả</MenuItem>
               <MenuItem value="entry">Mới tốt nghiệp</MenuItem>
               <MenuItem value="mid">Trung cấp</MenuItem>
               <MenuItem value="senior">Cao cấp</MenuItem>
@@ -99,36 +95,46 @@ const JobSearchFilters: React.FC<JobSearchFiltersProps> = ({
             </Select>
           </FormControl>
           
+          {/* Status Filter */}
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Trạng thái</InputLabel>
             <Select
-              value={filters.status}
+              value={statusFilter}
               label="Trạng thái"
-              onChange={(e) => handleStatusChange(e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
-              <MenuItem value="active">Đang hoạt động</MenuItem>
-              <MenuItem value="inactive">Tạm ngưng</MenuItem>
+              <MenuItem value="all">Tất cả</MenuItem>
+              <MenuItem value="draft">Nháp</MenuItem>
+              <MenuItem value="published">Đã xuất bản</MenuItem>
               <MenuItem value="expired">Hết hạn</MenuItem>
+              <MenuItem value="closed">Đã đóng</MenuItem>
             </Select>
           </FormControl>
           
+          {/* Location Filter */}
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Địa điểm</InputLabel>
             <Select
-              value={filters.location}
+              value={locationFilter}
               label="Địa điểm"
-              onChange={(e) => handleLocationChange(e.target.value)}
+              onChange={(e) => setLocationFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
-              <MenuItem value="ha-noi">Hà Nội</MenuItem>
-              <MenuItem value="ho-chi-minh">TP. Hồ Chí Minh</MenuItem>
-              <MenuItem value="da-nang">Đà Nẵng</MenuItem>
-              <MenuItem value="hai-phong">Hải Phòng</MenuItem>
-              <MenuItem value="can-tho">Cần Thơ</MenuItem>
+              <MenuItem value="all">Tất cả</MenuItem>
+              <MenuItem value="hà nội">Hà Nội</MenuItem>
+              <MenuItem value="hồ chí minh">TP. Hồ Chí Minh</MenuItem>
+              <MenuItem value="đà nẵng">Đà Nẵng</MenuItem>
+              <MenuItem value="hải phòng">Hải Phòng</MenuItem>
+              <MenuItem value="cần thơ">Cần Thơ</MenuItem>
               <MenuItem value="remote">Làm việc từ xa</MenuItem>
             </Select>
           </FormControl>
+        </Box>
+
+        {/* Result Count */}
+        <Box display="flex" justifyContent="flex-end">
+          <Typography variant="body2" color="text.secondary">
+            Hiển thị <strong>{filteredCount}</strong> / {totalCount} việc làm
+          </Typography>
         </Box>
       </CardContent>
     </Card>

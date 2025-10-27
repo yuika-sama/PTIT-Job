@@ -10,7 +10,8 @@ import {
   IconButton,
   Tooltip,
   CircularProgress,
-  Alert
+  Alert,
+  alpha
 } from '@mui/material';
 import {
   Work as WorkIcon,
@@ -58,7 +59,7 @@ const StatsBar: React.FC<StatsBarProps> = ({
 
   // Fetch stats from API
   const fetchStats = async () => {
-    if (statsData) return; // Don't fetch if data is already provided
+    if (statsData) return;
 
     try {
       setInternalIsLoading(true);
@@ -76,7 +77,6 @@ const StatsBar: React.FC<StatsBarProps> = ({
     } catch (error: any) {
       console.error('❌ Error fetching stats:', error);
       setInternalError(error.message || 'Không thể tải dữ liệu thống kê');
-      // Use default stats as fallback
       setInternalStatsData(defaultStats);
     } finally {
       setInternalIsLoading(false);
@@ -109,40 +109,40 @@ const StatsBar: React.FC<StatsBarProps> = ({
 
   const statItems = [
     {
-      icon: <WorkIcon sx={{ color: '#d32f2f', fontSize: 28 }} />,
+      icon: <WorkIcon sx={{ fontSize: 28 }} />,
       label: 'Việc làm đang tuyển',
       value: stats.totalJobs.toLocaleString('vi-VN'),
       trend: '+5.2%',
       trendUp: true,
-      color: '#d32f2f', // PTIT Red
-      bgColor: '#ffebee'
+      color: theme.palette.mode === 'dark' ? '#e63946' : '#d32f2f',
+      bgColor: theme.palette.mode === 'dark' ? alpha('#e63946', 0.1) : '#ffebee'
     },
     {
-      icon: <TrendingUpIcon sx={{ color: '#1976d2', fontSize: 28 }} />,
+      icon: <TrendingUpIcon sx={{ fontSize: 28 }} />,
       label: 'Việc làm mới hôm nay',
       value: stats.newJobsToday.toLocaleString('vi-VN'),
       trend: '+12.8%',
       trendUp: true,
-      color: '#1976d2', // PTIT Blue
-      bgColor: '#e3f2fd'
+      color: theme.palette.mode === 'dark' ? '#1e88e5' : '#1976d2',
+      bgColor: theme.palette.mode === 'dark' ? alpha('#1e88e5', 0.1) : '#e3f2fd'
     },
     {
-      icon: <BusinessIcon sx={{ color: '#f57c00', fontSize: 28 }} />,
+      icon: <BusinessIcon sx={{ fontSize: 28 }} />,
       label: 'Doanh nghiệp hợp tác',
       value: stats.totalCompanies.toLocaleString('vi-VN'),
       trend: '+3.1%',
       trendUp: true,
-      color: '#f57c00', // Orange
-      bgColor: '#fff3e0'
+      color: theme.palette.mode === 'dark' ? '#fb8c00' : '#f57c00',
+      bgColor: theme.palette.mode === 'dark' ? alpha('#fb8c00', 0.1) : '#fff3e0'
     },
     {
-      icon: <PeopleIcon sx={{ color: '#388e3c', fontSize: 28 }} />,
+      icon: <PeopleIcon sx={{ fontSize: 28 }} />,
       label: 'Sinh viên PTIT hoạt động',
       value: stats.activeApplicants.toLocaleString('vi-VN'),
       trend: '+8.7%',
       trendUp: true,
-      color: '#388e3c', // Green
-      bgColor: '#e8f5e8'
+      color: theme.palette.mode === 'dark' ? '#66bb6a' : '#388e3c',
+      bgColor: theme.palette.mode === 'dark' ? alpha('#66bb6a', 0.1) : '#e8f5e8'
     }
   ];
 
@@ -160,11 +160,14 @@ const StatsBar: React.FC<StatsBarProps> = ({
       sx={{ 
         borderRadius: 4,
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-        border: `1px solid ${theme.palette.divider}`,
+        bgcolor: 'background.paper',
+        border: 1,
+        borderColor: 'divider',
         position: 'relative',
         '&:hover': {
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          boxShadow: (theme) => theme.palette.mode === 'dark' 
+            ? '0 8px 32px rgba(0,0,0,0.5)'
+            : '0 8px 32px rgba(0,0,0,0.12)',
           transform: 'translateY(-3px)'
         },
         transition: 'all 0.3s ease'
@@ -172,7 +175,10 @@ const StatsBar: React.FC<StatsBarProps> = ({
     >
       {/* PTIT-themed Header */}
       <Box sx={{ 
-        background: 'linear-gradient(135deg, #d32f2f 0%, #1976d2 100%)', // PTIT colors
+        background: (theme) => 
+          theme.palette.mode === 'dark'
+            ? 'linear-gradient(135deg, #e63946 0%, #1e88e5 100%)'
+            : 'linear-gradient(135deg, #d32f2f 0%, #1976d2 100%)',
         color: 'white',
         p: 3,
         display: 'flex',
@@ -252,15 +258,16 @@ const StatsBar: React.FC<StatsBarProps> = ({
             <Card
               key={index}
               sx={{
-                background: `linear-gradient(135deg, ${stat.bgColor} 0%, #ffffff 100%)`,
-                border: `2px solid ${stat.color}15`,
+                bgcolor: 'background.paper',
+                border: 2,
+                borderColor: alpha(stat.color, 0.2),
                 borderRadius: 3,
                 position: 'relative',
                 overflow: 'hidden',
                 '&:hover': {
-                  borderColor: `${stat.color}30`,
+                  borderColor: alpha(stat.color, 0.4),
                   transform: 'translateY(-4px)',
-                  boxShadow: `0 8px 24px ${stat.color}20`
+                  boxShadow: `0 8px 24px ${alpha(stat.color, 0.2)}`
                 },
                 transition: 'all 0.3s ease'
               }}
@@ -272,7 +279,7 @@ const StatsBar: React.FC<StatsBarProps> = ({
                 right: -15,
                 width: 80,
                 height: 80,
-                background: `${stat.color}08`,
+                bgcolor: alpha(stat.color, 0.08),
                 borderRadius: '50%'
               }} />
               
@@ -281,7 +288,8 @@ const StatsBar: React.FC<StatsBarProps> = ({
                   <Box sx={{
                     p: 1.5,
                     borderRadius: 2,
-                    background: `${stat.color}10`,
+                    bgcolor: alpha(stat.color, 0.15),
+                    color: stat.color,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -348,13 +356,14 @@ const StatsBar: React.FC<StatsBarProps> = ({
         <Box sx={{ 
           textAlign: 'center',
           p: 3,
-          background: 'linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%)',
+          bgcolor: 'background.default',
           borderRadius: 3,
-          border: '1px solid #e0e0e0'
+          border: 1,
+          borderColor: 'divider'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2 }}>
-            <SchoolIcon sx={{ color: '#d32f2f', fontSize: 28 }} />
-            <Typography variant="h6" fontWeight={700} sx={{ color: '#d32f2f' }}>
+            <SchoolIcon sx={{ color: 'primary.main', fontSize: 28 }} />
+            <Typography variant="h6" fontWeight={700} color="primary.main">
               Học viện Công nghệ Bưu chính Viễn thông
             </Typography>
           </Box>

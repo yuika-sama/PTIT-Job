@@ -45,9 +45,9 @@ const CandidateHeader: React.FC = () => {
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
   const [toolsAnchorEl, setToolsAnchorEl] = useState<null | HTMLElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);  const closeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+ const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setProfileAnchorEl(event.currentTarget);
   };
 
@@ -55,58 +55,53 @@ const CandidateHeader: React.FC = () => {
     setProfileAnchorEl(null);
   };
 
-  const handleToolsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      setCloseTimeout(null);
+  const clearCloseTimeout = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
     }
+  };
+
+  const handleToolsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    clearCloseTimeout();
     setToolsAnchorEl(event.currentTarget);
   };
 
   const handleToolsMenuClose = () => {
+    clearCloseTimeout();
     setToolsAnchorEl(null);
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      setCloseTimeout(null);
-    }
   };
 
   const handleToolsHover = (event: React.MouseEvent<HTMLElement>) => {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      setCloseTimeout(null);
-    }
+    clearCloseTimeout();
     if (!toolsAnchorEl) {
       setToolsAnchorEl(event.currentTarget);
     }
   };
 
   const handleToolsLeave = () => {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-    }
-    const timeout = setTimeout(() => {
+    clearCloseTimeout();
+    closeTimeoutRef.current = setTimeout(() => {
       setToolsAnchorEl(null);
-    }, 200);
-    setCloseTimeout(timeout);
+    }, 300);
   };
 
   const handleMenuEnter = () => {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      setCloseTimeout(null);
-    }
+    clearCloseTimeout();
   };
 
   const handleMenuLeave = () => {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-    }
-    const timeout = setTimeout(() => {
+    clearCloseTimeout();
+    closeTimeoutRef.current = setTimeout(() => {
       setToolsAnchorEl(null);
-    }, 200);
-    setCloseTimeout(timeout);
+    }, 300);
   };
+
+  React.useEffect(() => {
+    return () => {
+      clearCloseTimeout();
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();

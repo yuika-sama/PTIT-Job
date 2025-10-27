@@ -1,21 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Alert, Pagination } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Typography, Button, Alert, Pagination, CircularProgress } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 import JobStatsCards from './components/JobStatsCards';
 import JobSearchFilters from './components/JobSearchFilters';
 import JobTable from './components/JobTable';
 import JobDialog from './components/JobDialog';
 import { jobService } from '../../services';
 import { Job, JobType } from '../../services/types';
-
-interface JobFilters {
-  search: string;
-  jobType: string;
-  location: string;
-  status: string;
-  experienceLevel: string;
-}
 
 interface JobFormData {
   title: string;
@@ -38,18 +30,23 @@ interface JobFormData {
 
 const Jobs: React.FC = () => {
   const theme = useTheme();
+  
+  // Data states
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [totalJobs, setTotalJobs] = useState(0);
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<JobFilters>({
-    search: '',
-    jobType: '',
-    location: '',
-    status: '',
-    experienceLevel: ''
-  });
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [jobTypeFilter, setJobTypeFilter] = useState<string>('all');
+  const [locationFilter, setLocationFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [experienceFilter, setExperienceFilter] = useState<string>('all');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(8);
   
   // Dialog states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -74,50 +71,69 @@ const Jobs: React.FC = () => {
     location_id: ''
   });
 
-  const itemsPerPage = 8;
-
-  const fetchJobs = React.useCallback(async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    const response = await jobService.getAllJobs({
-      page,
-      limit: itemsPerPage,
-      search: filters.search || undefined,
-      jobType: filters.jobType || undefined,
-      location: filters.location || undefined,
-      status: filters.status || undefined,
-      experienceLevel: filters.experienceLevel || undefined
-    });
-      
-      console.log('Jobs response:', response);
+  // Fetch jobs from API
+  const fetchJobs = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await jobService.getAllJobs({});
       
       if (response.success && response.data) {
-        setJobs(response.data || []);
-        setTotalJobs(response.count || 0); 
+        console.log('✅ Jobs loaded successfully:', response.data.length, 'jobs');
+        setJobs(response.data);
       } else {
-        setError(response.message || 'Lỗi khi tải danh sách việc làm');
+        throw new Error(response.message || 'Không thể tải danh sách việc làm');
       }
-    } catch (err) {
-      console.error('Error fetching jobs:', err);
-      setError('Lỗi khi tải danh sách việc làm');
+    } catch (err: any) {
+      console.error('❌ Error fetching jobs:', err);
+      setError(err.message || 'Không thể tải danh sách việc làm');
     } finally {
       setLoading(false);
     }
-  }, [page, filters, itemsPerPage]);
+  }, []);
+
+  // Filter jobs based on search and filters
+  useEffect(() => {
+    let filtered = jobs;
+
+    if (searchTerm) {
+      filtered = filtered.filter(job =>
+        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (job.description && job.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (job.requirements && job.requirements.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (job.company_name && job.company_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (job.location_name && job.location_name.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    if (jobTypeFilter !== 'all') {
+      filtered = filtered.filter(job => job.job_type === jobTypeFilter);
+    }
+
+    if (locationFilter !== 'all') {
+      filtered = filtered.filter(job => 
+        job.location_name && job.location_name.toLowerCase().includes(locationFilter.toLowerCase())
+      );
+    }
+
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(job => job.status === statusFilter);
+    }
+
+    setFilteredJobs(filtered);
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [jobs, searchTerm, jobTypeFilter, locationFilter, statusFilter, experienceFilter]);
+
+  // Calculate paginated jobs
+  const totalPages = Math.ceil(filteredJobs.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedJobs = filteredJobs.slice(startIndex, endIndex);
 
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
-
-  const handleFilterChange = (newFilters: JobFilters) => {
-    setFilters(newFilters);
-    setPage(1);
-  };
-
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-  };
 
   const handleAddJob = () => {
     setDialogMode('add');
@@ -142,6 +158,7 @@ const Jobs: React.FC = () => {
     });
     setDialogOpen(true);
   };
+
   const handleEditJob = (job: Job) => {
     setDialogMode('edit');
     setSelectedJob(job);
@@ -178,20 +195,25 @@ const Jobs: React.FC = () => {
     }
 
     try {
+      setLoading(true);
       const response = await jobService.deleteJob(jobId);
       if (response.success) {
-        await fetchJobs(); // Refresh the list
+        console.log('✅ Job deleted successfully');
+        await fetchJobs();
       } else {
-        setError(response.message || 'Lỗi khi xóa việc làm');
+        throw new Error(response.message || 'Không thể xóa việc làm');
       }
-    } catch (err) {
-      console.error('Error deleting job:', err);
-      setError('Lỗi khi xóa việc làm');
+    } catch (err: any) {
+      console.error('❌ Error deleting job:', err);
+      setError(err.message || 'Không thể xóa việc làm');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSaveJob = async () => {
     try {
+      setLoading(true);
       setError(null);
       
       if (!formData.title.trim()) {
@@ -202,13 +224,11 @@ const Jobs: React.FC = () => {
         setError('Tên công ty không được để trống');
         return;
       }
-
       if (!formData.description.trim()) {
         setError('Mô tả công việc không được để trống');
         return;
       }
 
-      let response;
       const jobData = {
         title: formData.title,
         description: formData.description,
@@ -225,85 +245,128 @@ const Jobs: React.FC = () => {
         location_name: formData.location_name
       };
 
+      let response;
       if (dialogMode === 'add') {
+        console.log('Creating new job:', jobData);
         response = await jobService.createJob(jobData);
-      } else {
-        response = await jobService.updateJob(selectedJob!.id, jobData);
+      } else if (dialogMode === 'edit' && selectedJob) {
+        console.log('Updating job:', selectedJob.id, jobData);
+        response = await jobService.updateJob(selectedJob.id, jobData);
       }
 
-      if (response.success) {
+      if (response?.success) {
+        console.log('✅ Job saved successfully');
         setDialogOpen(false);
-        await fetchJobs(); // Refresh the list
+        await fetchJobs();
       } else {
-        setError(response.message || 'Lỗi khi lưu thông tin việc làm');
+        throw new Error(response?.message || 'Không thể lưu thông tin việc làm');
       }
-    } catch (err) {
-      console.error('Error saving job:', err);
-      setError('Lỗi khi lưu thông tin việc làm');
+    } catch (err: any) {
+      console.error('❌ Error saving job:', err);
+      setError(err.message || 'Không thể lưu thông tin việc làm');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const totalPages = Math.ceil(totalJobs / itemsPerPage);
+  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 2.5 }, height: '100%' }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+    <Box sx={{ p: { xs: 2, sm: 3 }, height: '100%' }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
           Quản lý việc làm
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddJob}
-        >
-          Thêm việc làm
-        </Button>
+        <Box display="flex" gap={2}>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={fetchJobs}
+            disabled={loading}
+          >
+            Làm mới
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddJob}
+          >
+            Thêm việc làm
+          </Button>
+        </Box>
       </Box>
 
+      {loading && (
+        <Box display="flex" justifyContent="center" my={4}>
+          <CircularProgress />
+        </Box>
+      )}
+
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="warning" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
 
-      <JobStatsCards jobs={jobs} loading={loading} />
+      {!loading && (
+        <>
+          {/* Statistics Cards */}
+          <JobStatsCards jobs={jobs} loading={false} />
 
-      <JobSearchFilters 
-        filters={filters}
-        onFiltersChange={handleFilterChange}
-      />
-
-      <JobTable
-        jobs={jobs}
-        loading={loading}
-        page={page}
-        itemsPerPage={itemsPerPage}
-        onEdit={handleEditJob}
-        onView={handleViewJob}
-        onDelete={handleDeleteJob}
-      />
-
-      {totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={2}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-            size="large"
+          {/* Search and Filters */}
+          <JobSearchFilters 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            jobTypeFilter={jobTypeFilter}
+            setJobTypeFilter={setJobTypeFilter}
+            locationFilter={locationFilter}
+            setLocationFilter={setLocationFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            experienceFilter={experienceFilter}
+            setExperienceFilter={setExperienceFilter}
+            filteredCount={filteredJobs.length}
+            totalCount={jobs.length}
           />
-        </Box>
-      )}
 
-      <JobDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        mode={dialogMode}
-        job={selectedJob}
-        formData={formData}
-        setFormData={(data: JobFormData) => setFormData(data)}
-        onSave={handleSaveJob}
-      />
+          {/* Jobs Table */}
+          <JobTable
+            jobs={paginatedJobs}
+            loading={false}
+            page={currentPage}
+            itemsPerPage={pageSize}
+            onEdit={handleEditJob}
+            onView={handleViewJob}
+            onDelete={handleDeleteJob}
+          />
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Box display="flex" justifyContent="center" mt={3}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+              />
+            </Box>
+          )}
+
+          {/* Job Dialog */}
+          <JobDialog
+            open={dialogOpen}
+            onClose={() => setDialogOpen(false)}
+            mode={dialogMode}
+            job={selectedJob}
+            formData={formData}
+            setFormData={(data: JobFormData) => setFormData(data)}
+            onSave={handleSaveJob}
+          />
+        </>
+      )}
     </Box>
   );
 };

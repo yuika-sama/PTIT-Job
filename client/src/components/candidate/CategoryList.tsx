@@ -8,7 +8,8 @@ import {
   IconButton,
   useTheme,
   Chip,
-  Tooltip
+  Tooltip,
+  alpha
 } from '@mui/material';
 import {
   ArrowForwardIos as ArrowForwardIosIcon,
@@ -87,11 +88,14 @@ const CategoryList: React.FC<CategoryListProps> = ({
       flexDirection: 'column', 
       borderRadius: 4, 
       overflow: 'hidden',
-      border: `1px solid ${theme.palette.divider}`,
+      border: 1,
+      borderColor: 'divider',
       boxShadow: 3,
-      background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
+      bgcolor: 'background.paper',
       '&:hover': {
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+        boxShadow: (theme) => theme.palette.mode === 'dark'
+          ? '0 8px 32px rgba(0,0,0,0.5)'
+          : '0 8px 32px rgba(0,0,0,0.1)',
         transform: 'translateY(-2px)'
       },
       transition: 'all 0.3s ease'
@@ -99,7 +103,10 @@ const CategoryList: React.FC<CategoryListProps> = ({
       {/* Header */}
       <Box sx={{ 
         p: 3, 
-        background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+        background: (theme) => 
+          theme.palette.mode === 'dark'
+            ? `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`
+            : `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
         color: 'white',
         position: 'relative',
         overflow: 'hidden'
@@ -141,11 +148,12 @@ const CategoryList: React.FC<CategoryListProps> = ({
               sx={{ 
                 py: 2, 
                 px: 3,
-                borderBottom: index < pagedCategories.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
-                bgcolor: selected ? `${cat.color}08` : 'transparent',
+                borderBottom: index < pagedCategories.length - 1 ? 1 : 0,
+                borderColor: 'divider',
+                bgcolor: selected ? alpha(cat.color, 0.08) : 'transparent',
                 position: 'relative',
                 '&:hover': {
-                  bgcolor: `${cat.color}04`,
+                  bgcolor: alpha(cat.color, 0.04),
                   '& .category-arrow': {
                     transform: 'translateX(4px)',
                     color: cat.color
@@ -165,7 +173,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
                     width: 40,
                     height: 40,
                     borderRadius: 2,
-                    background: `${cat.color}15`,
+                    bgcolor: alpha(cat.color, 0.15),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -197,7 +205,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
                       sx={{
                         height: 20,
                         fontSize: '0.75rem',
-                        backgroundColor: `${cat.color}10`,
+                        bgcolor: alpha(cat.color, 0.1),
                         color: cat.color,
                         fontWeight: 600,
                         '& .MuiChip-label': {
@@ -230,8 +238,9 @@ const CategoryList: React.FC<CategoryListProps> = ({
           alignItems: 'center', 
           justifyContent: 'space-between', 
           p: 2, 
-          borderTop: `1px solid ${theme.palette.divider}`,
-          backgroundColor: 'grey.50'
+          borderTop: 1,
+          borderColor: 'divider',
+          bgcolor: 'background.default'
         }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
             Trang {page + 1} / {totalPages}
@@ -244,7 +253,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
                 onClick={handlePrev} 
                 disabled={page === 0}
                 sx={{
-                  color: theme.palette.primary.main,
+                  color: 'primary.main',
                   '&:disabled': {
                     color: 'text.disabled'
                   }
@@ -260,7 +269,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
                 onClick={handleNext} 
                 disabled={page === totalPages - 1}
                 sx={{
-                  color: theme.palette.primary.main,
+                  color: 'primary.main',
                   '&:disabled': {
                     color: 'text.disabled'
                   }
@@ -273,7 +282,6 @@ const CategoryList: React.FC<CategoryListProps> = ({
         </Box>
       )}
 
-      {/* CSS for animation */}
       <style>
         {`
           @keyframes pulse {
