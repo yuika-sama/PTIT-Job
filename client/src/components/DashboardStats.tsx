@@ -23,8 +23,17 @@ const DashboardStats: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
-      <Box sx={{ flex: '1 1 250px', minWidth: 250 }}>
+    <Box sx={{ 
+      display: 'grid', 
+      gridTemplateColumns: { 
+        xs: '1fr',                    // Mobile: 1 cột
+        sm: 'repeat(2, 1fr)',         // Tablet: 2 cột
+        md: 'repeat(4, 1fr)'          // Desktop: 4 cột (2 hàng)
+      }, 
+      gap: 3, 
+      mb: 4
+    }}>
+      <Box>
         <StatCard
           title="Tổng người dùng"
           value={users?.length || 0}
@@ -34,7 +43,7 @@ const DashboardStats: React.FC = () => {
           loading={usersLoading}
         />
       </Box>
-      <Box sx={{ flex: '1 1 250px', minWidth: 250 }}>
+      <Box>
         <StatCard
           title="Tổng công ty"
           value={companies?.length || 0}
@@ -44,7 +53,7 @@ const DashboardStats: React.FC = () => {
           loading={companiesLoading}
         />
       </Box>
-      <Box sx={{ flex: '1 1 250px', minWidth: 250 }}>
+      <Box>
         <StatCard
           title="Tổng việc làm"
           value={jobs?.length || 0}
@@ -54,7 +63,7 @@ const DashboardStats: React.FC = () => {
           loading={jobsLoading}
         />
       </Box>
-      <Box sx={{ flex: '1 1 250px', minWidth: 250 }}>
+      <Box>
         <StatCard
           title="Tổng đơn ứng tuyển"
           value={applications?.length || 0}

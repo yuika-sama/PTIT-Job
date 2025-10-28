@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Paper, 
@@ -12,7 +12,14 @@ import {
   IconButton,
   Divider,
   Fade,
-  Tooltip
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Alert,
+  Snackbar
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -27,11 +34,53 @@ import {
   AccountCircle as AccountIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { userService } from '../../services/userService';
+import { authService } from '../../services/authService';
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   console.log('User data:', user);
   const [avatarHover, setAvatarHover] = useState(false);
+  
+  // Dialog states
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [editFieldDialogOpen, setEditFieldDialogOpen] = useState(false);
+  const [currentEditField, setCurrentEditField] = useState<'name' | 'phone' | 'company' | null>(null);
+  
+  // Form states
+  const [editForm, setEditForm] = useState({
+    full_name: user?.full_name || '',
+    phone_number: user?.phone_number || '',
+  });
+  
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error' | 'info' | 'warning'
+  });
+
+  // Loading states
+  const [saveProfileLoading, setSaveProfileLoading] = useState(false);
+  const [savePasswordLoading, setSavePasswordLoading] = useState(false);
+
+  // Update editForm when user data changes
+  useEffect(() => {
+    if (user) {
+      setEditForm({
+        full_name: user.full_name || '',
+        phone_number: user.phone_number || '',
+      });
+    }
+  }, [user]);
 
   const getRoleColor = (role?: string) => {
     switch (role) {
@@ -56,10 +105,107 @@ const Profile: React.FC = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  const showSnackbar = (message: string, severity: 'success' | 'error' | 'info' | 'warning' = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   const handleEditProfile = () => {
-    // Logic to open edit profile dialog or navigate to edit profile page
-    alert('Chức năng chỉnh sửa hồ sơ sẽ được triển khai sau.');
-  }
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaveProfileLoading(true);
+      const response = await userService.updateUser(user?.id || '', editForm);
+      
+      if (response.success && response.data) {
+        // Update user context with new data
+        updateUser(response.data);
+        showSnackbar('Cập nhật hồ sơ thành công!', 'success');
+        setEditDialogOpen(false);
+      } else {
+        showSnackbar(response.message || 'Có lỗi xảy ra khi cập nhật hồ sơ', 'error');
+      }
+    } catch (error) {
+      showSnackbar(error instanceof Error ? error.message : 'Có lỗi xảy ra khi cập nhật hồ sơ', 'error');
+    } finally {
+      setSaveProfileLoading(false);
+    }
+  };
+
+  const handleEditField = (field: 'name' | 'phone' | 'company') => {
+    setCurrentEditField(field);
+    setEditFieldDialogOpen(true);
+  };
+
+  const handleSaveField = async () => {
+    try {
+      setSaveProfileLoading(true);
+      const response = await userService.updateUser(user?.id || '', editForm);
+      
+      if (response.success && response.data) {
+        // Update user context with new data
+        updateUser(response.data);
+        showSnackbar('Cập nhật thông tin thành công!', 'success');
+        setEditFieldDialogOpen(false);
+        setCurrentEditField(null);
+      } else {
+        showSnackbar(response.message || 'Có lỗi xảy ra khi cập nhật thông tin', 'error');
+      }
+    } catch (error) {
+      showSnackbar(error instanceof Error ? error.message : 'Có lỗi xảy ra khi cập nhật thông tin', 'error');
+    } finally {
+      setSaveProfileLoading(false);
+    }
+  };
+
+  const handleChangePassword = () => {
+    setPasswordDialogOpen(true);
+  };
+
+  const handleSavePassword = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      showSnackbar('Mật khẩu xác nhận không khớp', 'error');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      showSnackbar('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
+      return;
+    }
+
+    try {
+      setSavePasswordLoading(true);
+      const response = await authService.changePassword(
+        passwordForm.currentPassword, 
+        passwordForm.newPassword
+      );
+      
+      if (response.success) {
+        showSnackbar('Đổi mật khẩu thành công!', 'success');
+        setPasswordDialogOpen(false);
+        setPasswordForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        showSnackbar(response.message || 'Có lỗi xảy ra khi đổi mật khẩu', 'error');
+      }
+    } catch (error) {
+      showSnackbar(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đổi mật khẩu', 'error');
+    } finally {
+      setSavePasswordLoading(false);
+    }
+  };
+
+  const handleOpenSettings = () => {
+    setSettingsDialogOpen(true);
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 8,
@@ -216,7 +362,7 @@ const Profile: React.FC = () => {
                         {user?.full_name || 'Chưa cập nhật'}
                       </Typography>
                     </Box>
-                    <IconButton size="small">
+                    <IconButton size="small" onClick={() => handleEditField('name')}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Box>
@@ -231,7 +377,7 @@ const Profile: React.FC = () => {
                         {user?.phone_number || 'Chưa cập nhật'}
                       </Typography>
                     </Box>
-                    <IconButton size="small">
+                    <IconButton size="small" onClick={() => handleEditField('phone')}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Box>
@@ -248,7 +394,7 @@ const Profile: React.FC = () => {
                           {user?.company_name || 'Chưa cập nhật'}
                         </Typography>
                       </Box>
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={() => handleEditField('company')}>
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Box>
@@ -350,6 +496,7 @@ const Profile: React.FC = () => {
                       variant="outlined"
                       startIcon={<SecurityIcon />}
                       fullWidth
+                      onClick={handleChangePassword}
                       sx={{ 
                         py: 1,
                         borderColor: 'primary.main',
@@ -368,6 +515,7 @@ const Profile: React.FC = () => {
                       variant="outlined"
                       startIcon={<SettingsIcon />}
                       fullWidth
+                      onClick={handleOpenSettings}
                       sx={{ 
                         py: 1,
                         borderColor: 'secondary.main',
@@ -388,6 +536,149 @@ const Profile: React.FC = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Chỉnh sửa hồ sơ</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+            <TextField
+              label="Họ và tên"
+              fullWidth
+              value={editForm.full_name}
+              onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+            />
+            <TextField
+              label="Số điện thoại"
+              fullWidth
+              value={editForm.phone_number}
+              onChange={(e) => setEditForm({ ...editForm, phone_number: e.target.value })}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialogOpen(false)} disabled={saveProfileLoading}>Hủy</Button>
+          <Button 
+            variant="contained" 
+            onClick={handleSaveProfile}
+            disabled={saveProfileLoading}
+          >
+            {saveProfileLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Field Dialog */}
+      <Dialog open={editFieldDialogOpen} onClose={() => setEditFieldDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>
+          Chỉnh sửa {currentEditField === 'name' ? 'Họ và tên' : currentEditField === 'phone' ? 'Số điện thoại' : 'Tên công ty'}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            fullWidth
+            value={
+              currentEditField === 'name' ? editForm.full_name : editForm.phone_number
+            }
+            onChange={(e) => {
+              if (currentEditField === 'name') {
+                setEditForm({ ...editForm, full_name: e.target.value });
+              } else {
+                setEditForm({ ...editForm, phone_number: e.target.value });
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditFieldDialogOpen(false)} disabled={saveProfileLoading}>Hủy</Button>
+          <Button 
+            variant="contained" 
+            onClick={handleSaveField}
+            disabled={saveProfileLoading}
+          >
+            {saveProfileLoading ? 'Đang lưu...' : 'Lưu'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Change Password Dialog */}
+      <Dialog open={passwordDialogOpen} onClose={() => setPasswordDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Đổi mật khẩu</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+            <TextField
+              label="Mật khẩu hiện tại"
+              type="password"
+              fullWidth
+              value={passwordForm.currentPassword}
+              onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+            />
+            <TextField
+              label="Mật khẩu mới"
+              type="password"
+              fullWidth
+              value={passwordForm.newPassword}
+              onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+              helperText="Mật khẩu phải có ít nhất 6 ký tự"
+            />
+            <TextField
+              label="Xác nhận mật khẩu mới"
+              type="password"
+              fullWidth
+              value={passwordForm.confirmPassword}
+              onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPasswordDialogOpen(false)} disabled={savePasswordLoading}>Hủy</Button>
+          <Button 
+            variant="contained" 
+            onClick={handleSavePassword} 
+            color="primary"
+            disabled={savePasswordLoading}
+          >
+            {savePasswordLoading ? 'Đang đổi...' : 'Đổi mật khẩu'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onClose={() => setSettingsDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Cài đặt tài khoản</DialogTitle>
+        <DialogContent>
+          <Box sx={{ py: 2 }}>
+            <Alert severity="info">
+              Các tùy chọn cài đặt tài khoản sẽ được bổ sung trong phiên bản tiếp theo.
+            </Alert>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" gutterBottom>Tính năng sắp ra mắt:</Typography>
+              <ul>
+                <li>Cài đặt thông báo email</li>
+                <li>Tùy chọn bảo mật hai lớp (2FA)</li>
+                <li>Quản lý phiên đăng nhập</li>
+                <li>Cài đặt quyền riêng tư</li>
+              </ul>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSettingsDialogOpen(false)}>Đóng</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

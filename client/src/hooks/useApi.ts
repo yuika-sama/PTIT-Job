@@ -115,6 +115,56 @@ export function useUpdateUser() {
   return { updateUser, loading, error };
 }
 
+export function useUpdateCurrentUser() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateCurrentUser = async (userData: UpdateUserRequest) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await userService.updateCurrentUser(userData);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      return response.data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { updateCurrentUser, loading, error };
+}
+
+export function useChangePassword() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const changePassword = async (oldPassword: string, newPassword: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await authService.changePassword(oldPassword, newPassword);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      return response.data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to change password';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { changePassword, loading, error };
+}
+
 // Job hooks
 export function useJobs() {
   return useApi(() => jobService.getAllJobs());

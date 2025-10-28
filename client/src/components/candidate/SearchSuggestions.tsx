@@ -26,8 +26,8 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
   const theme = useTheme();
 
   const trendingKeywords = [
-    { text: 'ReactJS Developer', count: 234, hot: true },
-    { text: 'Backend Node.js', count: 189, hot: true },
+    { text: 'ReactJS Developer', count: 234, hot: false },
+    { text: 'Backend Node.js', count: 189, hot: false },
     { text: 'UI/UX Designer', count: 156, hot: false },
     { text: 'DevOps Engineer', count: 145, hot: false },
     { text: 'Data Analyst', count: 132, hot: false },

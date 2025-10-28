@@ -145,7 +145,7 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
 
     # Nếu chưa có state trong body và không phải lượt đầu, thử khôi phục từ AI message gần nhất
     if not state and not is_start:
-        last_ai_turn: Optional = next((msg for msg in reversed(history) if msg.sender == "ai"), None)
+        last_ai_turn = next((msg for msg in reversed(history) if msg.sender == "ai"), None)
         if last_ai_turn and last_ai_turn.state:
             state = last_ai_turn.state
             print("[DEBUG] Restored state from last AI message.")
@@ -237,23 +237,90 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
     # Hết câu hỏi → tổng kết + gợi ý cải thiện
     cv_score = float(state.get("cv_score", 0.0))
     scores = state.get("interview_scores", [])
+    
+    # Tính điểm phỏng vấn trung bình (0-100)
     avg_interview_score = (sum(scores) / len(scores) * 100.0) if scores else 0.0
-    final_score = 0.4 * cv_score + 0.6 * avg_interview_score
-
+    
+    # Phân tích chi tiết điểm phỏng vấn
+    interview_breakdown = {
+        "total_questions": len(scores),
+        "average_score": round(avg_interview_score, 2),
+        "min_score": round(min(scores) * 100, 2) if scores else 0,
+        "max_score": round(max(scores) * 100, 2) if scores else 0,
+        "scores_distribution": {
+            "excellent": sum(1 for s in scores if s >= 0.8),  # >= 80%
+            "good": sum(1 for s in scores if 0.6 <= s < 0.8),  # 60-79%
+            "average": sum(1 for s in scores if 0.4 <= s < 0.6),  # 40-59%
+            "poor": sum(1 for s in scores if s < 0.4)  # < 40%
+        }
+    }
+    
+    # Công thức tính điểm tổng hợp cải thiện:
+    # - CV score chiếm 30% (đánh giá background và kinh nghiệm)
+    # - Interview score chiếm 70% (đánh giá khả năng thực tế và communication)
+    # Lý do: Phỏng vấn phản ánh khả năng thực tế tốt hơn CV
+    cv_weight = 0.30
+    interview_weight = 0.70
+    final_score = cv_weight * cv_score + interview_weight * avg_interview_score
+    
+    # Đánh giá mức độ tổng thể
+    if final_score >= 80:
+        overall_assessment = "Xuất sắc"
+        recommendation = "Ứng viên rất phù hợp với vị trí. Đề xuất tiếp tục quy trình tuyển dụng."
+    elif final_score >= 70:
+        overall_assessment = "Tốt"
+        recommendation = "Ứng viên có tiềm năng. Cân nhắc phỏng vấn vòng tiếp theo với các câu hỏi chuyên sâu hơn."
+    elif final_score >= 60:
+        overall_assessment = "Trung bình khá"
+        recommendation = "Ứng viên có nền tảng cơ bản. Có thể cân nhắc cho vị trí junior hoặc với mentoring."
+    elif final_score >= 50:
+        overall_assessment = "Trung bình"
+        recommendation = "Ứng viên cần cải thiện thêm. Xem xét training hoặc vị trí phù hợp hơn với kỹ năng hiện tại."
+    else:
+        overall_assessment = "Cần cải thiện"
+        recommendation = "Ứng viên chưa đáp ứng yêu cầu cơ bản cho vị trí này."
+    
     improvements = _compile_improvements(state)
 
     # Soạn response text thân thiện (Markdown)
     lines = [
-        "Cảm ơn bạn! Dưới đây là tổng kết buổi phỏng vấn:",
-        f"- **Điểm CV**: **{cv_score:.2f}%**",
-        f"- **Điểm phỏng vấn**: **{avg_interview_score:.2f}%**",
+        "🎉 **Cảm ơn bạn đã hoàn thành buổi phỏng vấn!**",
         "",
-        f"### **Điểm tổng hợp**: **{final_score:.2f}%**",
+        "---",
         "",
-        "### Những điểm cần cải thiện"
+        "## 📊 Tổng kết điểm số",
+        "",
+        f"### Điểm CV: **{cv_score:.2f}%** (trọng số: {cv_weight*100:.0f}%)",
+        "- Đánh giá background, kỹ năng và kinh nghiệm từ CV",
+        "",
+        f"### Điểm phỏng vấn: **{avg_interview_score:.2f}%** (trọng số: {interview_weight*100:.0f}%)",
+        f"- Tổng số câu hỏi: {interview_breakdown['total_questions']}",
+        f"- Xuất sắc (≥80%): {interview_breakdown['scores_distribution']['excellent']} câu",
+        f"- Tốt (60-79%): {interview_breakdown['scores_distribution']['good']} câu",
+        f"- Trung bình (40-59%): {interview_breakdown['scores_distribution']['average']} câu",
+        f"- Cần cải thiện (<40%): {interview_breakdown['scores_distribution']['poor']} câu",
+        "",
+        "---",
+        "",
+        f"## 🎯 Điểm tổng hợp: **{final_score:.2f}%**",
+        f"**Đánh giá: {overall_assessment}**",
+        "",
+        f"_{recommendation}_",
+        "",
+        "---",
+        "",
+        "## 💡 Những điểm cần cải thiện",
+        ""
     ]
-    for imp in improvements:
-        lines.append(f"- **{imp['area']}**: {imp['tip']}")
+    
+    if improvements:
+        for idx, imp in enumerate(improvements, 1):
+            lines.append(f"### {idx}. {imp['area']}")
+            lines.append(f"{imp['tip']}")
+            lines.append("")
+    else:
+        lines.append("Bạn đã thể hiện rất tốt! Tiếp tục duy trì và phát triển kỹ năng của mình.")
+        lines.append("")
 
     response_text = "\n".join(lines)
 
@@ -261,9 +328,14 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
         "response": response_text,
         "finished": True,
         "final_score": round(final_score, 2),
+        "overall_assessment": overall_assessment,
+        "recommendation": recommendation,
         "breakdown": {
             "cv_score": round(cv_score, 2),
-            "interview_score": round(avg_interview_score, 2)
+            "cv_weight": cv_weight,
+            "interview_score": round(avg_interview_score, 2),
+            "interview_weight": interview_weight,
+            "interview_details": interview_breakdown
         },
         "improvements": improvements  # <-- cấu trúc máy đọc được để FE render đẹp
     }

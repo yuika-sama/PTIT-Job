@@ -1,46 +1,52 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import LoadingFallback from '../components/LoadingFallback';
+
+// Layouts - Eager load (needed frequently)
 import LayoutWrapper from '../components/LayoutWrapper';
-import Login from '../pages/Auth/Login';
-import SignUp from '../pages/Auth/SignUp';
-import ForgotPassword from '../pages/Auth/ForgotPassword';
-import NotFound404 from '../pages/Shared/404NotFound';
-
-// Admin Pages
-import AdminDashboard from '../pages/Admin/AdminDashboard';
-import AdminUsers from '../pages/Admin/Users';
-import AdminCompanies from '../pages/Admin/Companies';
-import AdminJobs from '../pages/Admin/Jobs';
-import AdminApplications from '../pages/Admin/Applications';
-import AdminJobCategories from '../pages/Admin/JobCategories';
-import AdminLocations from '../pages/Admin/Locations';
-
-// Employer Pages
-import EmployerDashboard from '../pages/Employer/EmployerDashboard';
-
-// Candidate Pages
-import CandidateDashboard from '../pages/Candidate/CandidateDashboard';
-import CandidateJobList from '../pages/Candidate/CandidateJobList';
-import BestJobsPage from '../pages/Candidate/BestJobsPage';
-import AttractiveJobsPage from '../pages/Candidate/AttractiveJobsPage';
-import CompaniesPage from '../pages/Candidate/CompaniesPage';
-import TopCompaniesPage from '../pages/Candidate/TopCompaniesPage';
-import CompanyDetailPage from '../pages/Candidate/CompanyDetailPage';
-import BHXHCalculatorPage from '../pages/Candidate/BHXHCalculatorPage';
-import SalaryCalculatorPage from '../pages/Candidate/SalaryCalculatorPage';
-import UnemploymentInsurancePage from '../pages/Candidate/UnemploymentInsurancePage';
-import JobSearchPage from '../pages/Candidate/JobSearchPage';
-import CVEvaluationPage from '../pages/Candidate/CVEvaluationPage';
-import CVUploaderPage from '../pages/Candidate/CVUploaderPage';
-import InterviewEmulate from '../pages/Candidate/InterviewEmulate';
-import { CompoundInterestPage, JobDetailsPage } from '../pages/Candidate';
-
-// Shared Pages
-import Profile from '../pages/Shared/Profile';
 import EmployerLayout from '../components/EmployerLayout';
 import CandidateLayout from '../components/CandidateLayout';
-import { PersonalIncomeTaxPage } from '../pages/Candidate';
+
+// Lazy load pages
+// Auth Pages
+const Login = lazy(() => import('../pages/Auth/Login'));
+const SignUp = lazy(() => import('../pages/Auth/SignUp'));
+const ForgotPassword = lazy(() => import('../pages/Auth/ForgotPassword'));
+const NotFound404 = lazy(() => import('../pages/Shared/404NotFound'));
+
+// Admin Pages
+const AdminDashboard = lazy(() => import('../pages/Admin/AdminDashboard'));
+const AdminUsers = lazy(() => import('../pages/Admin/Users'));
+const AdminCompanies = lazy(() => import('../pages/Admin/Companies'));
+const AdminJobs = lazy(() => import('../pages/Admin/Jobs'));
+const AdminApplications = lazy(() => import('../pages/Admin/Applications'));
+const AdminJobCategories = lazy(() => import('../pages/Admin/JobCategories'));
+const AdminLocations = lazy(() => import('../pages/Admin/Locations'));
+
+// Employer Pages
+const EmployerDashboard = lazy(() => import('../pages/Employer/EmployerDashboard'));
+
+// Candidate Pages
+const CandidateDashboard = lazy(() => import('../pages/Candidate/CandidateDashboard'));
+const CandidateJobList = lazy(() => import('../pages/Candidate/CandidateJobList'));
+const BestJobsPage = lazy(() => import('../pages/Candidate/BestJobsPage'));
+const AttractiveJobsPage = lazy(() => import('../pages/Candidate/AttractiveJobsPage'));
+const CompaniesPage = lazy(() => import('../pages/Candidate/CompaniesPage'));
+const TopCompaniesPage = lazy(() => import('../pages/Candidate/TopCompaniesPage'));
+const CompanyDetailPage = lazy(() => import('../pages/Candidate/CompanyDetailPage'));
+const BHXHCalculatorPage = lazy(() => import('../pages/Candidate/BHXHCalculatorPage'));
+const SalaryCalculatorPage = lazy(() => import('../pages/Candidate/SalaryCalculatorPage'));
+const UnemploymentInsurancePage = lazy(() => import('../pages/Candidate/UnemploymentInsurancePage'));
+const JobSearchPage = lazy(() => import('../pages/Candidate/JobSearchPage'));
+const CVEvaluationPage = lazy(() => import('../pages/Candidate/CVEvaluationPage'));
+const InterviewEmulate = lazy(() => import('../pages/Candidate/InterviewEmulate'));
+const CompoundInterestPage = lazy(() => import('../pages/Candidate/CompoundInterestPage'));
+const JobDetailsPage = lazy(() => import('../pages/Candidate/JobDetailsPage'));
+const PersonalIncomeTaxPage = lazy(() => import('../pages/Candidate/PersonalIncomeTaxPage'));
+
+// Shared Pages
+const Profile = lazy(() => import('../pages/Shared/Profile'));
 
 // Role-based route protection
 interface RoleProtectedRouteProps {
@@ -182,32 +188,33 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const AppRoutes: React.FC = () => {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route 
-          path="/login" 
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } 
-        />
-        <Route 
-          path="/signup" 
-          element={
-            <PublicRoute>
-              <SignUp />
-            </PublicRoute>
-          } 
-        />
-        <Route 
-          path="/forgot-password" 
-          element={
-            <PublicRoute>
-              <ForgotPassword />
-            </PublicRoute>
-          } 
-        />
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/signup" 
+            element={
+              <PublicRoute>
+                <SignUp />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/forgot-password" 
+            element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            } 
+          />
 
         {/* Dashboard Redirects */}
         <Route path="/" element={<DashboardRedirect />} />
@@ -299,6 +306,7 @@ const AppRoutes: React.FC = () => {
         {/* Catch all routes */}
         <Route path="*" element={<NotFound404 />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 };

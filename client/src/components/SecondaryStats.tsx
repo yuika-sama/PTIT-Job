@@ -6,13 +6,16 @@ import {
   Typography,
   LinearProgress
 } from '@mui/material';
-import { useUsers, useCompanies, useJobs, useJobApplications } from '../hooks/useApi';
+import { Description as DescriptionIcon } from '@mui/icons-material';
+import { useUsers, useCompanies, useJobs, useJobApplications, useResumes } from '../hooks/useApi';
+import StatCard from './StatCard';
 
 const SecondaryStats: React.FC = () => {
   const { data: users } = useUsers();
   const { data: companies } = useCompanies();
   const { data: jobs } = useJobs();
   const { data: applications } = useJobApplications();
+  const { data: resumes, loading: resumesLoading } = useResumes();
 
   // Calculate derived stats
   const totalUsers = users?.length || 0;
@@ -47,6 +50,14 @@ const SecondaryStats: React.FC = () => {
       
       
       <Box sx={{ flex: '1 1 250px', minWidth: 250 }}>
+        <StatCard
+          title="Tổng CV/Hồ sơ"
+          value={resumes?.length || 0}
+          icon={<DescriptionIcon />}
+          color="#00897b"
+          growth={18.5}
+          loading={resumesLoading}
+        />
       </Box>
 
       <Box sx={{ flex: '1 1 250px', minWidth: 250 }}>
