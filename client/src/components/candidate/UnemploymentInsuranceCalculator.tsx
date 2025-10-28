@@ -26,7 +26,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   borderRadius: 16,
   boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-  background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+  backgroundcolor: "theme.palette.background.paper",
   border: '1px solid #e8e8e8',
 }));
 
@@ -338,7 +338,7 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
                   </Typography>
 
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <Typography variant="body2" color="black" gutterBottom>
                       Mức hưởng hàng tháng:
                     </Typography>
                     <Typography variant="h5" fontWeight={700} color="#2E7D32">
@@ -349,7 +349,7 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
                   <Divider sx={{ my: 2 }} />
 
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <Typography variant="body2" color="black" gutterBottom>
                       Thời gian hưởng:
                     </Typography>
                     <Chip 
@@ -360,7 +360,7 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
                   </Box>
 
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <Typography variant="body2" color="black" gutterBottom>
                       Tổng số tiền được hưởng:
                     </Typography>
                     <Typography variant="h6" fontWeight={700} color="#1B5E20">
@@ -371,10 +371,10 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
                   <Divider sx={{ my: 2 }} />
 
                   <Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <Typography variant="body2" color="black" gutterBottom>
                       Mức hưởng tối đa:
                     </Typography>
-                    <Typography variant="body1" fontWeight={600}>
+                    <Typography variant="body1" fontWeight={600} color="#185E20">
                       {formatCurrency(result.maxMonthlyBenefit)}
                     </Typography>
                   </Box>
@@ -389,7 +389,7 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
             )}
 
             {/* Additional Info */}
-            <Card sx={{ mt: 3, background: '#f8f9fa' }}>
+            <Card sx={{ mt: 3, backgroundcolor:'theme.palette' }}>
               <CardContent>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: '#1976d2' }}>
                   📋 Thông tin quan trọng
