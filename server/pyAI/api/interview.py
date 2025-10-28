@@ -160,6 +160,16 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
         if not cv_analysis_result:
             raise HTTPException(status_code=400, detail="CV analysis result is required to start an interview.")
 
+        # Extract and validate CV score
+        cv_score_raw = cv_analysis_result.get("scoring", {}).get("overall_score_percent", 0)
+        cv_score = float(cv_score_raw) if cv_score_raw else 0.0
+        
+        print(f"[DEBUG] CV score extracted: {cv_score}%")
+        
+        if cv_score <= 0:
+            print("[WARNING] CV score is 0 or negative. Check CV analysis result.")
+            print(f"[DEBUG] CV analysis scoring section: {cv_analysis_result.get('scoring', {})}")
+
         print(f"[DEBUG] Generating interview plan...")
         try:
             plan = interview_simulator.generate_interview_plan(cv_analysis_result)
@@ -172,12 +182,14 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
             raise HTTPException(status_code=500, detail="Empty interview plan generated.")
 
         state = {
-            "cv_score": cv_analysis_result.get("scoring", {}).get("overall_score_percent", 0),
+            "cv_score": cv_score,
             "question_plan": plan,
             "current_question_index": 0,
             "interview_scores": [],
             "feedback_items": []  # lưu score + topic theo câu
         }
+        
+        print(f"[DEBUG] Initial state created with cv_score: {state['cv_score']}%")
 
         # Trả về CÂU HỎI MỞ ĐẦU NGAY Ở LƯỢT START
         next_question = plan[0]
@@ -238,8 +250,24 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
     cv_score = float(state.get("cv_score", 0.0))
     scores = state.get("interview_scores", [])
     
-    # Tính điểm phỏng vấn trung bình (0-100)
-    avg_interview_score = (sum(scores) / len(scores) * 100.0) if scores else 0.0
+    print(f"[DEBUG] Final scoring - CV score from state: {cv_score}%")
+    print(f"[DEBUG] Final scoring - Interview scores: {scores}")
+    
+    # Validation: Đảm bảo cv_score hợp lệ
+    if cv_score <= 0:
+        print("[WARNING] CV score is 0 or invalid at final scoring!")
+        # Thử lấy lại từ state hoặc đặt mặc định
+        cv_score = 0.0
+    
+    # Validation: Đảm bảo có điểm phỏng vấn
+    if not scores:
+        print("[WARNING] No interview scores recorded!")
+        avg_interview_score = 0.0
+    else:
+        # Tính điểm phỏng vấn trung bình (0-100)
+        avg_interview_score = (sum(scores) / len(scores) * 100.0)
+    
+    print(f"[DEBUG] Average interview score calculated: {avg_interview_score:.2f}%")
     
     # Phân tích chi tiết điểm phỏng vấn
     interview_breakdown = {
@@ -262,6 +290,11 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
     cv_weight = 0.30
     interview_weight = 0.70
     final_score = cv_weight * cv_score + interview_weight * avg_interview_score
+    
+    print(f"[DEBUG] Final score breakdown:")
+    print(f"  - CV: {cv_score:.2f}% × {cv_weight} = {cv_score * cv_weight:.2f}")
+    print(f"  - Interview: {avg_interview_score:.2f}% × {interview_weight} = {avg_interview_score * interview_weight:.2f}")
+    print(f"  - Total: {final_score:.2f}%")
     
     # Đánh giá mức độ tổng thể
     if final_score >= 80:

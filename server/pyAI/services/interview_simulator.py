@@ -97,9 +97,47 @@ def score_answer(question_data: dict, user_answer: str) -> float:
     Returns: float từ 0.0 đến 1.0
     """
     if not user_answer or not user_answer.strip():
+        print("[DEBUG] Empty answer - score: 0.0")
         return 0.0
     
     user_answer = user_answer.strip()
+    
+    # Validation: câu trả lời quá ngắn hoặc không có ý nghĩa
+    word_count = len(user_answer.split())
+    
+    # Câu trả lời dưới 3 từ hoặc chỉ là "ok", "yes", "no", "idk"... → 0 điểm
+    if word_count < 3:
+        print(f"[DEBUG] Answer too short ({word_count} words) - score: 0.0")
+        return 0.0
+    
+    # Check các câu trả lời vô nghĩa phổ biến
+    meaningless_patterns = [
+        'i dont know', 'i don\'t know', 'idk', 'không biết', 'ko biết', 'k biết',
+        'tôi không biết', 'tui không biết', 'mình không biết',
+        'không rõ', 'ko rõ', 'chưa biết', 'chưa rõ',
+        'pass', 'skip', 'next', 'bỏ qua',
+        'aaaaa', 'bbbbb', 'asdfgh', 'qwerty', 'test', 'testing',
+        '???', '...', '!!!'
+    ]
+    
+    answer_lower = user_answer.lower()
+    if any(pattern in answer_lower for pattern in meaningless_patterns):
+        print(f"[DEBUG] Meaningless answer detected - score: 0.0")
+        return 0.0
+    
+    # Nếu câu trả lời chỉ có 1 câu ngắn (< 5 từ) và không liên quan
+    if word_count < 5:
+        # Check xem có phải câu trả lời thực sự không
+        has_technical_words = any(word in answer_lower for word in [
+            'because', 'when', 'how', 'why', 'what', 'which', 'where',
+            'vì', 'khi', 'như thế nào', 'tại sao', 'là gì', 'nào', 'ở đâu',
+            'can', 'could', 'should', 'would', 'may', 'might',
+            'có thể', 'nên', 'sẽ', 'được'
+        ])
+        if not has_technical_words:
+            print(f"[DEBUG] Very short answer without substance ({word_count} words) - low score")
+            return 0.1  # Cho điểm tối thiểu
+    
     concepts = question_data.get("concepts", "")
     question_type = question_data.get("type", "technical")
     
@@ -111,9 +149,12 @@ def score_answer(question_data: dict, user_answer: str) -> float:
     # Normalize cosine similarity from [-1, 1] to [0, 1]
     semantic_score = (cos_sim + 1) / 2
     
-    # 2. Answer detail score (20%)
-    word_count = len(user_answer.split())
+    # Penalty cho semantic score quá thấp (< 0.3) → câu trả lời không liên quan
+    if semantic_score < 0.3:
+        print(f"[DEBUG] Very low semantic similarity ({semantic_score:.2f}) - likely irrelevant answer")
+        semantic_score = semantic_score * 0.5  # Giảm thêm 50%
     
+    # 2. Answer detail score (20%)
     # Detail scoring thresholds
     if word_count < 10:
         detail_score = 0.2  # Too short
@@ -135,7 +176,10 @@ def score_answer(question_data: dict, user_answer: str) -> float:
                  'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'be', 
                  'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 
                  'would', 'should', 'could', 'may', 'might', 'can', 'this', 'that', 
-                 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they'}
+                 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they',
+                 'của', 'và', 'hoặc', 'nhưng', 'trong', 'trên', 'ở', 'để', 'với',
+                 'bởi', 'từ', 'là', 'được', 'có', 'đã', 'sẽ', 'này', 'đó', 'các',
+                 'một', 'cho', 'đến', 'như', 'rất', 'thì', 'khi', 'nếu'}
     
     concept_keywords = concept_keywords - stopwords
     answer_words = answer_words - stopwords
@@ -143,6 +187,11 @@ def score_answer(question_data: dict, user_answer: str) -> float:
     if concept_keywords:
         matched_keywords = concept_keywords.intersection(answer_words)
         keyword_score = len(matched_keywords) / len(concept_keywords)
+        
+        # Penalty nếu không match keyword nào
+        if len(matched_keywords) == 0:
+            print(f"[DEBUG] No keyword matches - likely off-topic answer")
+            keyword_score = 0.0
     else:
         keyword_score = 0.5  # neutral if no concepts
     
@@ -151,7 +200,9 @@ def score_answer(question_data: dict, user_answer: str) -> float:
         # Behavioral questions value structure (STAR method)
         # Check for situation, task, action, result keywords
         star_keywords = ['situation', 'task', 'action', 'result', 'challenge', 
-                        'problem', 'solution', 'outcome', 'learned', 'impact']
+                        'problem', 'solution', 'outcome', 'learned', 'impact',
+                        'tình huống', 'nhiệm vụ', 'hành động', 'kết quả', 'thách thức',
+                        'vấn đề', 'giải pháp', 'học được', 'tác động', 'ảnh hưởng']
         star_matches = sum(1 for kw in star_keywords if kw in user_answer.lower())
         star_bonus = min(0.1, star_matches * 0.025)  # up to 10% bonus
     else:
