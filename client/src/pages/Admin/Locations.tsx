@@ -1,26 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Alert, Pagination } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Typography, Button, Alert, Pagination, CircularProgress } from '@mui/material';
+import { Add as AddIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
-import { Add as AddIcon } from '@mui/icons-material';
 import LocationStatsCards from './components/LocationStatsCards';
 import LocationSearchFilters from './components/LocationSearchFilters';
 import LocationTable from './components/LocationTable';
 import LocationDialog from './components/LocationDialog';
 import { locationService } from '../../services';
-import { Location, CreateLocationRequest, LocationFilters } from '../../services/types';
+import { Location, CreateLocationRequest } from '../../services/types';
 
 const Locations: React.FC = () => {
   const theme = useTheme();
+  
+  // Data states
   const [locations, setLocations] = useState<Location[]>([]);
-  const [totalLocations, setTotalLocations] = useState(0);
+  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<LocationFilters>({
-    search: '',
-    country: '',
-    status: ''
-  });
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [cityFilter, setCityFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(8);
   
   // Dialog states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -32,48 +37,68 @@ const Locations: React.FC = () => {
     job_count: 0
   });
 
-  const itemsPerPage = 8;
-
-  const fetchLocations = React.useCallback(async () => {
+  // Fetch locations from API
+  const fetchLocations = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await locationService.getAllLocations({
-        page,
-        limit: itemsPerPage,
-        search: filters.search || undefined,
-        country: filters.country || undefined,
-        status: filters.status || undefined
-      });
-      
-      console.log('Locations response:', response.data);
+      const response = await locationService.getAllLocations({});
       
       if (response.success && response.data) {
-        setLocations(response.data || []);
-        setTotalLocations(response.data.length || 0);
+        console.log('✅ Locations loaded successfully:', response.data.length, 'locations');
+        setLocations(response.data);
       } else {
-        setError(response.message || 'Lỗi khi tải danh sách địa điểm');
+        throw new Error(response.message || 'Không thể tải danh sách địa điểm');
       }
-    } catch (err) {
-      console.error('Error fetching locations:', err);
-      setError('Lỗi khi tải danh sách địa điểm');
+    } catch (err: any) {
+      console.error('❌ Error fetching locations:', err);
+      setError(err.message || 'Không thể tải danh sách địa điểm');
     } finally {
       setLoading(false);
     }
-  }, [page, filters, itemsPerPage]);
+  }, []);
+
+  // Filter locations based on search and filters
+  useEffect(() => {
+    let filtered = locations;
+
+   if (searchTerm) {
+  filtered = filtered.filter(location =>
+
+    location.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  
+    (location.job_count !== undefined && location.job_count.toString().includes(searchTerm))
+  );
+}
+
+    if (cityFilter !== 'all') {
+      filtered = filtered.filter(location => 
+        location.city && location.city === cityFilter
+      );
+    }
+
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'active') {
+        filtered = filtered.filter(location => location.is_active === true);
+      } else if (statusFilter === 'inactive') {
+        filtered = filtered.filter(location => location.is_active === false);
+      }
+    }
+
+    setFilteredLocations(filtered);
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [locations, searchTerm, cityFilter, statusFilter]);
+
+  // Calculate paginated locations
+  const totalPages = Math.ceil(filteredLocations.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedLocations = filteredLocations.slice(startIndex, endIndex);
 
   useEffect(() => {
     fetchLocations();
   }, [fetchLocations]);
-
-  const handleFilterChange = (newFilters: LocationFilters) => {
-    setFilters(newFilters);
-    setPage(1);
-  };
-
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-  };
 
   const handleAddLocation = () => {
     setDialogMode('add');
@@ -109,34 +134,43 @@ const Locations: React.FC = () => {
     }
 
     try {
+      setLoading(true);
       const response = await locationService.deleteLocation(locationId);
       if (response.success) {
-        await fetchLocations(); // Refresh the list
+        console.log('✅ Location deleted successfully');
+        await fetchLocations();
       } else {
-        setError(response.message || 'Lỗi khi xóa địa điểm');
+        throw new Error(response.message || 'Không thể xóa địa điểm');
       }
-    } catch (err) {
-      console.error('Error deleting location:', err);
-      setError('Lỗi khi xóa địa điểm');
+    } catch (err: any) {
+      console.error('❌ Error deleting location:', err);
+      setError(err.message || 'Không thể xóa địa điểm');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleToggleStatus = async (locationId: string) => {
     try {
+      setLoading(true);
       const response = await locationService.toggleLocationStatus(locationId);
       if (response.success) {
-        await fetchLocations(); // Refresh the list
+        console.log('✅ Location status updated successfully');
+        await fetchLocations();
       } else {
-        setError(response.message || 'Lỗi khi thay đổi trạng thái địa điểm');
+        throw new Error(response.message || 'Không thể thay đổi trạng thái địa điểm');
       }
-    } catch (err) {
-      console.error('Error toggling location status:', err);
-      setError('Lỗi khi thay đổi trạng thái địa điểm');
+    } catch (err: any) {
+      console.error('❌ Error toggling location status:', err);
+      setError(err.message || 'Không thể thay đổi trạng thái địa điểm');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSaveLocation = async () => {
     try {
+      setLoading(true);
       setError(null);
       
       if (!formData.city.trim()) {
@@ -144,85 +178,121 @@ const Locations: React.FC = () => {
         return;
       }
 
-      let response;
       const locationData = {
         city: formData.city,
         slug: formData.slug,
         job_count: formData.job_count
       };
 
+      let response;
       if (dialogMode === 'add') {
+        console.log('Creating new location:', locationData);
         response = await locationService.createLocation(locationData);
-      } else {
-        response = await locationService.updateLocation(selectedLocation!.id, locationData);
+      } else if (dialogMode === 'edit' && selectedLocation) {
+        console.log('Updating location:', selectedLocation.id, locationData);
+        response = await locationService.updateLocation(selectedLocation.id, locationData);
       }
 
-      if (response.success) {
+      if (response?.success) {
+        console.log('✅ Location saved successfully');
         setDialogOpen(false);
-        await fetchLocations(); // Refresh the list
+        await fetchLocations();
       } else {
-        setError(response.message || 'Lỗi khi lưu thông tin địa điểm');
+        throw new Error(response?.message || 'Không thể lưu thông tin địa điểm');
       }
-    } catch (err) {
-      console.error('Error saving location:', err);
-      setError('Lỗi khi lưu thông tin địa điểm');
+    } catch (err: any) {
+      console.error('❌ Error saving location:', err);
+      setError(err.message || 'Không thể lưu thông tin địa điểm');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const totalPages = Math.ceil(totalLocations / itemsPerPage);
+  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 2.5 }, height: '100%' }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
-            Quản lý địa điểm
-            </Typography>
-            <Button
+    <Box sx={{ p: { xs: 2, sm: 3 }, height: '100%' }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
+          Quản lý địa điểm
+        </Typography>
+        <Box display="flex" gap={2}>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={fetchLocations}
+            disabled={loading}
+          >
+            Làm mới
+          </Button>
+          <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={handleAddLocation}
-            >
+          >
             Thêm địa điểm
-            </Button>
+          </Button>
         </Box>
+      </Box>
 
-        {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-            </Alert>
-        )}
+      {loading && (
+        <Box display="flex" justifyContent="center" my={4}>
+          <CircularProgress />
+        </Box>
+      )}
 
-        <LocationStatsCards locations={locations} loading={loading} />
+      {error && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
 
-        <LocationSearchFilters 
-            filters={filters}
-            onFiltersChange={handleFilterChange}
-        />
+      {!loading && (
+        <>
+          {/* Statistics Cards */}
+          <LocationStatsCards locations={locations} loading={false} />
 
-        <LocationTable
-            locations={locations}
-            loading={loading}
-            page={page}
-            itemsPerPage={itemsPerPage}
+          {/* Search and Filters */}
+          <LocationSearchFilters 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            cityFilter={cityFilter}
+            setCityFilter={setCityFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            filteredCount={filteredLocations.length}
+            totalCount={locations.length}
+          />
+
+          {/* Locations Table */}
+          <LocationTable
+            locations={paginatedLocations}
+            loading={false}
+            page={currentPage}
+            itemsPerPage={pageSize}
             onView={handleViewLocation}
             onEdit={handleEditLocation}
             onDelete={handleDeleteLocation}
             onToggleStatus={handleToggleStatus}
-        />
+          />
 
-        {totalPages > 1 && (
-            <Box display="flex" justifyContent="center" mt={2}>
-            <Pagination
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Box display="flex" justifyContent="center" mt={3}>
+              <Pagination
                 count={totalPages}
-                page={page}
+                page={currentPage}
                 onChange={handlePageChange}
                 color="primary"
                 size="large"
-            />
+              />
             </Box>
-        )}
+          )}
 
-        <LocationDialog
+          {/* Location Dialog */}
+          <LocationDialog
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
             mode={dialogMode}
@@ -230,7 +300,9 @@ const Locations: React.FC = () => {
             formData={formData}
             setFormData={setFormData}
             onSave={handleSaveLocation}
-        />
+          />
+        </>
+      )}
     </Box>
   );
 };

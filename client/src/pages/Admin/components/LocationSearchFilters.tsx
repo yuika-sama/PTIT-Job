@@ -8,54 +8,47 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button
+  Typography,
+  InputAdornment
 } from '@mui/material';
-import { Search as SearchIcon, FilterList as FilterIcon } from '@mui/icons-material';
-
-interface LocationFilters {
-  search: string;
-  country: string;
-  status: string;
-}
+import { Search as SearchIcon } from '@mui/icons-material';
 
 interface LocationSearchFiltersProps {
-  filters: LocationFilters;
-  onFiltersChange: (filters: LocationFilters) => void;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  cityFilter: string;
+  setCityFilter: (value: string) => void;
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  filteredCount: number;
+  totalCount: number;
 }
 
-// Common countries for Vietnam job market
-const commonCountries = [
-  'Vietnam',
-  'Singapore',
-  'Japan',
-  'South Korea',
-  'United States',
-  'Australia',
-  'Canada',
-  'United Kingdom',
-  'Germany',
-  'France'
+// Major cities in Vietnam and popular international tech hubs
+const majorCities = [
+  // Vietnam
+  'Hà Nội',
+  'Hồ Chí Minh',
+  'Đà Nẵng',
+  'Hải Phòng',
+  'Cần Thơ',
+  'Biên Hòa',
+  'Nha Trang',
+  'Huế',
+  'Vũng Tàu',
+  'Buôn Ma Thuột',
 ];
 
 const LocationSearchFilters: React.FC<LocationSearchFiltersProps> = ({
-  filters,
-  onFiltersChange
+  searchTerm,
+  setSearchTerm,
+  cityFilter,
+  setCityFilter,
+  statusFilter,
+  setStatusFilter,
+  filteredCount,
+  totalCount
 }) => {
-  const handleFilterChange = (field: keyof LocationFilters, value: string) => {
-    onFiltersChange({
-      ...filters,
-      [field]: value
-    });
-  };
-
-  const handleClearFilters = () => {
-    onFiltersChange({
-      search: '',
-      country: '',
-      status: ''
-    });
-  };
-
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>
@@ -64,58 +57,60 @@ const LocationSearchFilters: React.FC<LocationSearchFiltersProps> = ({
           gap: 2, 
           flexWrap: 'wrap',
           alignItems: 'center',
-          '& > *': { 
-            flex: '1 1 200px',
-            minWidth: 200
-          }
+          mb: 2
         }}>
+          {/* Search Box */}
           <TextField
-            label="Tìm kiếm"
-            placeholder="Tìm theo thành phố, bang/tỉnh..."
-            value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
+            placeholder="Tìm theo thành phố, quốc gia..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              )
             }}
+            sx={{ flex: '1 1 300px', minWidth: 300 }}
           />
           
-          <FormControl>
-            <InputLabel>Quốc gia</InputLabel>
+          {/* City Filter */}
+          <FormControl sx={{ minWidth: 180 }}>
+            <InputLabel>Thành phố</InputLabel>
             <Select
-              value={filters.country}
-              label="Quốc gia"
-              onChange={(e) => handleFilterChange('country', e.target.value)}
+              value={cityFilter}
+              label="Thành phố"
+              onChange={(e) => setCityFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
-              {commonCountries.map((country) => (
-                <MenuItem key={country} value={country}>
-                  {country}
+              <MenuItem value="all">Tất cả</MenuItem>
+              {majorCities.map((city) => (
+                <MenuItem key={city} value={city}>
+                  {city}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <FormControl>
+          {/* Status Filter */}
+          <FormControl sx={{ minWidth: 180 }}>
             <InputLabel>Trạng thái</InputLabel>
             <Select
-              value={filters.status}
+              value={statusFilter}
               label="Trạng thái"
-              onChange={(e) => handleFilterChange('status', e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="all">Tất cả</MenuItem>
               <MenuItem value="active">Hoạt động</MenuItem>
               <MenuItem value="inactive">Không hoạt động</MenuItem>
             </Select>
           </FormControl>
+        </Box>
 
-          <Button
-            variant="outlined"
-            startIcon={<FilterIcon />}
-            onClick={handleClearFilters}
-            sx={{ flexShrink: 0, minWidth: 'auto' }}
-          >
-            Xóa bộ lọc
-          </Button>
+        {/* Result Count */}
+        <Box display="flex" justifyContent="flex-end">
+          <Typography variant="body2" color="text.secondary">
+            Hiển thị <strong>{filteredCount}</strong> / {totalCount} địa điểm
+          </Typography>
         </Box>
       </CardContent>
     </Card>

@@ -8,40 +8,42 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button
+  Button,
+  Typography,
+  InputAdornment
 } from '@mui/material';
 import { Search as SearchIcon, FilterList as FilterIcon } from '@mui/icons-material';
 
-interface ApplicationFilters {
-  search: string;
-  status: string;
-  jobTitle: string;
-  company: string;
-}
-
 interface ApplicationSearchFiltersProps {
-  filters: ApplicationFilters;
-  onFiltersChange: (filters: ApplicationFilters) => void;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  jobTitleFilter: string;
+  setJobTitleFilter: (value: string) => void;
+  companyFilter: string;
+  setCompanyFilter: (value: string) => void;
+  filteredCount: number;
+  totalCount: number;
 }
 
 const ApplicationSearchFilters: React.FC<ApplicationSearchFiltersProps> = ({
-  filters,
-  onFiltersChange
+  searchTerm,
+  setSearchTerm,
+  statusFilter,
+  setStatusFilter,
+  jobTitleFilter,
+  setJobTitleFilter,
+  companyFilter,
+  setCompanyFilter,
+  filteredCount,
+  totalCount
 }) => {
-  const handleFilterChange = (field: keyof ApplicationFilters, value: string) => {
-    onFiltersChange({
-      ...filters,
-      [field]: value
-    });
-  };
-
   const handleClearFilters = () => {
-    onFiltersChange({
-      search: '',
-      status: '',
-      jobTitle: '',
-      company: ''
-    });
+    setSearchTerm('');
+    setStatusFilter('all');
+    setJobTitleFilter('');
+    setCompanyFilter('');
   };
 
   return (
@@ -52,59 +54,74 @@ const ApplicationSearchFilters: React.FC<ApplicationSearchFiltersProps> = ({
           gap: 2, 
           flexWrap: 'wrap',
           alignItems: 'center',
-          '& > *': { 
-            flex: '1 1 200px',
-            minWidth: 200
-          }
+          mb: 2
         }}>
+          {/* Search Box */}
           <TextField
-            label="Tìm kiếm"
             placeholder="Tìm theo tên ứng viên, email..."
-            value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              )
             }}
+            sx={{ flex: '1 1 250px', minWidth: 250 }}
           />
           
-          <FormControl>
+          {/* Status Filter */}
+          <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Trạng thái</InputLabel>
             <Select
-              value={filters.status}
+              value={statusFilter}
               label="Trạng thái"
-              onChange={(e) => handleFilterChange('status', e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="all">Tất cả</MenuItem>
               <MenuItem value="pending">Chờ duyệt</MenuItem>
               <MenuItem value="reviewing">Đang xem xét</MenuItem>
               <MenuItem value="shortlisted">Vào danh sách ngắn</MenuItem>
-              <MenuItem value="accepted">Đã duyệt</MenuItem>
+              <MenuItem value="hired">Đã tuyển</MenuItem>
               <MenuItem value="rejected">Đã từ chối</MenuItem>
             </Select>
           </FormControl>
 
+          {/* Job Title Filter */}
           <TextField
             label="Vị trí công việc"
             placeholder="Tìm theo vị trí..."
-            value={filters.jobTitle}
-            onChange={(e) => handleFilterChange('jobTitle', e.target.value)}
+            value={jobTitleFilter}
+            onChange={(e) => setJobTitleFilter(e.target.value)}
+            sx={{ minWidth: 180 }}
           />
 
+          {/* Company Filter */}
           <TextField
             label="Công ty"
             placeholder="Tìm theo công ty..."
-            value={filters.company}
-            onChange={(e) => handleFilterChange('company', e.target.value)}
+            value={companyFilter}
+            onChange={(e) => setCompanyFilter(e.target.value)}
+            sx={{ minWidth: 180 }}
           />
 
+          {/* Clear Filters Button */}
           <Button
             variant="outlined"
             startIcon={<FilterIcon />}
             onClick={handleClearFilters}
-            sx={{ flexShrink: 0, minWidth: 'auto' }}
+            sx={{ flexShrink: 0 }}
           >
             Xóa bộ lọc
           </Button>
+        </Box>
+
+        {/* Result Count */}
+        <Box display="flex" justifyContent="flex-end">
+          <Typography variant="body2" color="text.secondary">
+            Hiển thị <strong>{filteredCount}</strong> / {totalCount} đơn ứng tuyển
+          </Typography>
         </Box>
       </CardContent>
     </Card>

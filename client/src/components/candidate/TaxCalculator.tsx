@@ -132,7 +132,7 @@ const TaxCalculator: React.FC<TaxCalculatorProps> = ({ onCalculate }) => {
       p: 4, 
       borderRadius: 3,
       border: `2px solid ${theme.palette.primary.main}20`,
-      background: `linear-gradient(135deg, ${theme.palette.background.paper}, ${theme.palette.grey[50]})`
+      backgroundColor: 'theme.palette.background.paperr'
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
         <CalculatorIcon sx={{ fontSize: 32, color: theme.palette.primary.main }} />

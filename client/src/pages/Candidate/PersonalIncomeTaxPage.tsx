@@ -114,7 +114,7 @@ const PersonalIncomeTaxPage: React.FC = () => {
         }} />
         
         <CalculateIcon sx={{ fontSize: 64, mb: 2, opacity: 0.9 }} />
-        <Typography variant="h3" fontWeight={700} sx={{ mb: 2 }}>
+        <Typography variant="h3" fontWeight={700} sx={{ mb: 2  }}>
           Công cụ tính Thuế thu nhập cá nhân chuẩn 2025
         </Typography>
         <Typography variant="h6" sx={{ opacity: 0.9, mb: 2 }}>
@@ -171,7 +171,7 @@ const PersonalIncomeTaxPage: React.FC = () => {
 
       {tabValue === 1 && (
         <Paper elevation={0} sx={{ p: 4, border: `1px solid ${theme.palette.divider}` }}>
-          <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+          <Typography variant="h5" fontWeight={700} sx={{ mb: 3, color: theme.palette.error.main }}>
             Bảng thuế suất thuế thu nhập cá nhân 2025
           </Typography>
           
@@ -240,7 +240,7 @@ const PersonalIncomeTaxPage: React.FC = () => {
 
       {tabValue === 2 && (
         <Paper elevation={0} sx={{ p: 4, border: `1px solid ${theme.palette.divider}` }}>
-          <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+          <Typography variant="h5" fontWeight={700} sx={{ mb: 3, color: theme.palette.error.main }}>
             Hướng dẫn và câu hỏi thường gặp
           </Typography>
           
@@ -248,8 +248,14 @@ const PersonalIncomeTaxPage: React.FC = () => {
             <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
               Công thức tính thuế TNCN:
             </Typography>
-            <Paper sx={{ p: 3, bgcolor: theme.palette.grey[50] }}>
-              <Typography variant="body1" fontWeight={600} sx={{ mb: 2 }}>
+            <Paper sx={{ 
+              p: 3, 
+              bgcolor: theme.palette.mode === 'dark' 
+                ? theme.palette.background.default 
+                : theme.palette.grey[50],
+              border: `1px solid ${theme.palette.divider}`
+            }}>
+              <Typography variant="body1" fontWeight={600} sx={{ mb: 2 }} >
                 Thuế TNCN = Thu nhập chịu thuế × Thuế suất
               </Typography>
               <Divider sx={{ my: 2 }} />
@@ -282,8 +288,14 @@ const PersonalIncomeTaxPage: React.FC = () => {
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 sx={{
-                  backgroundColor: theme.palette.grey[50],
-                  '&:hover': { backgroundColor: theme.palette.grey[100] }
+                  backgroundColor: theme.palette.mode === 'dark' 
+                    ? theme.palette.background.default 
+                    : theme.palette.grey[50],
+                  '&:hover': { 
+                    backgroundColor: theme.palette.mode === 'dark' 
+                      ? theme.palette.action.hover 
+                      : theme.palette.grey[100] 
+                  }
                 }}
               >
                 <Typography variant="subtitle1" fontWeight={600}>

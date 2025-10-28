@@ -6,7 +6,8 @@ import {
   Link,
   Divider,
   IconButton,
-  Tooltip
+  Tooltip,
+  useTheme
 } from '@mui/material';
 import {
   Facebook as FacebookIcon,
@@ -21,6 +22,7 @@ import {
 
 const CandidateFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const theme = useTheme();
 
   const footerLinks = {
     jobs: [
@@ -116,7 +118,7 @@ const CandidateFooter: React.FC = () => {
 
           {/* Jobs Links */}
           <Box>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
+            <Typography variant="h6" fontWeight="bold" gutterBottom color='text.primary'>
               Việc làm
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -142,7 +144,7 @@ const CandidateFooter: React.FC = () => {
 
           {/* Tools Links */}
           <Box>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
+            <Typography variant="h6" fontWeight="bold" gutterBottom color='text.primary'>
               Công cụ
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -168,7 +170,7 @@ const CandidateFooter: React.FC = () => {
 
           {/* Support & Company Links */}
           <Box>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
+            <Typography variant="h6" fontWeight="bold" gutterBottom color='text.primary'>
               Hỗ trợ
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
@@ -192,7 +194,7 @@ const CandidateFooter: React.FC = () => {
             </Box>
 
             {/* Social Media */}
-            <Typography variant="body2" fontWeight="medium" gutterBottom>
+            <Typography variant="body2" fontWeight="medium" gutterBottom color='text.secondary'>
               Theo dõi chúng tôi
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
