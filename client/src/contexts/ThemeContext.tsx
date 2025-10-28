@@ -221,7 +221,7 @@ export const ThemeContextProvider: React.FC<ThemeContextProviderProps> = ({ chil
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      const savedMode = localStorage.getItem('ptit-job-theme-mode');
+      const savedMode = localStorage.getItem('ptit-job-theme-mode');  
       // Only update if user hasn't manually set a preference
       if (!savedMode) {
         setMode(e.matches ? 'dark' : 'light');
