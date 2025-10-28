@@ -33,9 +33,9 @@ import { styled } from '@mui/material/styles';
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   borderRadius: 16,
-  boxShadow: theme.shadows[4],
-  background: theme.palette.background.paper,
-  border: `1px solid ${theme.palette.divider}`,
+  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+  backgroundcolor: "theme.palette.background.paper",
+  border: '1px solid #e8e8e8',
 }));
 
 const HeaderSection = styled(Box)(({ theme }) => ({
@@ -374,9 +374,12 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
                     }}>
                       <MonetizationOnIcon fontSize="small" />
                     </Box>
-
-                    <Typography variant="h6" fontWeight={700} sx={{ color: theme.palette.primary.dark }}>
-                      Kết quả tính toán
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="black" gutterBottom>
+                      Mức hưởng hàng tháng:
+                    </Typography>
+                    <Typography variant="h5" fontWeight={700} color="#2E7D32">
+                      {formatCurrency(result.monthlyBenefit)}
                     </Typography>
 
                     <Box sx={{ flex: 1 }} />
@@ -386,6 +389,7 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
                         <InfoOutlinedIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
+                  </Box>
                   </Stack>
 
                   {/* Hero number + small labels */}
@@ -414,19 +418,34 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
                   </Box>
 
                   <Divider sx={{ my: 1.5 }} />
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="black" gutterBottom>
+                      Thời gian hưởng:
+                    </Typography>
+                    <Chip 
+                      label={`${result.benefitPeriod} tháng`}
+                      color="success"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </Box>
 
-                  {/* breakdown rows */}
-                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 1.25, alignItems: 'center', mt: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Thời gian hưởng</Typography>
-                    <Chip label={`${result.benefitPeriod} tháng`} color="primary" sx={{ fontWeight: 700, borderRadius: 1 }} />
-
-                    <Typography variant="body2" color="text.secondary">Tổng số tiền được hưởng</Typography>
-                    <Typography variant="body1" fontWeight={800} sx={{ color: theme.palette.primary.dark }}>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="black" gutterBottom>
+                      Tổng số tiền được hưởng:
+                    </Typography>
+                    <Typography variant="h6" fontWeight={700} color="#1B5E20">
                       {formatCurrency(result.totalBenefit)}
                     </Typography>
+                  </Box>
+                  <Divider sx={{ my: 2 }} />
 
-                    <Typography variant="body2" color="text.secondary">Căn cứ</Typography>
-                    <Typography variant="body2" color="text.secondary">Điều 50, Luật việc làm 2013</Typography>
+                  <Box>
+                    <Typography variant="body2" color="black" gutterBottom>
+                      Mức hưởng tối đa:
+                    </Typography>
+                    <Typography variant="body1" fontWeight={600} color="#185E20">
+                      {formatCurrency(result.maxMonthlyBenefit)}
+                    </Typography>
                   </Box>
 
                   <Alert severity="info" sx={{ mt: 2 }}>
@@ -435,8 +454,8 @@ const UnemploymentInsuranceCalculator: React.FC = () => {
                 </CardContent>
               </ResultCard>
             )}
-
-            <Card sx={{ mt: 3, background: theme.palette.background.default }}>
+            {/* Additional Info */}
+            <Card sx={{ mt: 3, backgroundColor: theme.palette.background.default }}>
               <CardContent>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: theme.palette.primary.main }}>
                   Thông tin quan trọng

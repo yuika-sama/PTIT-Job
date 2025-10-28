@@ -214,6 +214,10 @@ export interface CategoryFilters {
 export interface Location {
   id: string;
   city: string;
+  state: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
   slug?: string;
   job_count?: number; 
 }

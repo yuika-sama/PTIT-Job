@@ -4,6 +4,8 @@ import { SidebarProvider } from './contexts/SidebarContext';
 import { ThemeContextProvider } from './contexts/ThemeContext';
 import AppRoutes from './routes/index';
 
+
+
 function App() {
   return (
     <ThemeContextProvider>

@@ -9,7 +9,6 @@ import {
   MenuItem,
   Box,
   InputBase,
-  Badge,
   Tooltip,
   Divider,
   Grow,
@@ -21,7 +20,6 @@ import {
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
   AccountCircle as AccountCircleIcon,
-  Notifications as NotificationsIcon,
   Work as WorkIcon,
   Build as BuildIcon,
   Assignment as AssignmentIcon,
@@ -40,9 +38,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 
 /** =========================================
- *  ToolsButtonWithHoverMenu (tách riêng nút "Công cụ")
- *  Hover chuẩn xác, không nháy, xử lý delay mở/đóng,
- *  loại bỏ khoảng hở giữa nút & menu.
+ *  ToolsButtonWithHoverMenu
  *  =========================================
  */
 type DropdownItem = {
@@ -94,11 +90,11 @@ const ToolsButtonWithHoverMenu: React.FC<ToolsButtonWithHoverMenuProps> = ({
 
   const handleToggleClick = () => {
     clearTimers();
-    setOpen((v) => !v);
+    setOpen(v => !v);
   };
 
-  const cvItems = items.filter((d) => d.category === 'cv');
-  const financeItems = items.filter((d) => d.category === 'finance');
+  const cvItems = items.filter(d => d.category === 'cv');
+  const financeItems = items.filter(d => d.category === 'finance');
 
   return (
     <Box
@@ -150,8 +146,8 @@ const ToolsButtonWithHoverMenu: React.FC<ToolsButtonWithHoverMenuProps> = ({
           sx: { py: 1.25 }
         }}
         PaperProps={{
-          sx: (theme) => ({
-            mt: 0, // loại bỏ khoảng hở giữa nút và menu
+          sx: theme => ({
+            mt: 0,
             px: 1,
             minWidth: 560,
             maxHeight: 520,
@@ -224,7 +220,7 @@ const ToolsButtonWithHoverMenu: React.FC<ToolsButtonWithHoverMenuProps> = ({
 };
 
 /** =========================================
- *  CandidateHeader (file đầy đủ)
+ *  CandidateHeader
  *  =========================================
  */
 const CandidateHeader: React.FC = () => {
@@ -237,8 +233,14 @@ const CandidateHeader: React.FC = () => {
 
   // Profile menu
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => setProfileAnchorEl(event.currentTarget);
-  const handleProfileMenuClose = () => setProfileAnchorEl(null);
+
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setProfileAnchorEl(null);
+  };
 
   const handleLogout = () => {
     logout();
@@ -295,7 +297,7 @@ const CandidateHeader: React.FC = () => {
     <AppBar
       position="sticky"
       elevation={trigger ? 6 : 0}
-      sx={(theme) => ({
+      sx={theme => ({
         color: 'text.primary',
         borderBottom: '1px solid',
         borderBottomColor: trigger ? 'transparent' : 'divider',
@@ -339,12 +341,11 @@ const CandidateHeader: React.FC = () => {
         {/* Navigation */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, mr: 'auto' }}>
           {navigationItems.map((item, index) =>
-            // Dùng component riêng cho nút "Công cụ"
             item.hasDropdown ? (
               <ToolsButtonWithHoverMenu
                 key={index}
                 items={item.dropdownItems as DropdownItem[]}
-                navigate={(p) => navigate(p)}
+                navigate={p => navigate(p)}
                 isDarkMode={isDarkMode}
                 label={item.label}
                 startIcon={item.icon}
@@ -384,7 +385,7 @@ const CandidateHeader: React.FC = () => {
         <Box
           component="form"
           onSubmit={handleSearch}
-          sx={(theme) => ({
+          sx={theme => ({
             display: { xs: 'none', sm: 'flex' },
             alignItems: 'center',
             borderRadius: 999,
@@ -406,7 +407,7 @@ const CandidateHeader: React.FC = () => {
           <InputBase
             placeholder="Tìm việc làm..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             sx={{
               flex: 1,
               minWidth: 0,
@@ -453,7 +454,7 @@ const CandidateHeader: React.FC = () => {
             onClose={handleProfileMenuClose}
             TransitionComponent={Grow}
             PaperProps={{
-              sx: (theme) => ({
+              sx: theme => ({
                 mt: 1,
                 minWidth: 240,
                 borderRadius: 2,

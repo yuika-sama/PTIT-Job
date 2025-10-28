@@ -26,8 +26,8 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
   const theme = useTheme();
 
   const trendingKeywords = [
-    { text: 'ReactJS Developer', count: 234, hot: false },
-    { text: 'Backend Node.js', count: 189, hot: false },
+    { text: 'ReactJS Developer', count: 234, hot: true },
+    { text: 'Backend Node.js', count: 189, hot: true },
     { text: 'UI/UX Designer', count: 156, hot: false },
     { text: 'DevOps Engineer', count: 145, hot: false },
     { text: 'Data Analyst', count: 132, hot: false },
@@ -55,23 +55,28 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
       sx={{
         borderRadius: 4,
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-        border: `1px solid ${theme.palette.divider}`,
+        bgcolor: 'background.paper',
+        border: 1,
+        borderColor: 'divider',
         mt: 3
       }}
     >
       {/* Header */}
       <Box sx={{
-        background: 'linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%)',
+        bgcolor: 'background.default',
         p: 3,
-        borderBottom: `1px solid ${theme.palette.divider}`,
+        borderBottom: 1,
+        borderColor: 'divider',
         position: 'relative'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{
             p: 1,
             borderRadius: 2,
-            background: 'linear-gradient(135deg, #d32f2f 0%, #1976d2 100%)', // PTIT colors
+            background: (theme) => 
+              theme.palette.mode === 'dark'
+                ? 'linear-gradient(135deg, #e63946 0%, #1e88e5 100%)'
+                : 'linear-gradient(135deg, #d32f2f 0%, #1976d2 100%)',
             color: 'white',
             display: 'flex',
             alignItems: 'center',
@@ -89,7 +94,7 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
         {/* Trending Keywords */}
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <SearchIcon sx={{ color: '#d32f2f', fontSize: 20 }} />
+            <SearchIcon sx={{ color: 'primary.main', fontSize: 20 }} />
             <Typography variant="subtitle1" fontWeight={600} color="text.primary">
               Từ khóa hot nhất tuần
             </Typography>
@@ -103,55 +108,66 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
           }}>
             {trendingKeywords.map((keyword, index) => (
               <Tooltip 
-              key={index}
-              title={`Tìm kiếm việc làm: ${keyword.text} (${keyword.count} việc làm)`}
-              placement="top"
+                key={index}
+                title={`Tìm kiếm việc làm: ${keyword.text} (${keyword.count} việc làm)`}
+                placement="top"
               >
-              <Chip
-                label={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  {keyword.hot && <StarIcon sx={{ fontSize: 14, color: '#ff9800' }} />}
-                  <span>{keyword.text}</span>
-                  <Box component="span" sx={{
-                  ml: 0.5,
-                  px: 0.8,
-                  py: 0.2,
-                  borderRadius: 1,
-                  background: 'rgba(255,255,255,0.9)',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: keyword.hot ? '#d32f2f' : '#666'
-                  }}>
-                  {keyword.count}
-                  </Box>
-                </Box>
-                }
-                onClick={() => {
-                  const searchParams = new URLSearchParams({ job: keyword.text });
-                  window.location.href = `/candidate/job-search?${searchParams.toString()}`;
-                }}
-                sx={{
-                background: keyword.hot 
-                  ? 'linear-gradient(135deg, #d32f2f 0%, #1976d2 100%)'
-                  : 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
-                color: keyword.hot ? 'white' : 'text.primary',
-                fontWeight: 600,
-                fontSize: '0.875rem',
-                height: 40,
-                px: 2,
-                cursor: 'pointer',
-                '&:hover': {
-                  background: keyword.hot
-                  ? 'linear-gradient(135deg, #b71c1c 0%, #1565c0 100%)'
-                  : 'linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: keyword.hot
-                  ? '0 4px 12px rgba(211, 47, 47, 0.3)'
-                  : '0 4px 12px rgba(0,0,0,0.1)'
-                },
-                transition: 'all 0.3s ease'
-                }}
-              />
+                <Chip
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      {keyword.hot && <StarIcon sx={{ fontSize: 14, color: '#ff9800' }} />}
+                      <span>{keyword.text}</span>
+                      <Box component="span" sx={{
+                        ml: 0.5,
+                        px: 0.8,
+                        py: 0.2,
+                        borderRadius: 1,
+                        bgcolor: (theme) => 
+                          theme.palette.mode === 'dark'
+                            ? 'rgba(255,255,255,0.15)'
+                            : 'rgba(255,255,255,0.9)',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: keyword.hot ? 'primary.main' : 'text.secondary'
+                      }}>
+                        {keyword.count}
+                      </Box>
+                    </Box>
+                  }
+                  onClick={() => {
+                    const searchParams = new URLSearchParams({ job: keyword.text });
+                    window.location.href = `/candidate/job-search?${searchParams.toString()}`;
+                  }}
+                  sx={{
+                    background: (theme) => keyword.hot 
+                      ? theme.palette.mode === 'dark'
+                        ? 'linear-gradient(135deg, #e63946 0%, #1e88e5 100%)'
+                        : 'linear-gradient(135deg, #d32f2f 0%, #1976d2 100%)'
+                      : theme.palette.mode === 'dark'
+                        ? 'linear-gradient(135deg, #424242 0%, #303030 100%)'
+                        : 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
+                    color: keyword.hot ? 'white' : 'text.primary',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    height: 40,
+                    px: 2,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      background: (theme) => keyword.hot
+                        ? theme.palette.mode === 'dark'
+                          ? 'linear-gradient(135deg, #c62828 0%, #1565c0 100%)'
+                          : 'linear-gradient(135deg, #b71c1c 0%, #1565c0 100%)'
+                        : theme.palette.mode === 'dark'
+                          ? 'linear-gradient(135deg, #616161 0%, #424242 100%)'
+                          : 'linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: (theme) => keyword.hot
+                        ? `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`
+                        : `0 4px 12px ${alpha(theme.palette.text.primary, 0.1)}`
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                />
               </Tooltip>
             ))}
           </Box>
@@ -160,7 +176,7 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
         {/* Popular Categories */}
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-            <LocalOfferIcon sx={{ color: '#1976d2', fontSize: 20 }} />
+            <LocalOfferIcon sx={{ color: 'secondary.main', fontSize: 20 }} />
             <Typography variant="subtitle1" fontWeight={600} color="text.primary">
               Danh mục nghề nghiệp nổi bật
             </Typography>
@@ -176,14 +192,15 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
                 key={index}
                 onClick={() => handleSuggestionClick(category.name)}
                 sx={{
-                  background: `linear-gradient(135deg, ${alpha(category.color, 0.05)} 0%, #ffffff 100%)`,
-                  border: `2px solid ${alpha(category.color, 0.1)}`,
+                  bgcolor: 'background.paper',
+                  border: 2,
+                  borderColor: alpha(category.color, 0.2),
                   borderRadius: 3,
                   cursor: 'pointer',
                   position: 'relative',
                   overflow: 'hidden',
                   '&:hover': {
-                    borderColor: alpha(category.color, 0.3),
+                    borderColor: alpha(category.color, 0.4),
                     transform: 'translateY(-4px)',
                     boxShadow: `0 8px 24px ${alpha(category.color, 0.2)}`
                   },
@@ -197,7 +214,7 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
                   right: -15,
                   width: 80,
                   height: 80,
-                  background: alpha(category.color, 0.08),
+                  bgcolor: alpha(category.color, 0.08),
                   borderRadius: '50%'
                 }} />
 
@@ -211,10 +228,8 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({ onSuggestionClick
                       alignItems: 'center',
                       justifyContent: 'center',
                       borderRadius: 2,
-                      background: alpha(category.color, 0.1),
-                    }}
-                      
-                    >
+                      bgcolor: alpha(category.color, 0.15),
+                    }}>
                       {category.icon}
                     </Box>
                     

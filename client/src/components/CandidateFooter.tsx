@@ -1,4 +1,4 @@
-import type React from "react"
+import type React from "react";
 import {
   Box,
   Container,
@@ -7,7 +7,8 @@ import {
   Divider,
   IconButton,
   Tooltip,
-} from "@mui/material"
+  useTheme
+} from "@mui/material";
 import {
   Facebook as FacebookIcon,
   LinkedIn as LinkedInIcon,
@@ -17,11 +18,11 @@ import {
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
   Work as WorkIcon,
-  ArrowRight as ArrowRightIcon,
-} from "@mui/icons-material"
+} from "@mui/icons-material";
 
 const CandidateFooter: React.FC = () => {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
+  const theme = useTheme();
 
   const footerLinks = {
     jobs: [
@@ -46,13 +47,14 @@ const CandidateFooter: React.FC = () => {
       { label: "Điều khoản sử dụng", href: "https://www.facebook.com/HocvienPTIT" },
       { label: "Blog", href: "https://www.facebook.com/HocvienPTIT" },
     ],
-  }
+  };
 
   const socialLinks = [
     { icon: <FacebookIcon />, href: "https://www.facebook.com/HocvienPTIT", label: "Facebook" },
     { icon: <LinkedInIcon />, href: "https://www.linkedin.com/school/posts-and-telecommunications-institute-of-technology/", label: "LinkedIn" },
+    { icon: <TwitterIcon />, href: "https://twitter.com", label: "X / Twitter" },
     { icon: <YouTubeIcon />, href: "https://www.youtube.com/@PChannels", label: "YouTube" },
-  ]
+  ];
 
   return (
     <Box
@@ -93,10 +95,11 @@ const CandidateFooter: React.FC = () => {
               >
                 <WorkIcon sx={{ color: "white", fontSize: 24 }} />
               </Box>
-              <Typography variant="h6" fontWeight="700" sx={{ fontSize: "1.1rem" }}>
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.1rem" }}>
                 PTIT Job
               </Typography>
             </Box>
+
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.6 }}>
               Nền tảng tìm việc làm hàng đầu dành cho sinh viên và người đi làm, kết nối với hàng
               nghìn cơ hội việc làm chất lượng.
@@ -125,74 +128,110 @@ const CandidateFooter: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Links Group */}
-          {[
-            { title: "Việc làm", links: footerLinks.jobs },
-            { title: "Công cụ", links: footerLinks.tools },
-            { title: "Hỗ trợ", links: footerLinks.support },
-          ].map((section, i) => (
-            <Box key={i} sx={{ flex: { xs: "1 1 45%", md: "1 1 22%" } }}>
-              <Typography variant="h6" fontWeight="700" gutterBottom sx={{ fontSize: "0.95rem", mb: 2.5 }}>
-                {section.title}
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}>
-                {section.links.map((link, index) => (
-                  <Link
-                    key={index}
-                    href={link.href}
-                    variant="body2"
-                    color="text.secondary"
+          {/* Jobs Links */}
+          <Box>
+            <Typography variant="h6" fontWeight="bold" gutterBottom color="text.primary">
+              Việc làm
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {footerLinks.jobs.map((link, index) => (
+                <Link
+                  key={index}
+                  href={link.href}
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    textDecoration: "none",
+                    "&:hover": {
+                      color: "primary.main",
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </Box>
+          </Box>
+
+          {/* Tools Links */}
+          <Box>
+            <Typography variant="h6" fontWeight="bold" gutterBottom color="text.primary">
+              Công cụ
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {footerLinks.tools.map((link, index) => (
+                <Link
+                  key={index}
+                  href={link.href}
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    textDecoration: "none",
+                    "&:hover": {
+                      color: "primary.main",
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </Box>
+          </Box>
+
+          {/* Support & Social */}
+          <Box>
+            <Typography variant="h6" fontWeight="bold" gutterBottom color="text.primary">
+              Hỗ trợ
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
+              {footerLinks.support.map((link, index) => (
+                <Link
+                  key={index}
+                  href={link.href}
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    textDecoration: "none",
+                    "&:hover": {
+                      color: "primary.main",
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </Box>
+
+            <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.9rem", mb: 1.5 }} color="text.secondary">
+              Theo dõi chúng tôi
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {socialLinks.map((social, index) => (
+                <Tooltip key={index} title={social.label}>
+                  <IconButton
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    size="small"
                     sx={{
-                      textDecoration: "none",
-                      fontSize: "0.9rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
+                      color: "text.secondary",
                       transition: "all 0.3s ease",
                       "&:hover": {
-                        color: "primary.main",
-                        transform: "translateX(4px)",
+                        color: "white",
+                        backgroundColor: "primary.main",
+                        transform: "translateY(-4px)",
                       },
                     }}
                   >
-                    {link.label}
-                    <ArrowRightIcon sx={{ fontSize: 14 }} />
-                  </Link>
-                ))}
-              </Box>
-
-              {section.title === "Hỗ trợ" && (
-                <>
-                  <Typography variant="body2" fontWeight="600" sx={{ fontSize: "0.9rem", mt: 3, mb: 1.5 }}>
-                    Theo dõi chúng tôi
-                  </Typography>
-                  <Box sx={{ display: "flex", gap: 1 }}>
-                    {socialLinks.map((social, index) => (
-                      <Tooltip key={index} title={social.label}>
-                        <IconButton
-                          href={social.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          size="small"
-                          sx={{
-                            color: "text.secondary",
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              color: "white",
-                              backgroundColor: "primary.main",
-                              transform: "translateY(-4px)",
-                            },
-                          }}
-                        >
-                          {social.icon}
-                        </IconButton>
-                      </Tooltip>
-                    ))}
-                  </Box>
-                </>
-              )}
+                    {social.icon}
+                  </IconButton>
+                </Tooltip>
+              ))}
             </Box>
-          ))}
+          </Box>
         </Box>
 
         <Divider sx={{ my: 4 }} />
@@ -257,7 +296,7 @@ const CandidateFooter: React.FC = () => {
         </Container>
       </Box>
     </Box>
-  )
-}
+  );
+};
 
-export default CandidateFooter
+export default CandidateFooter;

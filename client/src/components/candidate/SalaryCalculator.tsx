@@ -226,7 +226,7 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ calculationType, on
     <Paper elevation={3} sx={{ 
       p: 3, 
       borderRadius: 2,
-      background: 'linear-gradient(145deg, #ffffff, #f8f9fa)',
+      backgroundColor: 'theme.palette.background.paper',
       border: `1px solid #e0e0e0`,
       position: 'relative',
       overflow: 'hidden'
