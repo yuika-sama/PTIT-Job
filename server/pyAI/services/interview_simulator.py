@@ -112,13 +112,71 @@ def score_answer(question_data: dict, user_answer: str) -> float:
     
     # Check các câu trả lời vô nghĩa phổ biến
     meaningless_patterns = [
-        'i dont know', 'i don\'t know', 'idk', 'không biết', 'ko biết', 'k biết',
-        'tôi không biết', 'tui không biết', 'mình không biết',
-        'không rõ', 'ko rõ', 'chưa biết', 'chưa rõ',
-        'pass', 'skip', 'next', 'bỏ qua',
-        'aaaaa', 'bbbbb', 'asdfgh', 'qwerty', 'test', 'testing',
-        '???', '...', '!!!'
+        # ======= ENGLISH "DON'T KNOW" EXPRESSIONS =======
+        'i dont know', "i don't know", "i do not know", 'idk', 'dk', 'dunno', "i dunno",
+        'no idea', 'not sure', "i'm not sure", "im not sure", 'maybe', 'perhaps', 'no clue',
+        'nothing', 'none', 'not really', 'nope', 'nah', 'no thanks', 'not yet',
+        'no opinion', 'no answer', 'no comment', 'can\'t say', 'cant say',
+        "don't remember", 'forgot', 'don\'t recall', 'unsure', 'idc', "i don't care",
+        'whatever', 'who cares', "doesn't matter", 'meh', 'anything', 'something', 'stuff',
+
+        # ======= VIETNAMESE "KHÔNG BIẾT" & UNCERTAIN =======
+        'không biết', 'ko biết', 'k biết', 'hong biết', 'hổng biết', 'hông biết',
+        'tôi không biết', 'tui không biết', 'mình không biết', 'chả biết', 'éo biết',
+        'đéo biết', 'méo biết', 'chịu', 'chịu thua', 'chịu luôn', 'không nhớ', 'ko nhớ',
+        'k nhớ', 'chưa biết', 'chưa rõ', 'chưa nghĩ ra', 'chưa có ý kiến',
+        'không rõ', 'ko rõ', 'k rõ', 'chưa hiểu', 'chưa nghĩ', 'không quan tâm',
+        'sao cũng được', 'gì cũng được', 'tùy', 'tuỳ', 'tùy thôi', 'tuỳ thôi',
+        'tùy bạn', 'tuỳ bạn', 'thế nào cũng được', 'bình thường thôi', 'ko quan trọng',
+
+        # ======= PASS / SKIP / PLACEHOLDER =======
+        'pass', 'skip', 'next', 'bỏ qua', 'qua câu khác', 'để sau', 'sau đi',
+        'kế tiếp', 'none', 'n/a', 'na', 'not applicable', 'null', 'empty', 'trống',
+        'default', 'demo', 'sample', 'placeholder', 'test', 'testing', 'abc', 'xyz',
+        'lorem', 'ipsum', 'temp', 'draft', 'unknown', 'undefined',
+
+        # ======= RANDOM STRINGS & KEYBOARD MASHES =======
+        'aaa', 'aaaa', 'aaaaa', 'aaaaaa', 'bbb', 'bbbbb', 'ccc', 'ccc', 'ddd', 'eee',
+        'asdf', 'asdfg', 'asdfgh', 'asdfghjkl', 'qwerty', 'qwert', 'zxcv', 'zxcvb',
+        '123', '1234', '12345', '123456', '000', '0000', '111', '1111', '999', '9999',
+        'abc123', 'xyz123', 'test123', 'random', 'rubbish', 'nonsense',
+
+        # ======= SHORT FILLERS / REACTIONS =======
+        'ok', 'oke', 'okie', 'okay', 'okok', 'yes', 'no', 'yeah', 'yep', 'noo',
+        'uh', 'uhm', 'umm', 'um', 'hmm', 'hmmm', 'hm', 'uhhh', 'ah', 'oh', 'eh',
+        'bruh', 'bro', 'yo', 'hi', 'hello', 'hey', 'yooo', 'haha', 'hihi', 'hehe',
+        'huhu', 'kkk', 'lol', 'lmao', 'rofl', 'wtf', 'wtfff', 'idfk', 'idc', 'omg',
+        'wow', 'ouch', 'nah', 'ye', 'ya', 'ayo', 'yuh', 'hmmmmm', 'zzzz', 'zzz',
+
+        # ======= PUNCTUATION / SYMBOLS =======
+        '?', '??', '???', '????', '?????', '!', '!!', '!!!', '!!!!', '.....', '....',
+        '...', '??!!', '?!', '!?', '???!!!', '???...', '~~~', '---', '///', '\\\\\\',
+        '...', '......', '...', '--', '__', '___', '__', '~', '~ ~', '~~~',
+
+        # ======= NON-INFORMATIVE EMOJIS / REACTIONS =======
+        '¯\\_(ツ)_/¯', ':)', ':(', ':v', ':D', ':P', ':3', ':|', ':O',
+        '😅', '😂', '🤣', '😐', '🤷', '🤷‍♂️', '🤷‍♀️', '😕', '🙃', '😶', '😒', '😔',
+        '😞', '😢', '😭', '😆', '😎', '🥲', '🫠', '🤦', '🤦‍♂️', '🤦‍♀️',
+
+        # ======= INDIFFERENCE OR UNCLEAR MEANING =======
+        'whatever', 'anything', 'nothing special', 'no matter', 'up to you',
+        'as you wish', 'fine', 'it\'s fine', 'i guess', 'guess so', 'maybe later',
+        'not important', 'irrelevant', 'no difference', 'same', 'same thing',
+        'tùy thôi', 'cũng được', 'gì cũng được', 'tùy mà', 'tuỳ mà', 'hên xui',
+
+        # ======= CONFUSED / UNDECIDED REACTIONS =======
+        'not sure yet', 'still thinking', 'thinking', 'hmm i don\'t know',
+        'let me think', 'don\'t know yet', 'still unsure', 'idk yet', 'no thought',
+        'maybe no', 'maybe yes', 'possibly', 'probably not', 'perhaps later',
+
+        # ======= JOKING OR TROLL RESPONSES =======
+        'ask google', 'google it', 'who cares', 'ask chatgpt', 'your mom', 'bro idk',
+        'lol idk', 'idk man', 'idk bro', 'idk dude', '¯\\_(ツ)_/¯', 'don’t ask me',
+        'ai mà biết', 'trời biết', 'ai biết', 'biết chết liền', 'chịu chết',
+        'chịu luôn', 'hỏi làm gì', 'kệ đi', 'thôi kệ', 'thích thì trả lời',
+        'ai quan tâm', 'cần gì biết', 'tào lao', 'linh tinh', 'vớ vẩn', 'đéo', 'khum'   
     ]
+
     
     answer_lower = user_answer.lower()
     if any(pattern in answer_lower for pattern in meaningless_patterns):
@@ -129,11 +187,53 @@ def score_answer(question_data: dict, user_answer: str) -> float:
     if word_count < 5:
         # Check xem có phải câu trả lời thực sự không
         has_technical_words = any(word in answer_lower for word in [
-            'because', 'when', 'how', 'why', 'what', 'which', 'where',
-            'vì', 'khi', 'như thế nào', 'tại sao', 'là gì', 'nào', 'ở đâu',
-            'can', 'could', 'should', 'would', 'may', 'might',
-            'có thể', 'nên', 'sẽ', 'được'
+            # ======= ENGLISH EXPLANATORY / TECHNICAL CONNECTORS =======
+            'because', 'since', 'as', 'so that', 'in order to', 'therefore', 'thus',
+            'hence', 'for example', 'for instance', 'such as', 'including',
+            'when', 'while', 'whenever', 'once', 'after', 'before', 'until', 'unless',
+            'how', 'why', 'what', 'which', 'where', 'who', 'whose', 'whom',
+            'although', 'though', 'even though', 'despite', 'in spite of',
+            'can', 'could', 'should', 'would', 'may', 'might', 'must', 'will',
+            'is', 'are', 'was', 'were', 'be', 'being', 'been', 'does', 'did', 'do',
+            'if', 'then', 'else', 'otherwise',
+            'therefore', 'hence', 'consequently', 'accordingly', 'meanwhile', 'overall',
+            'depends', 'relates to', 'connected', 'based on', 'due to', 'caused by',
+            'function', 'process', 'method', 'algorithm', 'logic', 'condition',
+            'input', 'output', 'data', 'variable', 'parameter', 'result', 'return',
+            'calculate', 'compute', 'determine', 'reason', 'explain', 'define', 'describe',
+            'purpose', 'objective', 'goal', 'effect', 'impact', 'difference',
+            'approach', 'model', 'system', 'structure', 'workflow', 'pipeline',
+
+            # ======= VIETNAMESE LOGICAL / TECHNICAL CONNECTORS =======
+            'vì', 'bởi vì', 'do', 'do đó', 'nên', 'vì vậy', 'thành ra', 'cho nên',
+            'tại sao', 'bởi vậy', 'vì thế', 'vì lí do', 'bởi lẽ', 'tại vì',
+            'khi', 'nếu', 'khi nào', 'nếu như', 'trong khi', 'miễn là',
+            'như thế nào', 'bằng cách', 'cách mà', 'là gì', 'gì đó', 'cách thức',
+            'lúc', 'sau khi', 'trước khi', 'đến khi', 'điều kiện', 'giả sử',
+            'nào', 'ở đâu', 'tại đâu', 'bao giờ', 'thế nào',
+            'có thể', 'nên', 'sẽ', 'được', 'phải', 'cần', 'cần phải', 'nên phải',
+            'để', 'mục đích', 'nhằm', 'giúp cho', 'dẫn đến', 'ảnh hưởng đến',
+            'liên quan', 'phụ thuộc', 'dựa vào', 'dựa trên', 'gây ra', 'tạo ra',
+            'kết quả', 'nguyên nhân', 'hiệu ứng', 'tác động', 'ý nghĩa', 'đặc điểm',
+            'quy trình', 'hệ thống', 'cấu trúc', 'phương pháp', 'cách tiếp cận',
+            'ví dụ', 'chẳng hạn', 'bao gồm', 'tức là', 'nghĩa là', 'cụ thể là',
+
+            # ======= TECHNICAL CONTEXT WORDS (domain-relevant) =======
+            'code', 'coding', 'program', 'algorithm', 'data', 'database', 'function',
+            'method', 'class', 'object', 'variable', 'parameter', 'module', 'system',
+            'model', 'architecture', 'framework', 'library', 'component', 'process',
+            'server', 'client', 'frontend', 'backend', 'api', 'query', 'sql', 'json',
+            'analyze', 'analysis', 'logic', 'condition', 'loop', 'iterate', 'return',
+            'deploy', 'execute', 'performance', 'optimize', 'debug', 'compile', 'build',
+
+            # ======= VIETNAMESE TECHNICAL TERMS =======
+            'hàm', 'biến', 'dữ liệu', 'tham số', 'kết quả', 'trả về', 'chạy', 'thực thi',
+            'hiệu năng', 'thuật toán', 'mô hình', 'phân tích', 'xử lý', 'triển khai',
+            'tối ưu', 'gỡ lỗi', 'xây dựng', 'thực hiện', 'kiến trúc', 'hệ thống',
+            'thành phần', 'module', 'chương trình', 'cơ sở dữ liệu', 'truy vấn',
+            'đầu vào', 'đầu ra', 'vòng lặp', 'điều kiện', 'phương thức', 'hàm số'
         ])
+
         if not has_technical_words:
             print(f"[DEBUG] Very short answer without substance ({word_count} words) - low score")
             return 0.1  # Cho điểm tối thiểu
@@ -172,14 +272,48 @@ def score_answer(question_data: dict, user_answer: str) -> float:
     answer_words = set(user_answer.lower().split())
     
     # Remove common words
-    stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 
-                 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'be', 
-                 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 
-                 'would', 'should', 'could', 'may', 'might', 'can', 'this', 'that', 
-                 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they',
-                 'của', 'và', 'hoặc', 'nhưng', 'trong', 'trên', 'ở', 'để', 'với',
-                 'bởi', 'từ', 'là', 'được', 'có', 'đã', 'sẽ', 'này', 'đó', 'các',
-                 'một', 'cho', 'đến', 'như', 'rất', 'thì', 'khi', 'nếu'}
+    stopwords = {
+        # ===== ENGLISH STOPWORDS =====
+        'the', 'a', 'an', 'and', 'or', 'but', 'if', 'while', 'although', 'though', 'even', 'unless',
+        'because', 'since', 'so', 'therefore', 'thus', 'however', 'then', 'also', 'too', 'either', 'neither',
+        'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'about', 'as', 'into', 'onto', 'over',
+        'under', 'above', 'below', 'through', 'across', 'between', 'among', 'without', 'within', 'before', 'after',
+        'up', 'down', 'out', 'off', 'again', 'further', 'once',
+        'is', 'am', 'are', 'was', 'were', 'be', 'been', 'being',
+        'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing',
+        'will', 'would', 'shall', 'should', 'can', 'could', 'may', 'might', 'must',
+        'this', 'that', 'these', 'those', 'it', 'its', 'it\'s', 'there', 'their', 'theirs', 'them',
+        'i', 'me', 'my', 'mine', 'you', 'your', 'yours', 'he', 'him', 'his', 'she', 'her', 'hers',
+        'we', 'our', 'ours', 'they', 'their', 'ourselves', 'themselves', 'yourself', 'yourselves',
+        'who', 'whom', 'whose', 'what', 'which', 'where', 'when', 'why', 'how',
+        'yes', 'no', 'not', 'nor', 'very', 'just', 'only', 'own', 'same', 'such', 'than', 'too', 'so',
+        'more', 'most', 'some', 'any', 'each', 'few', 'many', 'much', 'several', 'all', 'both', 'either', 'neither',
+        'ever', 'never', 'always', 'sometimes', 'often', 'usually', 'rarely',
+        'oh', 'uh', 'um', 'hmm', 'huh', 'lol', 'yeah', 'yep', 'nope', 'ok', 'okay', 'alright',
+
+        # ===== VIETNAMESE STOPWORDS =====
+        'và', 'hoặc', 'nhưng', 'bởi', 'vì', 'do', 'tại', 'nên', 'nếu', 'khi', 'để', 'với', 'cho', 'như', 
+        'rồi', 'thì', 'là', 'có', 'không', 'chưa', 'đã', 'sẽ', 'đang', 'vẫn', 'được', 'bị', 'bằng', 'cùng', 
+        'trong', 'ngoài', 'trên', 'dưới', 'giữa', 'vào', 'ra', 'đến', 'tới', 'qua', 'về', 'theo', 'tại', 'ở',
+        'này', 'kia', 'đó', 'ấy', 'nọ', 'các', 'một', 'hai', 'ba', 'nhiều', 'ít', 'mọi', 'tất cả', 'toàn bộ',
+        'ai', 'gì', 'cái', 'nào', 'đâu', 'sao', 'vì sao', 'tại sao', 'bao nhiêu', 'thế nào', 'ra sao',
+        'tôi', 'ta', 'mình', 'chúng tôi', 'chúng ta', 'bạn', 'cậu', 'mày', 'mình', 'họ', 'ông', 'bà', 'anh', 'chị', 'em',
+        'nó', 'hắn', 'người', 'ai đó', 'gì đó', 'cái đó', 'này nọ',
+        'đây', 'kia', 'ấy', 'đó', 'chính', 'vừa', 'cũng', 'đều', 'thậm chí', 'cả', 'đôi khi', 'lắm', 'rất', 'hơi', 'quá',
+        'vừa mới', 'đã từng', 'đang khi', 'đang lúc', 'vì vậy', 'do đó', 'bởi vậy', 'bởi thế',
+        'nên là', 'cho nên', 'tuy nhiên', 'nhưng mà', 'mà', 'thế nên', 'vì thế', 'vì vậy nên',
+        'đúng', 'sai', 'vâng', 'dạ', 'ừ', 'ờ', 'ok', 'ừm', 'à', 'ơ', 'hả', 'hử', 'ờm', 'ừa', 'vậy', 'thế',
+        'hết', 'xong', 'đâu', 'chưa', 'rồi', 'nữa', 'còn', 'cũng như', 'hay là', 'thì ra', 'ngay', 'liền', 'luôn',
+        'thật', 'ra', 'thật ra', 'thực ra', 'thực tế', 'nói chung', 'nói thật', 'đại loại', 'kiểu như',
+        'với lại', 'dù sao', 'tức là', 'nghĩa là', 'như là', 'bao gồm', 'chẳng hạn', 'ví dụ', 'vậy thôi', 'thế thôi',
+
+        # ===== GENERIC FILLER / LOW-INFORMATION WORDS =====
+        'uh', 'ừm', 'ờm', 'ờ', 'à', 'á', 'hả', 'ơ', 'hử', 'ừ', 'dạ', 'vâng',
+        'ha', 'hihi', 'haha', 'hehe', 'huhu', 'lol', 'lmao', 'bruh', 'bro', 'okay', 'okie',
+        'yeah', 'nope', 'uhh', 'umm', 'uhm', 'hmm', 'hmmm', 'à nha', 'ờ ha', 'thế à',
+        'ờ kìa', 'ờ nhỉ', 'ờ há', 'ơ kìa', 'ơ hả', 'ơ nhỉ', 'ừ ha', 'ừ nhỉ',
+    }
+
     
     concept_keywords = concept_keywords - stopwords
     answer_words = answer_words - stopwords
@@ -199,10 +333,62 @@ def score_answer(question_data: dict, user_answer: str) -> float:
     if question_type == "behavioral":
         # Behavioral questions value structure (STAR method)
         # Check for situation, task, action, result keywords
-        star_keywords = ['situation', 'task', 'action', 'result', 'challenge', 
-                        'problem', 'solution', 'outcome', 'learned', 'impact',
-                        'tình huống', 'nhiệm vụ', 'hành động', 'kết quả', 'thách thức',
-                        'vấn đề', 'giải pháp', 'học được', 'tác động', 'ảnh hưởng']
+        star_keywords = [
+            # ===== ENGLISH: SITUATION =====
+            'situation', 'context', 'background', 'circumstance', 'scenario', 'case',
+            'environment', 'condition', 'state', 'setting', 'stage', 'problem statement',
+            'issue', 'challenge', 'difficulty', 'obstacle', 'barrier', 'risk',
+            'problem', 'incident', 'event', 'example', 'experience',
+
+            # ===== ENGLISH: TASK =====
+            'task', 'objective', 'goal', 'target', 'responsibility', 'duty', 'assignment',
+            'requirement', 'mission', 'expectation', 'job', 'role', 'purpose',
+            'aim', 'intention', 'thing to do', 'thing i had to do', 'deliverable',
+
+            # ===== ENGLISH: ACTION =====
+            'action', 'step', 'measure', 'activity', 'process', 'initiative', 'implementation',
+            'solution', 'approach', 'strategy', 'plan', 'method', 'procedure', 'operation',
+            'execution', 'handled', 'responded', 'did', 'performed', 'applied',
+            'contributed', 'supported', 'led', 'organized', 'collaborated', 'communicated',
+
+            # ===== ENGLISH: RESULT =====
+            'result', 'outcome', 'impact', 'effect', 'consequence', 'benefit', 'achievement',
+            'accomplishment', 'success', 'improvement', 'growth', 'learned', 'lesson',
+            'gain', 'insight', 'value', 'metric', 'feedback', 'recognition', 'reward',
+            'performance', 'progress', 'impactful', 'delivered', 'output', 'what happened',
+
+            # ===== ENGLISH: REFLECTION =====
+            'what i learned', 'what i gained', 'lesson learned', 'insight gained',
+            'reflection', 'takeaway', 'realized', 'understood', 'found out', 'discovered',
+
+            # ===== VIETNAMESE: SITUATION =====
+            'tình huống', 'bối cảnh', 'hoàn cảnh', 'trường hợp', 'môi trường',
+            'vấn đề', 'thách thức', 'khó khăn', 'rào cản', 'nguy cơ', 'trở ngại',
+            'sự cố', 'sự kiện', 'ví dụ', 'kinh nghiệm', 'tình trạng',
+
+            # ===== VIETNAMESE: TASK =====
+            'nhiệm vụ', 'mục tiêu', 'mục đích', 'trách nhiệm', 'công việc', 'vai trò',
+            'yêu cầu', 'sứ mệnh', 'điều cần làm', 'việc phải làm', 'mong đợi', 'kỳ vọng',
+            'kế hoạch', 'đề bài', 'nhiệm vụ được giao', 'điều được giao',
+
+            # ===== VIETNAMESE: ACTION =====
+            'hành động', 'bước', 'biện pháp', 'hoạt động', 'quy trình', 'cách xử lý',
+            'giải pháp', 'cách giải quyết', 'cách tiếp cận', 'phương pháp', 'cách làm',
+            'kế hoạch hành động', 'thực hiện', 'ứng dụng', 'triển khai', 'thực thi',
+            'phối hợp', 'hỗ trợ', 'tham gia', 'đóng góp', 'tổ chức', 'lãnh đạo', 'giải quyết',
+
+            # ===== VIETNAMESE: RESULT =====
+            'kết quả', 'tác động', 'ảnh hưởng', 'hiệu quả', 'thành công', 'thành tựu',
+            'cải thiện', 'tiến bộ', 'phát triển', 'đóng góp', 'thay đổi', 'đạt được',
+            'học được', 'rút ra', 'bài học', 'kinh nghiệm', 'đánh giá', 'phản hồi',
+            'nhận được', 'ghi nhận', 'khen thưởng', 'tăng trưởng', 'hiệu suất',
+
+            # ===== VIETNAMESE: REFLECTION =====
+            'điều tôi học được', 'tôi nhận ra', 'tôi hiểu rằng', 'bài học rút ra',
+            'điều rút ra', 'kinh nghiệm quý', 'bài học kinh nghiệm', 'đúc kết', 'nhận thức được',
+            'ý nghĩa', 'bài học cá nhân'
+        ]
+
         star_matches = sum(1 for kw in star_keywords if kw in user_answer.lower())
         star_bonus = min(0.1, star_matches * 0.025)  # up to 10% bonus
     else:

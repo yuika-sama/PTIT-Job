@@ -39,7 +39,7 @@ import { authService } from '../../services/authService';
 
 const Profile: React.FC = () => {
   const { user, updateUser } = useAuth();
-  console.log('User data:', user);
+  console.log('User data:', user);  
   const [avatarHover, setAvatarHover] = useState(false);
   
   // Dialog states

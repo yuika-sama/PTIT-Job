@@ -103,6 +103,7 @@ app.get('/health', () => ({
 }));
 
 const PORT = process.env.PORT || 3000;
+// app.listen(PORT, '0.0.0.0');
 app.listen(PORT, () => {
   console.log(`🦊 Elysia server is running on port ${PORT}`);
   console.log(`Swagger documentation at: http://localhost:${PORT}/swagger`);

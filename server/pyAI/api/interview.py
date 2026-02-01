@@ -250,13 +250,12 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
     cv_score = float(state.get("cv_score", 0.0))
     scores = state.get("interview_scores", [])
     
-    print(f"[DEBUG] Final scoring - CV score from state: {cv_score}%")
-    print(f"[DEBUG] Final scoring - Interview scores: {scores}")
+    print(f"[DEBUG] Final scoring - CV score from state: {cv_score}")
+    print(f"[DEBUG] Final scoring - Interview scores (0-1 range): {scores}")
     
-    # Validation: Đảm bảo cv_score hợp lệ
+    # Validation: Đảm bảo cv_score hợp lệ (cv_score đã ở dạng 0-100 từ lúc start)
     if cv_score <= 0:
         print("[WARNING] CV score is 0 or invalid at final scoring!")
-        # Thử lấy lại từ state hoặc đặt mặc định
         cv_score = 0.0
     
     # Validation: Đảm bảo có điểm phỏng vấn
@@ -264,8 +263,8 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
         print("[WARNING] No interview scores recorded!")
         avg_interview_score = 0.0
     else:
-        # Tính điểm phỏng vấn trung bình (0-100)
-        avg_interview_score = (sum(scores) / len(scores) * 100.0)
+        # Tính điểm phỏng vấn trung bình (scores đang ở dạng 0-1, cần chuyển sang 0-100)
+        avg_interview_score = (sum(scores) / len(scores)) * 100.0
     
     print(f"[DEBUG] Average interview score calculated: {avg_interview_score:.2f}%")
     
@@ -283,18 +282,22 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
         }
     }
     
-    # Công thức tính điểm tổng hợp cải thiện:
-    # - CV score chiếm 30% (đánh giá background và kinh nghiệm)
-    # - Interview score chiếm 70% (đánh giá khả năng thực tế và communication)
+    # Công thức tính điểm tổng hợp:
+    # - CV score chiếm 30% (đánh giá background và kinh nghiệm) - đã ở dạng 0-100
+    # - Interview score chiếm 70% (đánh giá khả năng thực tế và communication) - đã ở dạng 0-100
     # Lý do: Phỏng vấn phản ánh khả năng thực tế tốt hơn CV
     cv_weight = 0.30
     interview_weight = 0.70
-    final_score = cv_weight * cv_score + interview_weight * avg_interview_score
+    # Cả hai score đã ở dạng 0-100, nên công thức chính xác
+    final_score = (cv_weight * cv_score) + (interview_weight * avg_interview_score)
     
-    print(f"[DEBUG] Final score breakdown:")
-    print(f"  - CV: {cv_score:.2f}% × {cv_weight} = {cv_score * cv_weight:.2f}")
-    print(f"  - Interview: {avg_interview_score:.2f}% × {interview_weight} = {avg_interview_score * interview_weight:.2f}")
-    print(f"  - Total: {final_score:.2f}%")
+    print(f"[DEBUG] Final score calculation:")
+    print(f"  - CV score (0-100): {cv_score:.2f}")
+    print(f"  - CV contribution (30%): {cv_score:.2f} × {cv_weight} = {cv_weight * cv_score:.2f}")
+    print(f"  - Interview score (0-100): {avg_interview_score:.2f}")
+    print(f"  - Interview contribution (70%): {avg_interview_score:.2f} × {interview_weight} = {interview_weight * avg_interview_score:.2f}")
+    print(f"  - FINAL SCORE: {final_score:.2f}%")
+    print(f"[DEBUG] CV score validation: state['cv_score']={state.get('cv_score')}, type={type(state.get('cv_score'))}")
     
     # Đánh giá mức độ tổng thể
     if final_score >= 80:

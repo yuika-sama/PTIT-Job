@@ -205,36 +205,46 @@ const SearchSection: React.FC<SearchSectionProps> = ({
           </Box>
           
           {/* Main Heading */}
-          <Typography 
-            variant="h1" 
+          <Typography
+            variant="h1"
             component="h1"
-            sx={{ 
+            sx={{
               fontSize: { xs: '2.2rem', sm: '3rem', md: '3.8rem', lg: '4.2rem' },
               fontWeight: 900,
               background: 'linear-gradient(45deg, #ffffff 20%, #e3f2fd 40%, #ffffff 60%, #f3e5f5 80%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              textShadow: '0 4px 8px rgba(0,0,0,0.1)',
+              textShadow: '0 2px 4px rgba(0,0,0,0.05)',
               lineHeight: 1.1,
               mb: 3,
               letterSpacing: '-0.5px',
-              animation: 'textGlow 3s ease-in-out infinite alternate'
+              animation: 'textGlow 3s ease-in-out infinite alternate',
+              // Fix lỗi render font lớn
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale',
+              transform: 'translateZ(0)',
+              textRendering: 'optimizeLegibility',
             }}
           >
             Khám phá cơ hội nghề nghiệp
             <br />
-            <Box component="span" sx={{ 
-              background: 'linear-gradient(45deg, #ffeb3b, #ffc107)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              fontSize: '0.9em'
-            }}>
+            <Box
+              component="span"
+              sx={{
+                background: 'linear-gradient(45deg, #ffeb3b, #ffc107)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontSize: '0.9em',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
+                textRendering: 'optimizeLegibility',
+              }}
+            >
               cùng PTIT Job
             </Box>
-          </Typography>
-          
+          </Typography>       
           {/* Subtitle */}
           <Typography 
             variant="h5" 

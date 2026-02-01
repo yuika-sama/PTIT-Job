@@ -254,24 +254,24 @@ const AppRoutes: React.FC = () => {
         <Route path="/candidate/*" element={
           <RoleProtectedRoute allowedRoles={['candidate']}>
             <Routes>
-              <Route path="dashboard" element={<CandidateDashboard />} />
+              <Route path="dashboard" element={<CandidateDashboard />} />                           {/* Done */}
               <Route path="profile" element={<Profile />} />
-              <Route path="jobs" element={<CandidateJobList />} />
-              <Route path="job-search" element={<JobSearchPage />} />
-              <Route path="cv-evaluation" element={<CVEvaluationPage />} />
-              <Route path="interview-emulate" element={<InterviewEmulate />} />
-              <Route path="best-jobs" element={<BestJobsPage />} />
-              <Route path="attractive-jobs" element={<AttractiveJobsPage />} />
-              <Route path="companies" element={<CompaniesPage />} />
-              <Route path="companies/:companyId" element={<CompaniesPage />} />
-              <Route path="top-companies" element={<TopCompaniesPage />} />
-              <Route path="company/:id" element={<CompanyDetailPage />} />
-              <Route path="bhxh-calculator" element={<BHXHCalculatorPage />} />
-              <Route path="personal-income-tax" element={<PersonalIncomeTaxPage />} />
-              <Route path="salary-calculator" element={<SalaryCalculatorPage />} />
-              <Route path="unemployment-insurance" element={<UnemploymentInsurancePage />} />
-              <Route path="compound-interest" element={<CompoundInterestPage />} />
-              <Route path="/job/:jobId" element={<JobDetailsPage />} />
+              <Route path="jobs" element={<CandidateJobList />} />                                {/* Done */}
+              <Route path="job-search" element={<JobSearchPage />} />                           {/* Done */}
+              <Route path="cv-evaluation" element={<CVEvaluationPage />} />                   {/* Done */}
+              <Route path="interview-emulate" element={<InterviewEmulate />} />               {/* Done */}
+              <Route path="best-jobs" element={<BestJobsPage />} />                             {/* Done */}
+              <Route path="attractive-jobs" element={<AttractiveJobsPage />} />               {/* Done */}
+              <Route path="companies" element={<CompaniesPage />} />                          {/* Done */}
+              <Route path="companies/:companyId" element={<CompaniesPage />} />               {/* Done */}
+              <Route path="top-companies" element={<TopCompaniesPage />} />                     {/* Done */}
+              <Route path="company/:id" element={<CompanyDetailPage />} />                       {/* Done */}
+              <Route path="bhxh-calculator" element={<BHXHCalculatorPage />} />                {/* Done */}
+              <Route path="personal-income-tax" element={<PersonalIncomeTaxPage />} />        {/* Done */}
+              <Route path="salary-calculator" element={<SalaryCalculatorPage />} />           {/* Done */}
+              <Route path="unemployment-insurance" element={<UnemploymentInsurancePage />} />   {/* Done */}
+              <Route path="compound-interest" element={<CompoundInterestPage />} />             {/* Done */}
+              <Route path="/job/:jobId" element={<JobDetailsPage />} />                           {/* Done */}
               <Route path="" element={<Navigate to="/candidate/dashboard" replace />} />
               <Route path="*" element={<NotFound404 />} />
             </Routes>
