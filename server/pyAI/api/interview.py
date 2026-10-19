@@ -10,8 +10,7 @@ router = APIRouter()
 
 def _extract_topics(q_item: Dict[str, Any]) -> List[str]:
     """
-    Cố gắng lấy 'chủ đề' của câu hỏi từ plan item.
-    Ưu tiên các trường thường gặp; fallback: suy diễn đơn giản từ question.
+    Trích xuất danh sách chủ đề của câu hỏi từ item kế hoạch phỏng vấn.
     """
     candidates = []
     for key in ("topic", "topics", "skill", "skills", "category", "criteria", "tags"):
@@ -24,7 +23,6 @@ def _extract_topics(q_item: Dict[str, Any]) -> List[str]:
                     candidates.append(v.strip())
 
     if candidates:
-        # unique, giữ tối đa 3 chủ đề
         seen = set()
         out = []
         for c in candidates:
@@ -33,34 +31,30 @@ def _extract_topics(q_item: Dict[str, Any]) -> List[str]:
                 out.append(c)
         return out[:3]
 
-    # Fallback: heuristic dựa trên text
+    # Heuristic dựa trên nội dung text câu hỏi
     q_text = (q_item.get("question") or "").lower()
     hints = []
-    if any(k in q_text for k in ["algorithm", "data structure", "time complexity", "độ phức tạp"]):
+    if any(k in q_text for k in ["algorithm", "data structure", "cấu trúc dữ liệu", "thuật toán", "độ phức tạp"]):
         hints.append("Thuật toán & Cấu trúc dữ liệu")
-    if any(k in q_text for k in ["system design", "kiến trúc", "scale", "phân tán"]):
-        hints.append("System Design")
-    if any(k in q_text for k in ["database", "sql", "nosql", "transaction"]):
-        hints.append("Database/SQL")
-    if any(k in q_text for k in ["frontend", "react", "ui", "ux"]):
-        hints.append("Frontend/React")
-    if any(k in q_text for k in ["backend", "api", "microservice", "rest", "grpc"]):
-        hints.append("Backend/API")
-    if any(k in q_text for k in ["cloud", "aws", "gcp", "azure", "docker", "kubernetes"]):
-        hints.append("Cloud/DevOps")
-    if any(k in q_text for k in ["behavioral", "tình huống", "conflict", "giao tiếp", "team"]):
+    if any(k in q_text for k in ["system design", "kiến trúc", "scale", "phân tán", "microservices"]):
+        hints.append("System Design & Architecture")
+    if any(k in q_text for k in ["database", "sql", "nosql", "transaction", "index"]):
+        hints.append("Database / SQL")
+    if any(k in q_text for k in ["frontend", "react", "ui", "ux", "dom", "vue"]):
+        hints.append("Frontend Development")
+    if any(k in q_text for k in ["backend", "api", "rest", "grpc", "node", "fastapi", "spring"]):
+        hints.append("Backend & API")
+    if any(k in q_text for k in ["docker", "cloud", "aws", "devops", "kubernetes", "ci/cd"]):
+        hints.append("DevOps & Cloud")
+    if any(k in q_text for k in ["behavioral", "tình huống", "conflict", "giao tiếp", "team", "áp lực"]):
         hints.append("Kỹ năng hành vi (Behavioral)")
 
-    return hints[:3] if hints else ["Trình bày & ví dụ minh hoạ"]
+    return hints[:3] if hints else ["Kỹ năng chuyên môn"]
 
 
 def _compile_improvements(state: Dict[str, Any]) -> List[Dict[str, str]]:
     """
-    Sinh danh sách gợi ý cải thiện dựa trên:
-    - các câu có điểm thấp (< 0.6)
-    - điểm phỏng vấn tổng thể
-    - điểm CV
-    Trả về dạng: [{"area": "...", "tip": "..."}]
+    Tổng hợp gợi ý cải thiện có tính hành động cao dựa trên kết quả từng câu hỏi.
     """
     improvements: List[Dict[str, str]] = []
 
@@ -70,11 +64,11 @@ def _compile_improvements(state: Dict[str, Any]) -> List[Dict[str, str]]:
 
     avg_interview_score = (sum(scores) / len(scores)) if scores else 0.0  # 0..1
 
-    # 1) Chủ đề yếu (score < 0.6)
+    # 1) Các chủ đề còn yếu (< 60%)
     weak_topics: Dict[str, List[float]] = {}
     for item in feedback_items:
         s = float(item.get("score", 0.0))
-        if s < 0.6:
+        if s < 0.60:
             for t in item.get("topics", []):
                 weak_topics.setdefault(t, []).append(s)
 
@@ -83,46 +77,38 @@ def _compile_improvements(state: Dict[str, Any]) -> List[Dict[str, str]]:
         improvements.append({
             "area": topic,
             "tip": (
-                f"Điểm trung bình ở chủ đề này còn thấp (~{mean_s*100:.0f}%). "
-                "Hãy dùng cấu trúc STAR (Situation–Task–Action–Result), đưa ví dụ dự án thật, "
-                "nêu rõ vai trò cá nhân, công nghệ đã dùng và con số kết quả (VD: giảm latency 35%, tăng CTR 12%)."
+                f"Điểm số ở mảng {topic} còn khiêm tốn (~{mean_s*100:.0f}%). "
+                "Cần nắm vững lý thuyết cốt lõi (bản chất hoạt động, ưu nhược điểm) và chuẩn bị ví dụ thực tế "
+                "theo mô hình STAR (Situation - Task - Action - Result) có số liệu chứng minh."
             )
         })
 
-    # 2) Nếu điểm phỏng vấn chung thấp
-    if avg_interview_score < 0.7:
+    # 2) Đánh giá chung nếu điểm phỏng vấn chưa cao
+    if avg_interview_score < 0.70:
         improvements.append({
-            "area": "Cách trình bày câu trả lời",
+            "area": "Kỹ năng trình bày và diễn đạt kỹ thuật",
             "tip": (
-                "Câu trả lời nên mạch lạc, theo trình tự: bối cảnh → mục tiêu → giải pháp → tác động. "
-                "Tránh mô tả chung chung; hãy cụ thể hoá bằng số liệu, quy mô hệ thống, đội nhóm, công cụ & trade-offs."
-            )
-        })
-        improvements.append({
-            "area": "Làm rõ kỹ thuật cốt lõi",
-            "tip": (
-                "Khi nói về kỹ thuật, hãy chỉ ra vì sao chọn giải pháp A thay vì B (ví dụ: Postgres vs. Elasticsearch), "
-                "phân tích độ phức tạp, bottlenecks, và cách bạn theo dõi/giám sát chất lượng (metrics, alerting)."
+                "Nên trả lời theo cấu trúc rõ ràng: Định nghĩa ngắn gọn → Bản chất kỹ thuật → "
+                "Trường hợp áp dụng thực tế → Trade-offs (đánh đổi giải pháp). Tránh trả lời quá ngắn hoặc thiếu dẫn chứng."
             )
         })
 
-    # 3) Nếu CV score thấp → gợi ý tailor CV
+    # 3) Nếu điểm CV thấp
     if cv_score < 60:
         improvements.append({
-            "area": "Tối ưu hoá CV theo JD",
+            "area": "Tối ưu hóa nội dung CV",
             "tip": (
-                "Bổ sung từ khoá sát JD (kỹ năng, công cụ), nhấn mạnh kết quả định lượng cho từng trải nghiệm, "
-                "đưa lên đầu những kỹ năng/ dự án khớp vị trí, và làm rõ mức độ thành thạo (VD: React 3 năm, Docker 2 năm)."
+                "Bổ sung các từ khóa công nghệ sát với Job Description, đưa các dự án tiêu biểu lên đầu "
+                "và định lượng thành tích trong CV (VD: tăng tốc độ tải trang 40%, xử lý 10.000 requests/ngày)."
             )
         })
 
-    # Nếu chưa có gì cụ thể, thêm gợi ý chung
     if not improvements:
         improvements.append({
-            "area": "Đào sâu ví dụ và tác động",
+            "area": "Đào sâu kiến trúc & tối ưu hóa nâng cao",
             "tip": (
-                "Ngay cả khi trả lời đúng, hãy đào sâu hơn: mô hình kiến trúc, dữ liệu, độ phức tạp, "
-                "benchmark, bài học rút ra và tác động tới người dùng/doanh nghiệp."
+                "Bạn đã thể hiện rất tốt các câu hỏi tiêu chuẩn! Hãy đào sâu hơn vào các bài toán mở rộng (scalability), "
+                "bảo mật (security) và giám sát hệ thống (monitoring) để tạo ấn tượng xuất sắc với nhà tuyển dụng."
             )
         })
 
@@ -131,231 +117,201 @@ def _compile_improvements(state: Dict[str, Any]) -> List[Dict[str, str]]:
 
 @router.post("/interview")
 async def dynamic_interview_chat_endpoint(request: InterviewRequest):
-    # Debug logs
-    print(f"[DEBUG] Interview request received: {len(request.history)} messages")
-    print(f"[DEBUG] CV analysis present: {request.cv_analysis_result is not None}")
-    print(f"[DEBUG] State provided in body: {request.state is not None}")
-
     history = request.history or []
     cv_analysis_result = request.cv_analysis_result
     state: Dict[str, Any] = request.state or {}
 
-    # Chỉ coi là bắt đầu khi KHÔNG có lịch sử (lần đầu)
     is_start = len(history) == 0
 
-    # Nếu chưa có state trong body và không phải lượt đầu, thử khôi phục từ AI message gần nhất
+    # Khôi phục state từ message cuối nếu không có trong request body
     if not state and not is_start:
         last_ai_turn = next((msg for msg in reversed(history) if msg.sender == "ai"), None)
         if last_ai_turn and last_ai_turn.state:
             state = last_ai_turn.state
-            print("[DEBUG] Restored state from last AI message.")
         else:
-            print("[DEBUG] Missing state on non-start turn.")
             raise HTTPException(
                 status_code=400,
-                detail="Interview state missing or expired. Please restart the interview."
+                detail="Trạng thái phỏng vấn (state) bị thiếu hoặc đã hết hạn. Vui lòng bắt đầu lại buổi phỏng vấn."
             )
 
+    # ==================== LƯỢT ĐẦU TIÊN (START) ====================
     if is_start:
         if not cv_analysis_result:
-            raise HTTPException(status_code=400, detail="CV analysis result is required to start an interview.")
+            raise HTTPException(status_code=400, detail="Cần kết quả phân tích CV để khởi tạo buổi phỏng vấn.")
 
-        # Extract and validate CV score
         cv_score_raw = cv_analysis_result.get("scoring", {}).get("overall_score_percent", 0)
         cv_score = float(cv_score_raw) if cv_score_raw else 0.0
-        
-        print(f"[DEBUG] CV score extracted: {cv_score}%")
-        
-        if cv_score <= 0:
-            print("[WARNING] CV score is 0 or negative. Check CV analysis result.")
-            print(f"[DEBUG] CV analysis scoring section: {cv_analysis_result.get('scoring', {})}")
 
-        print(f"[DEBUG] Generating interview plan...")
+        target_count = request.total_questions or 6
         try:
-            plan = interview_simulator.generate_interview_plan(cv_analysis_result)
-            print(f"[DEBUG] Plan generated: {len(plan)} questions")
+            plan = interview_simulator.generate_interview_plan(cv_analysis_result, target_count=target_count)
         except Exception as e:
-            print(f"[DEBUG] Error generating plan: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to generate interview plan: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Không thể tạo kế hoạch phỏng vấn: {str(e)}")
 
         if not plan:
-            raise HTTPException(status_code=500, detail="Empty interview plan generated.")
+            raise HTTPException(status_code=500, detail="Kế hoạch phỏng vấn trống.")
 
         state = {
             "cv_score": cv_score,
             "question_plan": plan,
             "current_question_index": 0,
             "interview_scores": [],
-            "feedback_items": []  # lưu score + topic theo câu
+            "feedback_items": []
         }
-        
-        print(f"[DEBUG] Initial state created with cv_score: {state['cv_score']}%")
 
-        # Trả về CÂU HỎI MỞ ĐẦU NGAY Ở LƯỢT START
-        next_question = plan[0]
+        first_question = plan[0]
+        intro_text = (
+            "👋 **Chào mừng bạn đến với buổi phỏng vấn giả lập cùng AI!**\n\n"
+            f"Dựa trên hồ sơ CV của bạn, buổi phỏng vấn sẽ bao gồm **{len(plan)} câu hỏi trọng tâm** "
+            "về kỹ thuật, dự án và kỹ năng giải quyết vấn đề.\n\n"
+            f"**Câu hỏi 1/{len(plan)}:**\n{first_question.get('question')}"
+        )
+
         return {
-            "response": next_question.get("question"),
+            "response": intro_text,
             "finished": False,
             "state": state,
-            "progress": {"current": 1, "total": len(plan)}
+            "progress": {"current": 1, "total": len(plan)},
+            "current_question": first_question.get("question")
         }
 
-    # Các lượt sau: chấm điểm câu hiện tại và chuyển sang câu tiếp theo
+    # ==================== CÁC LƯỢT TIẾP THEO ====================
     last_user_msg = next((msg for msg in reversed(history) if msg.sender == "user"), None)
     last_user_answer = last_user_msg.text if last_user_msg else ""
 
     plan = state.get("question_plan", [])
     if not plan:
-        print("[DEBUG] No plan found in state at mid-interview.")
         raise HTTPException(
             status_code=400,
-            detail="Interview state invalid (no plan). Please restart the interview."
+            detail="Trạng thái phỏng vấn không hợp lệ (không tìm thấy câu hỏi). Vui lòng bắt đầu lại."
         )
 
     current_idx = int(state.get("current_question_index", 0))
 
-    # Chấm điểm câu hỏi hiện tại (nếu còn trong phạm vi plan)
+    # Chấm điểm câu hỏi vừa trả lời
+    latest_feedback = None
     if 0 <= current_idx < len(plan):
         current_question = plan[current_idx]
         try:
-            score = interview_simulator.score_answer(current_question, last_user_answer)  # 0..1
+            score = interview_simulator.score_answer(current_question, last_user_answer)
         except Exception as e:
-            print(f"[DEBUG] Error scoring answer: {e}")
-            raise HTTPException(status_code=500, detail=f"Scoring failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Lỗi khi đánh giá câu trả lời: {str(e)}")
 
         state.setdefault("interview_scores", []).append(score)
-        # Lưu feedback theo câu hỏi
         topics = _extract_topics(current_question)
+
+        # Tạo phản hồi tức thì về câu trả lời vừa rồi
+        latest_feedback = interview_simulator.generate_turn_feedback(current_question, last_user_answer, score)
+
         state.setdefault("feedback_items", []).append({
             "index": current_idx,
             "question": current_question.get("question"),
             "topics": topics,
-            "score": score
+            "score": score,
+            "evaluation": latest_feedback["evaluation"],
+            "feedback": latest_feedback["comment"]
         })
-        # Tăng chỉ số sang câu tiếp theo
+
+        # Chuyển sang câu hỏi kế tiếp
         state["current_question_index"] = current_idx + 1
         current_idx = state["current_question_index"]
 
-    # Nếu còn câu hỏi → gửi câu tiếp theo
+    # Nếu vẫn còn câu hỏi -> gửi câu hỏi tiếp theo kèm phản hồi ngắn
     if current_idx < len(plan):
         next_question = plan[current_idx]
+        fb_comment = latest_feedback["comment"] if latest_feedback else "Cảm ơn câu trả lời của bạn."
+        fb_transition = latest_feedback["transition"] if latest_feedback else "Chúng ta cùng đến với câu hỏi tiếp theo:"
+
+        turn_response_text = (
+            f"💬 **Nhận xét nhanh:** {fb_comment}\n\n"
+            f"{fb_transition}\n\n"
+            f"**Câu hỏi {current_idx + 1}/{len(plan)}:**\n{next_question.get('question')}"
+        )
+
         return {
-            "response": next_question.get("question"),
+            "response": turn_response_text,
             "finished": False,
             "state": state,
-            "progress": {"current": current_idx + 1, "total": len(plan)}
+            "progress": {"current": current_idx + 1, "total": len(plan)},
+            "current_question": next_question.get("question"),
+            "turn_feedback": latest_feedback,
+            "turn_score": latest_feedback["score_percent"] if latest_feedback else 0.0
         }
 
-    # Hết câu hỏi → tổng kết + gợi ý cải thiện
+    # ==================== HOÀN THÀNH PHỎNG VẤN (TỔNG KẾT) ====================
     cv_score = float(state.get("cv_score", 0.0))
     scores = state.get("interview_scores", [])
-    
-    print(f"[DEBUG] Final scoring - CV score from state: {cv_score}")
-    print(f"[DEBUG] Final scoring - Interview scores (0-1 range): {scores}")
-    
-    # Validation: Đảm bảo cv_score hợp lệ (cv_score đã ở dạng 0-100 từ lúc start)
-    if cv_score <= 0:
-        print("[WARNING] CV score is 0 or invalid at final scoring!")
-        cv_score = 0.0
-    
-    # Validation: Đảm bảo có điểm phỏng vấn
-    if not scores:
-        print("[WARNING] No interview scores recorded!")
-        avg_interview_score = 0.0
-    else:
-        # Tính điểm phỏng vấn trung bình (scores đang ở dạng 0-1, cần chuyển sang 0-100)
-        avg_interview_score = (sum(scores) / len(scores)) * 100.0
-    
-    print(f"[DEBUG] Average interview score calculated: {avg_interview_score:.2f}%")
-    
-    # Phân tích chi tiết điểm phỏng vấn
+
+    avg_interview_score = (sum(scores) / len(scores) * 100.0) if scores else 0.0
+
+    # Phân bổ kết quả theo thang điểm
     interview_breakdown = {
         "total_questions": len(scores),
         "average_score": round(avg_interview_score, 2),
         "min_score": round(min(scores) * 100, 2) if scores else 0,
         "max_score": round(max(scores) * 100, 2) if scores else 0,
         "scores_distribution": {
-            "excellent": sum(1 for s in scores if s >= 0.8),  # >= 80%
-            "good": sum(1 for s in scores if 0.6 <= s < 0.8),  # 60-79%
-            "average": sum(1 for s in scores if 0.4 <= s < 0.6),  # 40-59%
-            "poor": sum(1 for s in scores if s < 0.4)  # < 40%
+            "excellent": sum(1 for s in scores if s >= 0.8),
+            "good": sum(1 for s in scores if 0.6 <= s < 0.8),
+            "average": sum(1 for s in scores if 0.4 <= s < 0.6),
+            "poor": sum(1 for s in scores if s < 0.4)
         }
     }
-    
-    # Công thức tính điểm tổng hợp:
-    # - CV score chiếm 30% (đánh giá background và kinh nghiệm) - đã ở dạng 0-100
-    # - Interview score chiếm 70% (đánh giá khả năng thực tế và communication) - đã ở dạng 0-100
-    # Lý do: Phỏng vấn phản ánh khả năng thực tế tốt hơn CV
+
+    # Trọng số: CV 30%, Phỏng vấn 70%
     cv_weight = 0.30
     interview_weight = 0.70
-    # Cả hai score đã ở dạng 0-100, nên công thức chính xác
     final_score = (cv_weight * cv_score) + (interview_weight * avg_interview_score)
-    
-    print(f"[DEBUG] Final score calculation:")
-    print(f"  - CV score (0-100): {cv_score:.2f}")
-    print(f"  - CV contribution (30%): {cv_score:.2f} × {cv_weight} = {cv_weight * cv_score:.2f}")
-    print(f"  - Interview score (0-100): {avg_interview_score:.2f}")
-    print(f"  - Interview contribution (70%): {avg_interview_score:.2f} × {interview_weight} = {interview_weight * avg_interview_score:.2f}")
-    print(f"  - FINAL SCORE: {final_score:.2f}%")
-    print(f"[DEBUG] CV score validation: state['cv_score']={state.get('cv_score')}, type={type(state.get('cv_score'))}")
-    
-    # Đánh giá mức độ tổng thể
+
     if final_score >= 80:
         overall_assessment = "Xuất sắc"
-        recommendation = "Ứng viên rất phù hợp với vị trí. Đề xuất tiếp tục quy trình tuyển dụng."
+        recommendation = "Ứng viên sở hữu kiến thức vững chắc và kỹ năng giao tiếp tốt. Rất phù hợp với vị trí."
     elif final_score >= 70:
         overall_assessment = "Tốt"
-        recommendation = "Ứng viên có tiềm năng. Cân nhắc phỏng vấn vòng tiếp theo với các câu hỏi chuyên sâu hơn."
-    elif final_score >= 60:
-        overall_assessment = "Trung bình khá"
-        recommendation = "Ứng viên có nền tảng cơ bản. Có thể cân nhắc cho vị trí junior hoặc với mentoring."
-    elif final_score >= 50:
-        overall_assessment = "Trung bình"
-        recommendation = "Ứng viên cần cải thiện thêm. Xem xét training hoặc vị trí phù hợp hơn với kỹ năng hiện tại."
+        recommendation = "Ứng viên có tiềm năng lớn, đáp ứng tốt yêu cầu công việc. Khuyến nghị vòng tiếp theo."
+    elif final_score >= 55:
+        overall_assessment = "Khá / Trung bình khá"
+        recommendation = "Ứng viên có nền tảng cơ bản, cần trau dồi thêm kinh nghiệm thực tế và độ sâu kiến trúc."
     else:
         overall_assessment = "Cần cải thiện"
-        recommendation = "Ứng viên chưa đáp ứng yêu cầu cơ bản cho vị trí này."
-    
+        recommendation = "Ứng viên cần củng cố thêm kiến thức kỹ thuật và rèn luyện kỹ năng trả lời phỏng vấn."
+
     improvements = _compile_improvements(state)
 
-    # Soạn response text thân thiện (Markdown)
+    # Soạn thảo báo cáo Markdown đẹp mắt
     lines = [
-        "🎉 **Cảm ơn bạn đã hoàn thành buổi phỏng vấn!**",
+        "🎉 **Chúc mừng bạn đã hoàn thành xuất sắc buổi phỏng vấn giả lập!**",
         "",
         "---",
         "",
-        "## 📊 Tổng kết điểm số",
+        "## 📊 Bảng tổng kết kết quả",
         "",
-        f"### Điểm CV: **{cv_score:.2f}%** (trọng số: {cv_weight*100:.0f}%)",
-        "- Đánh giá background, kỹ năng và kinh nghiệm từ CV",
+        f"### 📄 Điểm CV: **{cv_score:.1f}%** *(Trọng số: {cv_weight*100:.0f}%)*",
+        "- Đánh giá mức độ khớp kỹ năng, kinh nghiệm và nền tảng học vấn từ CV với JD.",
         "",
-        f"### Điểm phỏng vấn: **{avg_interview_score:.2f}%** (trọng số: {interview_weight*100:.0f}%)",
-        f"- Tổng số câu hỏi: {interview_breakdown['total_questions']}",
-        f"- Xuất sắc (≥80%): {interview_breakdown['scores_distribution']['excellent']} câu",
-        f"- Tốt (60-79%): {interview_breakdown['scores_distribution']['good']} câu",
-        f"- Trung bình (40-59%): {interview_breakdown['scores_distribution']['average']} câu",
-        f"- Cần cải thiện (<40%): {interview_breakdown['scores_distribution']['poor']} câu",
-        "",
-        "---",
-        "",
-        f"## 🎯 Điểm tổng hợp: **{final_score:.2f}%**",
-        f"**Đánh giá: {overall_assessment}**",
-        "",
-        f"_{recommendation}_",
+        f"### 🎙️ Điểm Phỏng vấn: **{avg_interview_score:.1f}%** *(Trọng số: {interview_weight*100:.0f}%)*",
+        f"- Tổng số câu hỏi: **{interview_breakdown['total_questions']} câu**",
+        f"- Xuất sắc (≥80%): **{interview_breakdown['scores_distribution']['excellent']} câu**",
+        f"- Đạt yêu cầu (60-79%): **{interview_breakdown['scores_distribution']['good']} câu**",
+        f"- Trung bình (40-59%): **{interview_breakdown['scores_distribution']['average']} câu**",
+        f"- Cần cải thiện (<40%): **{interview_breakdown['scores_distribution']['poor']} câu**",
         "",
         "---",
         "",
-        "## 💡 Những điểm cần cải thiện",
+        f"## 🎯 ĐIỂM TỔNG HỢP: **{final_score:.1f}%**",
+        f"**Đánh giá chung: {overall_assessment}**",
+        "",
+        f"*{recommendation}*",
+        "",
+        "---",
+        "",
+        "## 💡 Lộ trình cải thiện & Lời khuyên",
         ""
     ]
-    
-    if improvements:
-        for idx, imp in enumerate(improvements, 1):
-            lines.append(f"### {idx}. {imp['area']}")
-            lines.append(f"{imp['tip']}")
-            lines.append("")
-    else:
-        lines.append("Bạn đã thể hiện rất tốt! Tiếp tục duy trì và phát triển kỹ năng của mình.")
+
+    for idx, imp in enumerate(improvements, 1):
+        lines.append(f"### {idx}. {imp['area']}")
+        lines.append(f"{imp['tip']}")
         lines.append("")
 
     response_text = "\n".join(lines)
@@ -371,7 +327,8 @@ async def dynamic_interview_chat_endpoint(request: InterviewRequest):
             "cv_weight": cv_weight,
             "interview_score": round(avg_interview_score, 2),
             "interview_weight": interview_weight,
-            "interview_details": interview_breakdown
+            "interview_details": interview_breakdown,
+            "question_details": state.get("feedback_items", [])
         },
-        "improvements": improvements  # <-- cấu trúc máy đọc được để FE render đẹp
+        "improvements": improvements
     }

@@ -1,10 +1,11 @@
 import React from 'react';
 import { Paper, Stepper, Step, StepLabel, StepContent, Typography } from '@mui/material';
+import { StepIconProps } from '@mui/material/StepIcon';
 
 export interface CVEvaluationStep {
   key: string;
   title: string;
-  icon: React.ElementType;
+  icon: React.ElementType<StepIconProps>;
   content: React.ReactNode;
 }
 
